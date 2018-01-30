@@ -1,0 +1,47 @@
+{
+  "name": "controller",
+  "version": "0.1.0",
+  "description": "NodeJS controller and WebSocket server for the LEDs connected to the GPIO pins.",
+  "main": "src/server.js",
+  "author": "Bart van Oort",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bvobart/ceiLED/issues"
+  },
+  "homepage": "https://github.com/bvobart/ceiLED#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bvobart/ceiLED.git"
+  },
+  "scripts": {
+    "start": "nodemon src/server.js --exec babel-node",
+    "build": "rm -rf build && babel src --out-dir build",
+    "serve": "node build/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "nodemon": "^1.14.11"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "8.0"
+          }
+        }
+      ]
+    ]
+  },
+  "eslint": {
+    "extends": "airbnb-base"
+  }
+}
