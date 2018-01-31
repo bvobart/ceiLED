@@ -16,6 +16,7 @@ class LEDControls extends Component {
         this.handleRedChange = this.handleRedChange.bind(this);
         this.handleGreenChange = this.handleGreenChange.bind(this);
         this.handleBlueChange = this.handleBlueChange.bind(this);
+        this.handleSetColor = this.handleSetColor.bind(this);
     }
 
     handleRedChange(event, newValue) {
@@ -31,10 +32,11 @@ class LEDControls extends Component {
     }
     
     handleSetColor(event) {
-        // No connection can be made right now
-        // const socket = new WebSocket('ws://localhost:6565');
-        // socket.send('je moeder');
-        // socket.close();
+        const socket = new WebSocket('ws://localhost:6565');
+        socket.onopen = event => {
+            socket.send(JSON.stringify(this.state));
+            socket.close();
+        };
     }
 
     render() {
