@@ -42,7 +42,7 @@
       ]
     ]
   },
-  "eslint": {
+  "eslintConfig": {
     "extends": "airbnb-base"
   }
 }
