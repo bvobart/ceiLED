@@ -1,0 +1,23 @@
+{
+    "name": "ceiled",
+    "version": "0.1.0",
+    "description": "Server and web interface for LEDs on ceiling",
+    "author": "Bart van Oort",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/bvobart/ceiLED/issues"
+    },
+    "homepage": "https://github.com/bvobart/ceiLED#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/bvobart/ceiLED.git"
+    },
+    "scripts": {
+        "install": "concurrently \"cd controller && npm install\" \"cd ceiled-web && npm install \"",
+        "start": "concurrently \"cd controller && npm start\" \"cd ceiled-web && npm run serve\"",
+        "build": "concurrently \"cd controller && npm run build\" \"cd ceiled-web && npm run build \""
+    },
+    "dependencies": {
+        "concurrently": "^3.5.1"
+    }
+}
