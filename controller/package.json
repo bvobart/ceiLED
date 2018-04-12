@@ -1,7 +1,7 @@
 {
   "name": "controller",
   "version": "0.1.0",
-  "description": "NodeJS controller and WebSocket server for the LEDs connected to the GPIO pins.",
+  "description": "TypeScript NodeJS controller and WebSocket server for the LEDs connected to the GPIO pins.",
   "main": "src/server.js",
   "author": "Bart van Oort",
   "license": "ISC",
@@ -14,35 +14,46 @@
     "url": "git+https://github.com/bvobart/ceiLED.git"
   },
   "scripts": {
-    "start": "nodemon src/server.js --exec babel-node",
-    "build": "rm -rf build && babel src --out-dir build",
-    "serve": "node build/server.js",
+    "start": "nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts",
+    "build": "tsc",
+    "serve": "nodemon build/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
+    "typescript": "^2.8.1",
     "ws": "^4.0.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
-    "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.8.0",
-    "nodemon": "^1.14.11"
+    "@types/bluebird": "^3.5.20",
+    "@types/bluebird-global": "^3.5.5",
+    "@types/jest": "^22.2.3",
+    "@types/node": "^9.6.4",
+    "@types/ws": "^4.0.2",
+    "jest": "^22.4.3",
+    "nodemon": "^1.17.2",
+    "ts-jest": "^22.4.2",
+    "ts-node": "^5.0.1",
+    "tslint": "^5.9.1"
   },
-  "babel": {
-    "presets": [
-      [
-        "env",
-        {
-          "targets": {
-            "node": "8.0"
-          }
-        }
-      ]
-    ]
-  },
-  "eslintConfig": {
-    "extends": "airbnb-base"
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfigFile": "../tsconfig.json"
+      }
+    },
+    "moduleFileExtensions": [
+      "js",
+      "ts",
+      "tsx"
+    ],
+    "rootDir": "src",
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    }
   }
 }
