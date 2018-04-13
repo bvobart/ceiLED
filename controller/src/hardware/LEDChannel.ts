@@ -1,3 +1,4 @@
+import Color from '../common/Color';
 import Pin from './Pin';
 
 /**
@@ -23,7 +24,7 @@ interface IChannelMap {
  * are mapped to.
  */
 class LEDChannel {
-  protected static channelMap: IChannelMap = {
+  private static channelMap: IChannelMap = {
     1: { red: 3, green: 5, blue: 7},
     2: { red: 11, green: 13, blue: 15},
     3: { red: 19, green: 21, blue: 23},
@@ -46,9 +47,25 @@ class LEDChannel {
   constructor(channelNr: number) {
     this.number = channelNr;
     const channelMapping: IChannelMapping = LEDChannel.channelMap[this.number];
-    this.red = new Pin(channelMapping.red);
-    this.green = new Pin(channelMapping.green);
-    this.blue = new Pin(channelMapping.blue);
-    // TODO: upon init, set to black.
+    if (channelMapping) {
+      this.red = new Pin(channelMapping.red);
+      this.green = new Pin(channelMapping.green);
+      this.blue = new Pin(channelMapping.blue);
+      this.setColor({ red: 0, green: 0, blue: 0 });
+    } else {
+      throw new Error('Channel ' + this.number + ' does not exist!');
+    }
+  }
+
+  /**
+   * Sets a color on the LED channel.
+   * @param color Color to set
+   */
+  public setColor(color: Color): void {
+    this.red.value = color.red;
+    this.green.value = color.green;
+    this.blue.value = color.blue;
   }
 }
+
+export default LEDChannel;

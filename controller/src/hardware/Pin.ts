@@ -13,7 +13,7 @@ class Pin {
     this.driver = spawn('sudo', ['python', '-u', 'scripts/driver.py']);
     this.driver.stdout.on('data', (data: string | Buffer): void => {
       const message: string = data.toString();
-      console.log('LED Driver:', message); // TODO: handle this message, signifies incorrect command or pin nr.
+      console.log(message); // TODO: handle this message, signifies incorrect command or pin nr.
     });
     this.driver.stderr.on('data', (data: string | Buffer): void => {
       console.log(data.toString());
