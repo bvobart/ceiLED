@@ -1,5 +1,5 @@
-import * as WebSocket from 'ws';
 import { IncomingMessage } from 'http';
+import * as WebSocket from 'ws';
 
 function handleClose(code: number, reason: string, clientIP: string): void {
   console.log("Connection with " + clientIP + " closed.");
@@ -12,7 +12,7 @@ function handleMessage(message: IncomingMessage): void {
 const server = new WebSocket.Server({ port: 6565 });
 server.on('connection', (ws: WebSocket, req: IncomingMessage) => {
   const clientIP: string = req.connection.remoteAddress;
-  //console.log("Connection incoming from ", clientIP);
+  // console.log("Connection incoming from ", clientIP);
 
   ws.on('message', handleMessage);
   ws.on('close', (code: number, reason: string) => handleClose(code, reason, clientIP));
