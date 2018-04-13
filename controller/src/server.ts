@@ -1,6 +1,8 @@
 import { IncomingMessage } from 'http';
 import * as WebSocket from 'ws';
 
+import Pin from './hardware/Pin';
+
 function handleClose(code: number, reason: string, clientIP: string): void {
   console.log("Connection with " + clientIP + " closed.");
 };
@@ -25,3 +27,6 @@ server.on('error', (error: Error) => {
 console.log(".--------------------------.");
 console.log("| CeiLED Controller online |");
 console.log("'--------------------------'");
+
+const pin = new Pin(3);
+pin.value = 65

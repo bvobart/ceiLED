@@ -6,25 +6,14 @@ import { ChildProcess, spawn, spawnSync } from 'child_process';
  * make use of in order to actually drive the pin.
  */
 class Pin {
-  private static driver: ChildProcess = spawn('sudo', ['python', '-u', 'scripts/driver.py']);
-
-  /** Pin number. */
-  number: number;
-
-  /** Pin value. Can be between 0 and 255 */
-  private _value: number;
-
-  constructor(pinNr: number) {
-    this.number = pinNr;
-  }
-
   /**
-   * Statically initialises the driver by attaching functions to its output.
+   * Statically initialises the driver and attaches functions to its output.
    */
-  static initializeDriver() {
+  public static initializeDriver() {
+    this.driver = spawn('sudo', ['python', '-u', 'scripts/driver.py']);
     this.driver.stdout.on('data', (data: string | Buffer): void => {
       const message: string = data.toString();
-      console.log('LED Driver:', message); //TODO: handle this message, signifies incorrect command or pin nr.
+      console.log('LED Driver:', message); // TODO: handle this message, signifies incorrect command or pin nr.
     });
     this.driver.stderr.on('data', (data: string | Buffer): void => {
       console.log(data.toString());
@@ -32,6 +21,18 @@ class Pin {
     this.driver.on('close', (code, signal) => {
       console.error('LED Driver exited with code', code, 'and signal', signal);
     });
+  }
+
+  private static driver: ChildProcess;
+
+  /** Pin number. */
+  public number: number;
+
+  /** Pin value. Can be between 0 and 255 */
+  private _value: number; // tslint:disable-line
+
+  constructor(pinNr: number) {
+    this.number = pinNr;
   }
 
   /**
