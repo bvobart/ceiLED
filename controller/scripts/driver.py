@@ -1,9 +1,63 @@
 import mraa
+import signal
 import sys
+import threading
+import time
 
-# TODO: Initialise pins
+shouldClose = False
+def close(sig, frame):
+  shouldClose = True
+  sys.exit()
 
-while True:
+class Pin(object):
+  pwmFrequency = 50 # Hz
+  cycleLength = 1/pwmFrequency # seconds
+
+  def __init__(self, pinNr):
+    self.pinNr = pinNr
+    self.pin = mraa.Gpio(pinNr)
+    self.pin.dir(mraa.DIR_OUT)
+    self.value = 0
+    self.pwmThread = threading.Thread(
+      name="PWM Pin " + str(self.pinNr), 
+      target=self.__setValue,
+      kwargs={ 'value': self.value }
+    )
+    self.pwmThread.daemon = True
+    self.pwmThread.start()
+
+  def setValue(self, value):
+    "Sets a value on the pin. Value should be a value between 0 and 255."
+    assert value >= 0 and value <= 255
+    self.value = value
+    print('Setting pin', self.pinNr, ' to ', self.value)
+  
+  def __setValue(self, value):
+    "Only to be used as target for a thread, as this method is blocking."
+    while not shouldClose:
+      duty = value / 255
+      timeOn = duty * Pin.cycleLength # seconds pin should be on
+      timeOff = Pin.cycleLength - timeOn # seconds pin should be off
+
+      if timeOn == 0:
+        self.pin.write(0)
+        time.sleep(timeOff)
+      elif timeOff == 0:
+        self.pin.write(1)
+        time.sleep(timeOn)
+      else:
+        self.pin.write(1)
+        time.sleep(timeOn)
+        self.pin.write(0)
+        time.sleep(timeOff)
+
+
+print('LEDDriver: Initialising')
+signal.signal(signal.SIGINT, close)
+pins = { x: Pin(x) for x in (3, 5, 7, 11, 13, 15, 19, 21, 23)}
+print('LEDDriver: Ready!')
+
+while not shouldClose:
   line = sys.stdin.readline()
 
   args = line.split(' ')
@@ -23,4 +77,4 @@ while True:
     value = 255
   
   print('LEDDriver: Pin %d set to %d' % (pinNr, value))
-  # TODO: actually set pin value
+  pins[pinNr].setValue(value)
