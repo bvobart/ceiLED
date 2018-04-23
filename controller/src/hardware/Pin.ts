@@ -1,29 +1,32 @@
-import { ChildProcess, spawn, spawnSync } from 'child_process';
+import { openSync } from 'i2c-bus';
+import { Pca9685Driver, Pca9685Options } from 'pca9685';
 
 /**
  * Class to represent and control a pin on the Up Squared.
- * It is statically initialised with the Python driver process, which the Pin objects can then
- * make use of in order to actually drive the pin.
+ * It is statically initialised with the pin driver, which the Pin objects can then
+ * make use of in order to actually drive their pin.
  */
 class Pin {
   /**
-   * Statically initialises the driver and attaches functions to its output.
+   * Statically initialises the driver for the PCA9685 chip that controls the LED pins.
    */
   public static initializeDriver() {
-    this.driver = spawn('sudo', ['python', '-u', 'scripts/driver.py']);
-    this.driver.stdout.on('data', (data: string | Buffer): void => {
-      const message: string = data.toString();
-      console.log(message); // TODO: handle this message, signifies incorrect command or pin nr.
-    });
-    this.driver.stderr.on('data', (data: string | Buffer): void => {
-      console.log(data.toString());
+    const options: Pca9685Options = {
+      i2c: openSync(5),
+      address: 0x40,
+      frequency: 1000,
+      debug: false
+    };
+    this.driver = new Pca9685Driver(options, (error: any) => {
+      if (error) {
+        console.error("Error initialising driver!");
+        console.error(error);
+        throw new Error(error);
+      }
     })
-    this.driver.on('close', (code, signal) => {
-      console.error('LED Driver exited with code', code, 'and signal', signal);
-    });
   }
 
-  private static driver: ChildProcess;
+  private static driver: Pca9685Driver;
 
   /** Pin number. */
   public number: number;
@@ -46,8 +49,11 @@ class Pin {
    * Sets the value of a pin, and tells the driver to set it on the actual pin as well.
    */
   set value(newValue: number) {
+    if (newValue < 0 || newValue > 255) {
+      throw Error("Value out of range: " + newValue + ". Should be between 0 and 255");
+    }
     this._value = newValue;
-    Pin.driver.stdin.write(`${this.number} ${this._value}\n`);
+    Pin.driver.setDutyCycle(this.number, newValue / 255)
   }
 }
 

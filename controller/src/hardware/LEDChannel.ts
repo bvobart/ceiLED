@@ -25,9 +25,9 @@ interface IChannelMap {
  */
 class LEDChannel {
   private static channelMap: IChannelMap = {
-    1: { red: 3, green: 5, blue: 7},
-    2: { red: 11, green: 13, blue: 15},
-    3: { red: 19, green: 21, blue: 23},
+    1: { red: 0, green: 1, blue: 2},
+    2: { red: 3, green: 4, blue: 5},
+    3: { red: 6, green: 7, blue: 8},
   }
 
   /** Channel number */
