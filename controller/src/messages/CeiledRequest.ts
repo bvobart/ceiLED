@@ -23,6 +23,8 @@ export class CeiledRequest {
 
   /**
    * Returns true iff the given argument is a valid Request object.
+   * Only checks whether the argument has the right attributes and the right attribute types.
+   * It does not check whether the attributes contain the right values!
    * @param x the argument to check
    */
   public static isRequest(x: any): x is Request {
@@ -54,9 +56,10 @@ export class CeiledRequest {
     patternOptions?: JumpPatternOptions | FadePatternOptions
   ) {
     this.type = type;
-    this.brightness = brightness;
-    this.roomLight = roomLight;
-    this.colors = colors;
+    this.brightness = brightness < 0 ? 0 : brightness > 100 ? 100 : brightness;
+    this.roomLight = roomLight < 0 ? 0 : roomLight > 100 ? 100 : roomLight;
+    // the colours that come in through the web socket have the attributes of Color, but not the methods.
+    this.colors = colors.map((value: Color) => new Color(value.red, value.green, value.blue));
     this.patternOptions = patternOptions;
   }
 

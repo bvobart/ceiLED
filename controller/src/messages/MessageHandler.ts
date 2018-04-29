@@ -47,9 +47,11 @@ class MessageHandler {
         this.sendSuccess();
       } else {
         const error: Error = new Error('Message is invalid: ' + message);
+        console.error('Error with request:', error);
         this.sendFail([error]);
       }
     } catch (error) {
+      console.error('Internal error:', error);
       this.sendError([error]);
     }
   }

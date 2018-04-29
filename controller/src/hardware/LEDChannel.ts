@@ -5,7 +5,7 @@ import Pin from './Pin';
  * Defines a mapping between a channels colours (red, green and blue) and their respective
  * pin numbers.
  */
-interface IChannelMapping {
+interface ChannelMapping {
   red: number;
   green: number;
   blue: number;
@@ -14,8 +14,8 @@ interface IChannelMapping {
 /**
  * Map to contain the mappings for the different channels.
  */
-interface IChannelMap {
-  [key: number]: IChannelMapping
+interface ChannelMap {
+  [key: number]: ChannelMapping
 }
 
 /**
@@ -24,7 +24,7 @@ interface IChannelMap {
  * are mapped to.
  */
 class LEDChannel {
-  private static channelMap: IChannelMap = {
+  private static channelMap: ChannelMap = {
     1: { red: 0, green: 1, blue: 2},
     2: { red: 3, green: 4, blue: 5},
     3: { red: 6, green: 7, blue: 8},
@@ -46,7 +46,7 @@ class LEDChannel {
    */
   constructor(channelNr: number) {
     this.number = channelNr;
-    const channelMapping: IChannelMapping = LEDChannel.channelMap[this.number];
+    const channelMapping: ChannelMapping = LEDChannel.channelMap[this.number];
     if (channelMapping) {
       this.red = new Pin(channelMapping.red);
       this.green = new Pin(channelMapping.green);

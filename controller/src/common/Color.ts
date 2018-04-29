@@ -12,6 +12,8 @@ class Color {
   public static RED: Color = new Color(255, 0, 0);
   /** The colour white */
   public static WHITE: Color = new Color(255, 255, 255);
+  /** The colour of standard room lighting */
+  public static ROOMLIGHT: Color = new Color(255, 241, 224);
 
   public static isColor(x: any): x is Color {
     if (typeof x.red !== 'number' || typeof x.green !== 'number' || typeof x.blue !== 'number') {
@@ -28,9 +30,43 @@ class Color {
   public blue: number;
 
   constructor(red: number, green: number, blue: number) {
+    if (red < 0 || red > 255) throw new Error('Red value not in range: ' + red);
+    if (green < 0 || green > 255) throw new Error('Green value not in range: ' + green);
+    if (blue < 0 || blue > 255) throw new Error('Blue value not in range: ' + blue);
+
     this.red = red;
     this.green = green;
     this.blue = blue;
+  }
+
+  /**
+   * Sets this colour to a specific brightness.
+   * @param brightness Percentage of colour brightness
+   */
+  public withBrightness(brightness: number): Color {
+    if (brightness < 0 || brightness > 100) throw new Error('Brightness not in range: ' + brightness);
+    if (brightness === 0) return Color.BLACK;
+    if (brightness === 100) return this;
+
+    const factor: number = brightness / 100;
+    return new Color(
+      this.red * factor,
+      this.green * factor,
+      this.blue * factor
+    );
+  }
+
+  /**
+   * Blends this colour with some standard room lighting colour.
+   * @param roomLight Percentage of room light to be blended through.
+   */
+  public withRoomLight(roomLight: number): Color {
+    if (roomLight < 0 || roomLight > 100) throw new Error('Room light not in range: ' + roomLight);
+    if (roomLight === 0) return this;
+    if (roomLight === 100) return Color.ROOMLIGHT;
+
+    const factor: number = roomLight / 100;
+    return this;
   }
 }
 

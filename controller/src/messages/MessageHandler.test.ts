@@ -9,6 +9,7 @@ describe('MessageHandler', () => {
     let handler: MessageHandler;
 
     beforeEach(() => {
+      console.error = jest.fn();
       socketMock = {
         on: jest.fn(),
         emit: jest.fn((event: string) => console.log(event))
@@ -27,9 +28,7 @@ describe('MessageHandler', () => {
         65,
         colors
       );
-      const message: any = {
-        data: request
-      }
+      const message: any = { data: request }
       handler.handle(JSON.stringify(message));
       const expected: CeiledResponse = new CeiledResponse(CeiledResponseType.SUCCES);
       const expectedResponse: string = JSON.stringify(expected);

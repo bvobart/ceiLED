@@ -1,6 +1,10 @@
 import Color from '../common/Color';
+import ChannelStore from '../hardware/ChannelStore';
 import Pattern from './Pattern';
 
+/**
+ * Shows a solid pattern. See the API documentation for more details on this pattern.
+ */
 class SolidPattern implements Pattern {
   private colors: Color[];
   private brightness: number;
@@ -12,14 +16,24 @@ class SolidPattern implements Pattern {
     this.roomLight = roomLight;
   }
 
+  /**
+   * Shows this pattern.
+   */
   public show(): void {
-    // actually show pattern.
-    console.log("Show solid pattern!");
+    this.colors.splice(3);
+    this.colors.map((color: Color) => 
+      color.withRoomLight(this.roomLight)
+           .withBrightness(this.brightness)
+    );
+
+    const store: ChannelStore = ChannelStore.getInstance();
+    store.channel1.setColor(this.colors[0]);
+    store.channel2.setColor(this.colors[1] ? this.colors[1] : this.colors[0]);
+    store.channel3.setColor(this.colors[2] ? this.colors[2] : this.colors[0]);
   }
 
   public stop(): void {
-    // won't'need to do anything
-    console.log("Stop solid pattern");
+    // there is no need to stop this pattern, since it is not continually set.
   }
 }
 
