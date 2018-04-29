@@ -3,6 +3,7 @@ import withWindowSize from './withWindowSize';
 import { Card, CardTitle } from 'material-ui/Card';
 
 import LEDControls from './LEDControls';
+import Paper from 'material-ui/Paper/Paper';
 
 class App extends Component {
     render() {
@@ -10,10 +11,10 @@ class App extends Component {
             width: this.props.isMobile ? this.props.windowSize.innerWidth : this.props.mobileMaxWidth
         }
         return (
-            <Card style={mainStyle}>
+            <Paper style={mainStyle}>
                 <CardTitle title='CeiLED' subtitle='Controlling those LEDs on a ceiling near you ;)' />
                 <LEDControls />
-            </Card>
+            </Paper>
         );
     }
 }
