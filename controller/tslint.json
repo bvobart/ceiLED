@@ -4,6 +4,8 @@
     "tslint-config-prettier"
   ],
   "rules": {
+    "curly": false,
+    "interface-name": false,
     "no-console": false,
     "object-literal-sort-keys": false
   }

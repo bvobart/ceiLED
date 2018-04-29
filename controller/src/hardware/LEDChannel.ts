@@ -51,7 +51,7 @@ class LEDChannel {
       this.red = new Pin(channelMapping.red);
       this.green = new Pin(channelMapping.green);
       this.blue = new Pin(channelMapping.blue);
-      this.setColor({ red: 0, green: 0, blue: 0 });
+      this.setColor(Color.BLACK);
     } else {
       throw new Error('Channel ' + this.number + ' does not exist!');
     }

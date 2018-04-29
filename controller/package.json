@@ -17,7 +17,7 @@
     "start": "nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts",
     "build": "tsc",
     "serve": "nodemon build/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --coverage"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
