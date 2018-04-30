@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import withWindowSize from './withWindowSize';
-import { Card, CardTitle } from 'material-ui/Card';
+import { CardTitle } from 'material-ui/Card';
 
 import LEDControls from './LEDControls';
 import Paper from 'material-ui/Paper/Paper';
