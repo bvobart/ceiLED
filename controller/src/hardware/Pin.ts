@@ -1,5 +1,6 @@
 import { openSync } from 'i2c-bus';
 import { Pca9685Driver, Pca9685Options } from 'pca9685';
+import DebugDriver from './DebugDriver';
 
 /**
  * Class to represent and control a pin on the Up Squared.
@@ -17,16 +18,27 @@ class Pin {
       frequency: 1000,
       debug: false
     };
-    this.driver = new Pca9685Driver(options, (error: any) => {
-      if (error) {
-        console.error("Error initialising driver!");
-        console.error(error);
-        throw new Error(error);
-      }
-    })
+    try {
+      Pin.driver = new Pca9685Driver(options, (error: any) => {
+        if (error) {
+          console.error("Error initialising driver!");
+          console.error(error);
+          throw error;
+        }
+      });
+    } catch (error) {
+      console.warn(".--------------------------.");
+      console.warn("|---------WARNING!---------|");
+      console.warn("|--------------------------|");
+      console.warn("|--Now using debug driver--|");
+      console.warn("|--No actual LEDs will be--|");
+      console.warn("|--------controlled--------|");
+      console.warn("'--------------------------'");
+      this.driver = new DebugDriver();
+    }
   }
 
-  private static driver: Pca9685Driver;
+  private static driver: Pca9685Driver | DebugDriver;
 
   /** Pin number. */
   public number: number;
