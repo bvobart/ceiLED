@@ -10,8 +10,8 @@ export enum FadeType {
 export class FadePatternOptions {
   public speed: number;
   public channels: number;
-  public colors2: Color[];
-  public colors3: Color[];
+  public colors2?: Color[];
+  public colors3?: Color[];
   public fadeType: FadeType;
 
   constructor(

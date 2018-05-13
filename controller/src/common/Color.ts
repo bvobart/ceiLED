@@ -8,6 +8,8 @@ class Color {
   public static BLUE: Color = new Color(0, 0, 255);
   /** The colour green */
   public static GREEN: Color = new Color(0, 255, 0);
+  /** The colour purple */
+  public static PURPLE: Color = new Color(255, 0, 255);
   /** The colour red */
   public static RED: Color = new Color(255, 0, 0);
   /** The colour white */

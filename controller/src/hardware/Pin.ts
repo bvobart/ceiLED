@@ -28,14 +28,27 @@ class Pin {
       });
     } catch (error) {
       console.warn(".--------------------------.");
-      console.warn("|---------WARNING!---------|");
+      console.warn("|-------- WARNING! --------|");
       console.warn("|--------------------------|");
-      console.warn("|--Now using debug driver--|");
-      console.warn("|--No actual LEDs will be--|");
-      console.warn("|--------controlled--------|");
+      console.warn("|- Now using debug driver -|");
+      console.warn("|- No actual LEDs will be -|");
+      console.warn("|------- controlled -------|");
       console.warn("'--------------------------'");
       this.driver = new DebugDriver();
     }
+  }
+
+  /**
+   * Sets a new driver for the pins. Allows drivers to be swapped in for testing.
+   * @param driver The driver to be set.
+   */
+  public static setDriver(driver: Pca9685Driver | DebugDriver) {
+    console.warn(".--------------------------.")
+    console.warn("|-------- WARNING! --------|");
+    console.warn("|-----       -        -----|");
+    console.warn("|--- Pin driver changed ---|");
+    console.warn("'------------ -------------'");
+    Pin.driver = driver;
   }
 
   private static driver: Pca9685Driver | DebugDriver;
@@ -61,11 +74,12 @@ class Pin {
    * Sets the value of a pin, and tells the driver to set it on the actual pin as well.
    */
   set value(newValue: number) {
-    if (newValue < 0 || newValue > 255) {
-      throw Error("Value out of range: " + newValue + ". Should be between 0 and 255");
-    }
+    if (newValue < 0) newValue = 0;
+    if (newValue > 255) newValue = 255;
+
+    newValue = newValue;
     this._value = newValue;
-    Pin.driver.setDutyCycle(this.number, newValue / 255)
+    Pin.driver.setDutyCycle(this.number, Math.round((newValue / 255) * 1000) / 1000);
   }
 }
 
