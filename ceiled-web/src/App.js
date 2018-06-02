@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { hot } from 'react-hot-loader';
 import withWindowSize from './withWindowSize';
 import { CardTitle } from 'material-ui/Card';
 
@@ -41,4 +42,4 @@ class App extends Component {
   }
 }
 
-export default withWindowSize(App);
+export default hot(module)(withWindowSize(App));
