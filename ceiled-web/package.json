@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^1.1.0",
+    "@material-ui/icons": "^1.1.0",
     "material-ui": "^0.20.1",
     "react": "^16.4.0",
     "react-app-rewire-hot-loader": "^1.0.1",
@@ -10,6 +12,7 @@
     "react-dom": "^16.4.0",
     "react-hot-loader": "^4.2.0",
     "react-scripts": "1.1.4",
+    "recompose": "^0.27.1",
     "serve": "^7.2.0"
   },
   "scripts": {
