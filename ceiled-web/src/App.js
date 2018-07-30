@@ -6,9 +6,10 @@ import { theme } from './theme';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import withWidth from '@material-ui/core/withWidth';
-
-import CardHeader from '@material-ui/core/CardHeader';
 import Paper from '@material-ui/core/Paper';
+
+import ControllerSocketProvider from './context/ControllerSocketProvider';
+import Header from './common/Header';
 
 const styles = theme => ({
   root: {
@@ -22,11 +23,13 @@ const styles = theme => ({
 class App extends Component {
   render() {
     const { classes } = this.props;
-    const isMobile = this.props.width === 'sm' ? window.innerWidth : 960;
+    const isMobile = this.props.width === 'sm' || this.props.width === 'xs' ? window.innerWidth : 960;
     
     return (
       <Paper className={classes.root} style={{ width: isMobile }}>
-        <CardHeader title='Jemoeder' />
+        <ControllerSocketProvider>
+          <Header />
+        </ControllerSocketProvider>
       </Paper>
     )
   }
@@ -74,11 +77,11 @@ class App extends Component {
 // }
 
 const StyledApp = compose(withStyles(styles), withWidth())(App);
-const HotApp = hot(module)(() => 
+const HotStyledApp = hot(module)(() => 
   <MuiThemeProvider theme={theme}>
     <CssBaseline />
     <StyledApp />
   </MuiThemeProvider>
 );
 
-export default HotApp;
+export default HotStyledApp;
