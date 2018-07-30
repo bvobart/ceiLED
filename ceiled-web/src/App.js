@@ -10,6 +10,8 @@ import Paper from '@material-ui/core/Paper';
 
 import ControllerSocketProvider from './context/ControllerSocketProvider';
 import Header from './common/Header';
+import LEDControls from './common/LEDControls';
+import Footer from './common/Footer';
 
 const styles = theme => ({
   root: {
@@ -29,6 +31,8 @@ class App extends Component {
       <Paper className={classes.root} style={{ width: isMobile }}>
         <ControllerSocketProvider>
           <Header />
+          <LEDControls />
+          <Footer />
         </ControllerSocketProvider>
       </Paper>
     )

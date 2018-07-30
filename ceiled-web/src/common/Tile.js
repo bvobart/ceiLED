@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import FlatButton from 'material-ui/FlatButton';
+import { Button } from '@material-ui/core';
 
 class Tile extends Component {
 
@@ -13,12 +13,13 @@ class Tile extends Component {
     };
 
     return (
-      <FlatButton
-        label=' '
+      <Button
         style={tileStyle} 
         onClick={(event) => this.props.onClick(event, this.props.color)}
+        variant='flat'
       >
-      </FlatButton>
+        <div></div>
+      </Button>
     );
   }
 }

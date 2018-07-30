@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Paper from 'material-ui/Paper/Paper';
+import { Paper } from '@material-ui/core';
 
 class SolidOptionsPanel extends Component {
   render() {

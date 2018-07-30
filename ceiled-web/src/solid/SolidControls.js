@@ -6,19 +6,19 @@ class SolidControls extends Component {
 
   handleClick(event, color) {
     console.log('Sending colour: ', color);
-    const socket = new WebSocket('ws://localhost:6565');
-    socket.onopen = event => {
-      const request = {
-        data: {
-          type: 'solid',
-          colors: [color],
-          brightness: 100,
-          roomLight: 0
-        }
-      };
-      socket.send(JSON.stringify(request));
-      socket.close();
-    };
+    // const socket = new WebSocket('ws://localhost:6565');
+    // socket.onopen = event => {
+    //   const request = {
+    //     data: {
+    //       type: 'solid',
+    //       colors: [color],
+    //       brightness: 100,
+    //       roomLight: 0
+    //     }
+    //   };
+    //   socket.send(JSON.stringify(request));
+    //   socket.close();
+    // };
   }
   
   render() {
