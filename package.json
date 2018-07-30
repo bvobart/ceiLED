@@ -18,6 +18,6 @@
         "build": "concurrently \"cd controller && npm run build\" \"cd ceiled-web && npm run build \""
     },
     "dependencies": {
-        "concurrently": "^3.5.1"
+        "concurrently": "^3.6.1"
     }
 }
