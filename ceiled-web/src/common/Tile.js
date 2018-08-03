@@ -9,6 +9,7 @@ class Tile extends Component {
       height: 50,
       minWidth: 0,
       backgroundColor: colorString,
+      borderRadius: 0,
       flex: '1 100%'
     };
 
