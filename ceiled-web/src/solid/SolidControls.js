@@ -1,18 +1,41 @@
 import React, { Component } from 'react';
-import CustomColourPanel from './CustomColourPanel';
+import CustomColorPanel from './CustomColorPanel';
 import Tile from '../common/Tile';
 import { withStyles } from '@material-ui/core';
 
 const styles = theme => ({
+  customColorPanel: {
+    padding: '10',
+    flex: '1 40%'
+  },
+  colorRows: {
+    flex: '1 60%'
+  },
   row: {
     display: 'flex'
+  },
+  root: {
+    display: 'flex',
+    flexFlow: 'row wrap',
   }
 });
 
 class SolidControls extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      color: {
+        red: Math.round(Math.random() * 255),
+        green: Math.round(Math.random() * 255),
+        blue: Math.round(Math.random() * 255),
+      }
+    };
+
+    this.handleClick = this.handleClick.bind(this);
+  }
 
   handleClick(event, color) {
-    console.log('Sending colour: ', color);
+    this.setState({ color });
     // const socket = new WebSocket('ws://localhost:6565');
     // socket.onopen = event => {
     //   const request = {
@@ -50,8 +73,8 @@ class SolidControls extends Component {
     const purple = { red: 255, green: 0, blue: 255 };
 
     return (
-      <div style={{ display: 'flex', flexFlow: 'row wrap' }}>
-        <div style={{ flex: '1 60%' }}>
+      <div className={classes.root}>
+        <div className={classes.colorRows}>
           <div className={classes.row}> 
             <Tile color={red} onClick={this.handleClick} />
             <Tile color={redOrange} onClick={this.handleClick} />
@@ -74,7 +97,9 @@ class SolidControls extends Component {
             <Tile color={purple} onClick={this.handleClick} />
           </div>
         </div>
-        <CustomColourPanel style={{ flex: '1 40%', padding: 10 }} />
+        <div className={classes.customColorPanel}>
+          <CustomColorPanel color={this.state.color} />
+        </div>
       </div>
     );
   }

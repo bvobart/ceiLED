@@ -10,13 +10,13 @@ class Tile extends Component {
       minWidth: 0,
       backgroundColor: colorString,
       borderRadius: 0,
-      flex: '1 100%'
+      flex: this.props.flex ? this.props.flex : '1 100%'
     };
 
     return (
       <Button
         style={tileStyle} 
-        onClick={(event) => this.props.onClick(event, this.props.color)}
+        onClick={(event) => this.props.onClick && this.props.onClick(event, this.props.color)}
         variant='flat'
       >
         <div></div>
