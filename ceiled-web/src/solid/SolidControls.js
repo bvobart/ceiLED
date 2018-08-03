@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import SolidOptionsPanel from './SolidOptionsPanel';
+import CustomColourPanel from './CustomColourPanel';
 import Tile from '../common/Tile';
 import { withStyles } from '@material-ui/core';
 
@@ -74,7 +74,7 @@ class SolidControls extends Component {
             <Tile color={purple} onClick={this.handleClick} />
           </div>
         </div>
-        <SolidOptionsPanel style={{ flex: '1 40%', padding: 10 }} />
+        <CustomColourPanel style={{ flex: '1 40%', padding: 10 }} />
       </div>
     );
   }

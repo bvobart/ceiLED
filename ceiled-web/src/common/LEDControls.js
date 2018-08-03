@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Card, CardHeader, Collapse, IconButton, Typography } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import SolidControls from '../solid/SolidControls';
+import GlobalControls from './GlobalControls';
 
 class Control extends Component {
   constructor(props) {
@@ -37,6 +38,7 @@ class LEDControls extends Component {
   render() {
     return (
       <Card>
+        <GlobalControls />
         <Control title="Solid">
           <SolidControls />
         </Control>
