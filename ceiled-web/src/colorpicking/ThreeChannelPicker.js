@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { AppBar, Tab, Tabs, withStyles, Button } from '@material-ui/core';
-import SolidControls from './SolidControls';
+import ColorPicker from '../colorpicking/ColorPicker';
 import { toRgbString } from '../common/utils';
 
 const styles = theme => ({
@@ -24,64 +24,45 @@ const styles = theme => ({
   }
 });
 
-class SolidTabs extends Component {
+class ThreeChannelPicker extends Component {
   constructor(props) {
     super(props);
+    const black = { red: 0, green: 0, blue: 0 };
     this.state = {
-      solidControlsTab: 0,
-      channel1: {
-        red: Math.round(Math.random() * 255),
-        green: Math.round(Math.random() * 255),
-        blue: Math.round(Math.random() * 255),
-      },
-      channel2: {
-        red: Math.round(Math.random() * 255),
-        green: Math.round(Math.random() * 255),
-        blue: Math.round(Math.random() * 255),
-      },
-      channel3: {
-        red: Math.round(Math.random() * 255),
-        green: Math.round(Math.random() * 255),
-        blue: Math.round(Math.random() * 255),
-      }
+      tab: 0,
+      channel1: props.channel1 ? props.channel1 : black,
+      channel2: props.channel2 ? props.channel2 : black,
+      channel3: props.channel3 ? props.channel3 : black
     };
 
     this.handleChangeChannelColor = this.handleChangeChannelColor.bind(this);
-    this.handleConfirmChannelColor = this.handleConfirmChannelColor.bind(this);
     this.handleSetForAllChannels = this.handleSetForAllChannels.bind(this);
   }
 
   handleSetForAllChannels(event) {
-    const color = this.state['channel' + (this.state.solidControlsTab + 1)];
+    const color = this.state['channel' + (this.state.tab + 1)];
     this.setState({
       channel1: color,
       channel2: color,
       channel3: color
     });
-    // TODO: call controller to actually set to this value.
+
+    if (this.props.onSetForAllChannels) this.props.onSetForAllChannels(color);
   }
 
   handleChangeChannelColor(event, color) {
-    const channel = 'channel' + (this.state.solidControlsTab + 1);
+    if (this.props.onChange) this.props.onChange({ 
+      channel1: this.state.channel1,
+      channel2: this.state.channel2,
+      channel3: this.state.channel3
+    });
+    const channel = 'channel' + (this.state.tab + 1);
     this.setState({ [channel]: color });
-    // const socket = new WebSocket('ws://localhost:6565');
-    // socket.onopen = event => {
-    //   const request = {
-    //     data: {
-    //       type: 'solid',
-    //       colors: [color],
-    //       brightness: 100,
-    //       roomLight: 0
-    //     }
-    //   };
-    //   socket.send(JSON.stringify(request));
-    //   socket.close();
-    // };
   }
 
   render() {
     const { classes } = this.props;
-    const { solidControlsTab } = this.state;
+    const { tab } = this.state;
     
     const ch1ColorString = toRgbString(this.state.channel1);
     const ch2ColorString = toRgbString(this.state.channel2);
@@ -93,16 +74,16 @@ class SolidTabs extends Component {
               className={classes.tabsBar} 
               centered 
               fullWidth 
-              value={solidControlsTab}
-              onChange={(e, tab) => this.setState({ solidControlsTab: tab })}>
+              value={tab}
+              onChange={(e, tab) => this.setState({ tab })}>
             <Tab className={classes.tab} label='Channel 1' style={{ backgroundColor: ch1ColorString }} />
             <Tab className={classes.tab} label='Channel 2' style={{ backgroundColor: ch2ColorString }} />
             <Tab className={classes.tab} label='Channel 3' style={{ backgroundColor: ch3ColorString }} />
           </Tabs>
         </AppBar>
-        {solidControlsTab === 0 && <SolidControls color={this.state.channel1} onChange={this.handleChangeChannelColor} /> }
-        {solidControlsTab === 1 && <SolidControls color={this.state.channel2} onChange={this.handleChangeChannelColor} /> }
-        {solidControlsTab === 2 && <SolidControls color={this.state.channel3} onChange={this.handleChangeChannelColor} /> }
+        {tab === 0 && <ColorPicker color={this.state.channel1} onChange={this.handleChangeChannelColor} /> }
+        {tab === 1 && <ColorPicker color={this.state.channel2} onChange={this.handleChangeChannelColor} /> }
+        {tab === 2 && <ColorPicker color={this.state.channel3} onChange={this.handleChangeChannelColor} /> }
         <Button className={classes.allChannelsButton} onClick={this.handleSetForAllChannels}>
           Set for all channels
         </Button>
@@ -111,4 +92,4 @@ class SolidTabs extends Component {
   }
 }
 
-export default withStyles(styles)(SolidTabs);
+export default withStyles(styles)(ThreeChannelPicker);
