@@ -37,10 +37,7 @@ class FadeControls extends Component {
       <div>
         <FadeOptionsControl 
           options={this.state.options} 
-          onChange={options => {
-            console.log('options changed: ', options);
-            this.setState({ options });
-          }} 
+          onChange={options => this.setState({ options })} 
         />
         <ThreeChannelPicker
           channel1={this.state.channel1}
