@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { Button } from '@material-ui/core';
+import { toRgbString } from './utils';
 
 class Tile extends Component {
 
   render() {
-    const colorString = 'rgb(' + this.props.color.red + ',' + this.props.color.green + ',' + this.props.color.blue + ')';
+    const colorString = toRgbString(this.props.color);
     const tileStyle = {
       height: 50,
       minWidth: 0,

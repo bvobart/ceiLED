@@ -15,7 +15,8 @@ const styles = theme => ({
     marginTop: 4
   },
   button: {
-    flex: '1 50%'
+    flex: '1 50%',
+    borderRadius: 0
   }
 });
 

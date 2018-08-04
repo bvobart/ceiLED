@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import { Card, CardHeader, Collapse, IconButton, Typography } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import SolidControls from '../solid/SolidControls';
 import GlobalControls from './GlobalControls';
+import SolidTabs from '../solid/SolidTabs';
 
 class Control extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      expanded: false
+      expanded: false,
     }
 
     this.handleClick = this.handleClick.bind(this);
@@ -40,7 +40,7 @@ class LEDControls extends Component {
       <Card>
         <GlobalControls />
         <Control title="Solid">
-          <SolidControls />
+          <SolidTabs />
         </Control>
         <Control title="Fade">
           <Typography paragraph>Not yet implemented</Typography>
