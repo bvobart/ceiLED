@@ -41,9 +41,9 @@ class CustomColorPanel extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.color !== this.props.color) {
+    if (prevProps.color !== this.props.color && this.props.color !== prevState && this.props.color !== this.state) {
       this.setState({ ...this.props.color });
-    } else {
+    } else if (this.state !== prevState) {
       this.props.onChange && this.props.onChange(this.state);
     }
   }
@@ -58,9 +58,8 @@ class CustomColorPanel extends Component {
           <ColorSlider value={this.state.blue} onChange={(e, blue) => this.setState({ blue })}/>
         </div>
         <div className={classes.buttonBox}>
-          <Tile flex='1 50%' color={this.state} />
-          <Button className={classes.button}>Confirm</Button>
-        </div>       
+          <Tile color={this.state} />
+        </div>
       </Paper>
     );
   }

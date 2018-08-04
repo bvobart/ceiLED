@@ -69,7 +69,7 @@ class SolidControls extends Component {
           </div>
         </div>
         <div className={classes.customColorPanel}>
-          <CustomColorPanel color={this.props.color} />
+          <CustomColorPanel color={this.props.color} onChange={(color) => onChange(null, color)} />
         </div>
       </div>
     );

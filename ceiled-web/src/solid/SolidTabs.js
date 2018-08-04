@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { AppBar, Tab, Tabs, withStyles, Button } from '@material-ui/core';
 import SolidControls from './SolidControls';
+import { toRgbString } from '../common/utils';
 
 const styles = theme => ({
   root: {},
@@ -78,13 +79,13 @@ class SolidTabs extends Component {
     // };
   }
 
-  handleConfirmChannelColor(event, color) {
-    // TODO: send color to controller when color for a channel is confirmed.
-  }
-
   render() {
     const { classes } = this.props;
     const { solidControlsTab } = this.state;
+    
+    const ch1ColorString = toRgbString(this.state.channel1);
+    const ch2ColorString = toRgbString(this.state.channel2);
+    const ch3ColorString = toRgbString(this.state.channel3);
     return (
       <div className={classes.root}>
         <AppBar position='static'>
@@ -94,9 +95,9 @@ class SolidTabs extends Component {
               fullWidth 
               value={solidControlsTab}
               onChange={(e, tab) => this.setState({ solidControlsTab: tab })}>
-            <Tab className={classes.tab} label='Channel 1' />
-            <Tab className={classes.tab} label='Channel 2' />
-            <Tab className={classes.tab} label='Channel 3' />
+            <Tab className={classes.tab} label='Channel 1' style={{ backgroundColor: ch1ColorString }} />
+            <Tab className={classes.tab} label='Channel 2' style={{ backgroundColor: ch2ColorString }} />
+            <Tab className={classes.tab} label='Channel 3' style={{ backgroundColor: ch3ColorString }} />
           </Tabs>
         </AppBar>
         {solidControlsTab === 0 && <SolidControls color={this.state.channel1} onChange={this.handleChangeChannelColor} /> }
