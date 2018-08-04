@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Typography, withStyles, TextField } from '@material-ui/core';
+import { Button, Typography, withStyles } from '@material-ui/core';
 import { Slider } from '@material-ui/lab';
 import debounce from 'debounce';
 

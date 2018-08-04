@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Paper, withStyles, Button } from '@material-ui/core';
+import { Paper, withStyles } from '@material-ui/core';
 import { Slider } from '@material-ui/lab';
 import Tile from '../common/Tile';
 
@@ -9,15 +9,11 @@ const styles = theme => ({
     flexDirection: 'column',
     justifyContent: 'space-between'
   },
-  buttonBox: {
+  tile: {
     height: 50,
     display: 'flex',
     marginTop: 4
   },
-  button: {
-    flex: '1 50%',
-    borderRadius: 0
-  }
 });
 
 const ColorSlider = (props) => (
@@ -57,9 +53,7 @@ class CustomColorPanel extends Component {
           <ColorSlider value={this.state.green} onChange={(e, green) => this.setState({ green })}/>
           <ColorSlider value={this.state.blue} onChange={(e, blue) => this.setState({ blue })}/>
         </div>
-        <div className={classes.buttonBox}>
-          <Tile color={this.state} />
-        </div>
+        <Tile className={classes.tile} color={this.state} />
       </Paper>
     );
   }

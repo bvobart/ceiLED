@@ -3,7 +3,6 @@ import { Button } from '@material-ui/core';
 import { toRgbString } from './utils';
 
 class Tile extends Component {
-
   render() {
     const colorString = toRgbString(this.props.color);
     const tileStyle = {
@@ -16,6 +15,7 @@ class Tile extends Component {
 
     return (
       <Button
+        className={this.props.className}
         style={tileStyle} 
         onClick={(event) => this.props.onClick && this.props.onClick(event, this.props.color)}
         variant='flat'
