@@ -4,7 +4,6 @@ import { AppBar, Tab, Tabs, withStyles, Button } from '@material-ui/core';
 import ColorPicker from '../colorpicking/ColorPicker';
 
 const styles = theme => ({
-  root: {},
   appBar: {
     backgroundColor: theme.palette.background.paper,
   },
@@ -38,7 +37,7 @@ class ThreeChannelPickerBase extends Component {
     const currentColor = this.props['channel' + (tab + 1)];
 
     return (
-      <div className={classes.root}>
+      <div>
         <AppBar position='static'>
           <Tabs 
               className={classes.tabsBar} 
@@ -54,7 +53,11 @@ class ThreeChannelPickerBase extends Component {
         {tab === 0 && <ColorPicker color={this.props.channel1} onChange={(e, color) => this.props.onPickChannelColor(tab, color)} /> }
         {tab === 1 && <ColorPicker color={this.props.channel2} onChange={(e, color) => this.props.onPickChannelColor(tab, color)} /> }
         {tab === 2 && <ColorPicker color={this.props.channel3} onChange={(e, color) => this.props.onPickChannelColor(tab, color)} /> }
-        {this.props.children}
+        
+        <div className={this.props.className}>
+          {this.props.children}
+        </div>
+        
         <Button className={classes.allChannelsButton} onClick={() => this.props.onSetForAllChannels(currentColor)}>
           Set for all channels
         </Button>
