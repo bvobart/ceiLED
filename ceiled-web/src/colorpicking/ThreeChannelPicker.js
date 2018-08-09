@@ -12,7 +12,7 @@ class ThreeChannelPicker extends Component {
       channel3: props.channel3 ? props.channel3 : black
     };
 
-    this.handlePickChannelColor = this.handlePickChannelColor.bind(this);
+    this.handleChangeChannelColor = this.handleChangeChannelColor.bind(this);
     this.handleSetForAllChannels = this.handleSetForAllChannels.bind(this);
   }
 
@@ -26,9 +26,9 @@ class ThreeChannelPicker extends Component {
     if (this.props.onSetForAllChannels) this.props.onSetForAllChannels(color);
   }
 
-  handlePickChannelColor(channelNr, color) {
+  handleChangeChannelColor(channelNr, color) {
     if (this.props.onChange) this.props.onChange(this.state);
-    const channel = 'channel' + (channelNr + 1);
+    const channel = 'channel' + channelNr;
     this.setState({ [channel]: color });
   }
 
@@ -40,9 +40,11 @@ class ThreeChannelPicker extends Component {
     }
     return (
       <ThreeChannelPickerBase
+        setForAll
         {...this.state}
         tabBgColors={tabBgColors}
-        onPickChannelColor={this.handlePickChannelColor}
+        onChangeChannelColor={this.handleChangeChannelColor}
+        onConfirmChannelColor={this.handleChangeChannelColor}
         onSetForAllChannels={this.handleSetForAllChannels}
       />
     );

@@ -22,8 +22,9 @@ const styles = theme => ({
 
 class ColorPicker extends Component {
   render() {
-    const { classes } = this.props;
+    const { classes, color } = this.props;
     const onChange = this.props.onChange ? this.props.onChange : () => {};
+    const onConfirm = this.props.onConfirm ? this.props.onConfirm : () => {};
 
     const red = { red: 255, green: 0, blue: 0 };
     const redOrange = { red: 255, green: 64, blue: 0 };
@@ -47,29 +48,33 @@ class ColorPicker extends Component {
       <div className={classes.root}>
         <div className={classes.colorRows}>
           <div className={classes.row}> 
-            <Tile color={red} onClick={onChange} />
-            <Tile color={redOrange} onClick={onChange} />
-            <Tile color={orange} onClick={onChange} />
-            <Tile color={orangeYellow} onClick={onChange} />
-            <Tile color={yellow} onClick={onChange} />
+            <Tile color={red} onClick={onConfirm} />
+            <Tile color={redOrange} onClick={onConfirm} />
+            <Tile color={orange} onClick={onConfirm} />
+            <Tile color={orangeYellow} onClick={onConfirm} />
+            <Tile color={yellow} onClick={onConfirm} />
           </div>
           <div className={classes.row}>
-            <Tile color={turquoise} onClick={onChange} />
-            <Tile color={greenBlue} onClick={onChange} />
-            <Tile color={green} onClick={onChange} />
-            <Tile color={yellowGreen} onClick={onChange} />
-            <Tile color={yellowerGreen} onClick={onChange} />
+            <Tile color={turquoise} onClick={onConfirm} />
+            <Tile color={greenBlue} onClick={onConfirm} />
+            <Tile color={green} onClick={onConfirm} />
+            <Tile color={yellowGreen} onClick={onConfirm} />
+            <Tile color={yellowerGreen} onClick={onConfirm} />
           </div>
           <div className={classes.row}> 
-            <Tile color={blueGreen} onClick={onChange} />
-            <Tile color={blue} onClick={onChange} />
-            <Tile color={bluePurple} onClick={onChange} />
-            <Tile color={purpleBlue} onClick={onChange} />
-            <Tile color={purple} onClick={onChange} />
+            <Tile color={blueGreen} onClick={onConfirm} />
+            <Tile color={blue} onClick={onConfirm} />
+            <Tile color={bluePurple} onClick={onConfirm} />
+            <Tile color={purpleBlue} onClick={onConfirm} />
+            <Tile color={purple} onClick={onConfirm} />
           </div>
         </div>
         <div className={classes.customColorPanel}>
-          <CustomColorPanel color={this.props.color} onChange={(color) => onChange(null, color)} />
+          <CustomColorPanel 
+            color={color}
+            onChange={(color) => onChange(color)}
+            onClick={onConfirm}
+          />
         </div>
       </div>
     );

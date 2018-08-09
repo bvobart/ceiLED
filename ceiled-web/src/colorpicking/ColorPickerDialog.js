@@ -13,6 +13,16 @@ class ColorPickerDialog extends Component {
     this.handleDelete = this.handleDelete.bind(this);
   }
 
+  static getDerivedStateFromProps(props, state) {
+    if (props.color.red !== state.color.red 
+        || props.color.green !== state.color.green 
+        || props.color.blue !== state.color.blue
+    ) {
+      return { color: props.color };
+    }
+    return null;
+  }
+
   handleConfirm(event) {
     const { onConfirm, onClose } = this.props;
     onConfirm(this.state.color);
@@ -37,7 +47,11 @@ class ColorPickerDialog extends Component {
       >
         <DialogTitle>Pick a colour</DialogTitle>
         <DialogContent>
-          <ColorPicker color={color} onChange={(e, color) => this.setState({ color })} />
+          <ColorPicker 
+            color={color} 
+            onChange={(color) => this.setState({ color })} 
+            onConfirm={(color) => this.setState({ color })} 
+          />
         </DialogContent>
         <DialogActions style={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button onClick={this.handleConfirm}>Confirm</Button>

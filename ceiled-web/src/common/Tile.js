@@ -18,10 +18,10 @@ class Tile extends Component {
       <Button
         className={this.props.className}
         style={tileStyle} 
-        onClick={(event) => this.props.onClick && this.props.onClick(event, this.props.color)}
+        onClick={() => this.props.onClick && this.props.onClick(this.props.color)}
         variant='flat'
       >
-        <div></div>
+        <div>{this.props.label}</div>
       </Button>
     );
   }
@@ -36,6 +36,8 @@ Tile.propTypes = {
   }).isRequired,
   // sets the CSS flex property on the component.
   flex: PropTypes.string,
+  // text to display on the tile
+  label: PropTypes.string,
   // since the tile is actually a button, this function is executed when the tile is clicked
   onClick: PropTypes.func
 };

@@ -13,7 +13,7 @@ class EditableTile extends Component {
 
   render() {
     return (
-      <div>
+      <div style={{ display: 'flex' }}>
         <Tile {...this.props} onClick={() => this.setState({ open: true })} />
         <ColorPickerDialog
           color={this.props.color}

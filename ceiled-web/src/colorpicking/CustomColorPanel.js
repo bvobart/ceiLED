@@ -34,26 +34,55 @@ class CustomColorPanel extends Component {
       green: props.color ? props.color.green : 0,
       blue: props.color ? props.color.blue : 0
     };
+
+    this.handleChangeRed = this.handleChangeRed.bind(this);
+    this.handleChangeGreen = this.handleChangeGreen.bind(this);
+    this.handleChangeBlue = this.handleChangeBlue.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.color !== this.props.color && this.props.color !== prevState && this.props.color !== this.state) {
-      this.setState({ ...this.props.color });
-    } else if (this.state !== prevState) {
-      this.props.onChange && this.props.onChange(this.state);
+  static getDerivedStateFromProps(props, state) {
+    if (props.color.red !== state.red 
+        || props.color.green !== state.green 
+        || props.color.blue !== state.blue
+    ) {
+      return props.color;
     }
+    return null;
+  }
+
+  handleChangeRed(e, red) {
+    const newColor = { ...this.state, red };
+    this.props.onChange && this.props.onChange(newColor);
+    this.setState(newColor);
+  }
+
+  handleChangeGreen(e, green) {
+    const newColor = { ...this.state, green };
+    this.props.onChange && this.props.onChange(newColor);
+    this.setState(newColor);
+  }
+
+  handleChangeBlue(e, blue) {
+    const newColor = { ...this.state, blue };
+    this.props.onChange && this.props.onChange(newColor);
+    this.setState(newColor);
+  }
+
+  handleClick(event) {
+    this.props.onClick && this.props.onClick(this.state);
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, label } = this.props;
     return (
       <Paper square className={classes.root}>
         <div>
-          <ColorSlider value={this.state.red} onChange={(e, red) => this.setState({ red })} />
-          <ColorSlider value={this.state.green} onChange={(e, green) => this.setState({ green })}/>
-          <ColorSlider value={this.state.blue} onChange={(e, blue) => this.setState({ blue })}/>
+          <ColorSlider value={this.state.red} onChange={this.handleChangeRed} />
+          <ColorSlider value={this.state.green} onChange={this.handleChangeGreen} />
+          <ColorSlider value={this.state.blue} onChange={this.handleChangeBlue} />
         </div>
-        <Tile className={classes.tile} color={this.state} />
+        <Tile label={label} className={classes.tile} color={this.state} onClick={this.handleClick} />
       </Paper>
     );
   }
