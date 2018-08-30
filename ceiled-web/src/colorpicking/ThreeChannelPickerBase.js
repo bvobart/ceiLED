@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { AppBar, Tab, Tabs, withStyles, Button } from '@material-ui/core';
+import isEqual from 'lodash.isequal';
+import { AppBar, Tab, Tabs, withStyles } from '@material-ui/core';
 import ColorPicker from '../colorpicking/ColorPicker';
 
 const styles = theme => ({
@@ -18,14 +19,6 @@ const styles = theme => ({
   },
   tab3: {
     maxWidth: '100%'
-  },
-  allChannelsButton: {
-    backgroundColor: theme.palette.background.paper,
-    borderRadius: 0,
-    width: '100%',
-    '&:hover': {
-      backgroundColor: theme.palette.background.default
-    }
   }
 });
 
@@ -37,11 +30,39 @@ class ThreeChannelPickerBase extends Component {
       tab: 0,
       color1: props.channel1 ? props.channel1 : black,
       color2: props.channel2 ? props.channel2 : black,
-      color3: props.channel3 ? props.channel3 : black
+      color3: props.channel3 ? props.channel3 : black,
+      prevPropColor1: props.channel1 ? props.channel1 : black,
+      prevPropcolor2: props.channel2 ? props.channel2 : black,
+      prevPropcolor3: props.channel3 ? props.channel3 : black,
     };
 
+    this.handleChangeTab = this.handleChangeTab.bind(this);
     this.handleChangeChannelColor = this.handleChangeChannelColor.bind(this);
     this.handleConfirmChannelColor = this.handleConfirmChannelColor.bind(this);
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    const oldPropColors = {
+      color1: state.prevPropColor1,
+      color2: state.prevPropColor2,
+      color3: state.prevPropColor3,
+    }
+
+    const newPropColors = {
+      color1: props.channel1,
+      color2: props.channel2,
+      color3: props.channel3,
+    };
+
+    if (!isEqual(oldPropColors, newPropColors)) {
+      return {
+        ...newPropColors,
+        prevPropColor1: props.channel1,
+        prevPropColor2: props.channel2,
+        prevPropColor3: props.channel3
+      };
+    }
+    return null;
   }
 
   handleChangeChannelColor(channel, color) {
@@ -56,6 +77,11 @@ class ThreeChannelPickerBase extends Component {
     this.setState({ ['color' + channel]: color });
   }
 
+  handleChangeTab(tab) {
+    this.setState({ tab });
+    this.handleChangeChannelColor(tab + 1, this.state['color' + (tab + 1)]);
+  }
+
   renderColorPicker(tab) {
     const channel = tab + 1;
     return (
@@ -68,9 +94,8 @@ class ThreeChannelPickerBase extends Component {
   }
 
   render() {
-    const { classes, tabBgColors, setForAll } = this.props;
+    const { classes, tabBgColors } = this.props;
     const { tab } = this.state;
-    const currentColor = this.state['color' + (tab + 1)];
 
     return (
       <div style={this.props.style}>
@@ -80,7 +105,7 @@ class ThreeChannelPickerBase extends Component {
               centered 
               fullWidth 
               value={tab}
-              onChange={(e, tab) => this.setState({ tab })}>
+              onChange={(e, tab) => this.handleChangeTab(tab)}>
             <Tab className={classes.tab1} label='Channel 1' style={{ backgroundColor: tabBgColors.channel1 }} />
             <Tab className={classes.tab2} label='Channel 2' style={{ backgroundColor: tabBgColors.channel2 }} />
             <Tab className={classes.tab3} label='Channel 3' style={{ backgroundColor: tabBgColors.channel3 }} />
@@ -93,12 +118,6 @@ class ThreeChannelPickerBase extends Component {
         <div className={this.props.className}>
           {this.props.children}
         </div>
-        
-        { setForAll && 
-            <Button className={classes.allChannelsButton} onClick={() => this.props.onSetForAllChannels(currentColor)}>
-              Set for all channels
-            </Button> 
-        }
       </div>
     );
   }
@@ -121,7 +140,6 @@ ThreeChannelPickerBase.propTypes = {
   }).isRequired,
   onChangeChannelColor: PropTypes.func.isRequired,
   onConfirmChannelColor: PropTypes.func.isRequired,
-  onSetForAllChannels: PropTypes.func.isRequired
 }
 
 ThreeChannelPickerBase.defaultProps = {
