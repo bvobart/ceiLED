@@ -1,26 +1,49 @@
 import React, { Component } from 'react';
-import FlatButton from 'material-ui/FlatButton';
+import PropTypes from 'prop-types';
+import { Button } from '@material-ui/core';
+import { toRgbString } from './utils';
 
 class Tile extends Component {
-
   render() {
-    const colorString = 'rgb(' + this.props.color.red + ',' + this.props.color.green + ',' + this.props.color.blue + ')';
+    const colorString = toRgbString(this.props.color);
     const tileStyle = {
       height: 50,
       minWidth: 0,
       backgroundColor: colorString,
-      flex: '1 100%'
+      borderRadius: 0,
+      flex: this.props.flex ? this.props.flex : '1 100%'
     };
 
     return (
-      <FlatButton
-        label=' '
+      <Button
+        className={this.props.className}
         style={tileStyle} 
-        onClick={(event) => this.props.onClick(event, this.props.color)}
+        onClick={() => this.props.onClick && this.props.onClick(this.props.color)}
+        variant='flat'
       >
-      </FlatButton>
+        <div>{this.props.label}</div>
+      </Button>
     );
   }
 }
+
+Tile.propTypes = {
+  // color of the tile.
+  color: PropTypes.shape({
+    red: PropTypes.number.isRequired,
+    green: PropTypes.number.isRequired,
+    blue: PropTypes.number.isRequired
+  }).isRequired,
+  // sets the CSS flex property on the component.
+  flex: PropTypes.string,
+  // text to display on the tile
+  label: PropTypes.string,
+  // since the tile is actually a button, this function is executed when the tile is clicked
+  onClick: PropTypes.func
+};
+
+Tile.defaultProps = {
+  color: { red: 0, green: 0, blue: 0 }
+};
 
 export default Tile;

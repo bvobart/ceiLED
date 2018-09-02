@@ -13,11 +13,14 @@
         "url": "git+https://github.com/bvobart/ceiLED.git"
     },
     "scripts": {
-        "install": "concurrently \"cd controller && npm install\" \"cd ceiled-web && npm install \"",
-        "start": "concurrently \"cd controller && npm start\" \"cd ceiled-web && npm run serve\"",
-        "build": "concurrently \"cd controller && npm run build\" \"cd ceiled-web && npm run build \""
+        "install": "concurrently \"cd controller && yarn install\" \"cd ceiled-web && yarn install \"",
+        "start": "concurrently \"cd controller && yarn start\" \"cd ceiled-web && yarn serve\"",
+        "build": "concurrently \"cd controller && yarn build\" \"cd ceiled-web && yarn build \""
     },
     "dependencies": {
-        "concurrently": "^3.5.1"
+        "concurrently": "^4.0.1"
+    },
+    "devDependencies": {
+        "yarn": "1.9.4"
     }
 }

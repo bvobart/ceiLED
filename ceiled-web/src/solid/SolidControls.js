@@ -1,53 +1,41 @@
 import React, { Component } from 'react';
-import SolidOptionsPanel from './SolidOptionsPanel';
-import Tile from '../common/Tile';
+import ThreeChannelPicker from '../colorpicking/ThreeChannelPicker';
 
 class SolidControls extends Component {
-
-  handleClick(event, color) {
-    console.log('Sending colour: ', color);
-    const socket = new WebSocket('ws://localhost:6565');
-    socket.onopen = event => {
-      const request = {
-        data: {
-          type: 'solid',
-          colors: [color],
-          brightness: 100,
-          roomLight: 0
-        }
-      };
-      socket.send(JSON.stringify(request));
-      socket.close();
+  constructor(props) {
+    super(props);
+    this.state = {
+      channel1: {
+        red: Math.round(Math.random() * 255),
+        green: Math.round(Math.random() * 255),
+        blue: Math.round(Math.random() * 255),
+      },
+      channel2: {
+        red: Math.round(Math.random() * 255),
+        green: Math.round(Math.random() * 255),
+        blue: Math.round(Math.random() * 255),
+      },
+      channel3: {
+        red: Math.round(Math.random() * 255),
+        green: Math.round(Math.random() * 255),
+        blue: Math.round(Math.random() * 255),
+      }
     };
   }
-  
-  render() {
-    const black = { red: 0, green: 0, blue: 0 };
-    const white = { red: 255, green: 255, blue: 255 };
-    const red = { red: 255, green: 0, blue: 0 };
-    const green = { red: 0, green: 255, blue: 0 };
-    const blue = { red: 0, green: 0, blue: 255 };
 
+  handleChangeColors(colors) {
+    // TODO: send to actual controller as well.
+    this.setState(colors);
+  }
+
+  render() {
     return (
-      <div style={{ display: 'flex', flexFlow: 'row wrap' }}>
-        <div style={{ flex: '1 60%' }}>
-          <div style={{ display: 'flex' }}>
-            <Tile color={black} onClick={this.handleClick} />
-            <Tile color={white} onClick={this.handleClick} />
-            <Tile color={red} onClick={this.handleClick} />
-            <Tile color={green} onClick={this.handleClick} />
-            <Tile color={blue} onClick={this.handleClick} />
-          </div>
-          <div style={{ display: 'flex' }}>
-            <Tile color={white} onClick={this.handleClick} />
-            <Tile color={black} onClick={this.handleClick} />
-            <Tile color={red} onClick={this.handleClick} />
-            <Tile color={green} onClick={this.handleClick} />
-            <Tile color={blue} onClick={this.handleClick} />
-          </div>
-        </div>
-        <SolidOptionsPanel style={{ flex: '1 40%', padding: 10 }} />
-      </div>
+      <ThreeChannelPicker 
+        channel1={this.state.channel1} 
+        channel2={this.state.channel2} 
+        channel3={this.state.channel3}
+        onChange={this.handleChangeColors.bind(this)}
+      />
     );
   }
 }
