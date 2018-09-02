@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
+import { Typography } from '@material-ui/core';
 
 class FunControls extends Component {
   render() {
     return (
-      <div>
-        To be implemented...
-      </div>
+      <Typography paragraph>Not yet implemented</Typography>
     );
   }
 }
