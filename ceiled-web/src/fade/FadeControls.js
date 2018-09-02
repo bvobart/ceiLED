@@ -12,7 +12,8 @@ class FadeControls extends Component {
     super(props);
     this.state = {
       options: {
-        fadeMode: 3
+        fadeMode: 3,
+        speed: 60
       },
       channel1: [{
         red: Math.round(Math.random() * 255),
@@ -30,6 +31,41 @@ class FadeControls extends Component {
         blue: Math.round(Math.random() * 255),
       }]
     };
+
+    this.handleChangeColors = this.handleChangeColors.bind(this);
+    this.handleChangeOptions = this.handleChangeOptions.bind(this);
+  }
+
+  handleChangeColors(channelNr, colors) {
+    // TODO: send colors to controller here
+    this.setState({ ['channel' + channelNr]: colors });
+  }
+
+  /**
+   * Handles changes in the FadeControlOptions.
+   * In case the fade mode changes, also sets the colours of the other channels. It does this by
+   * making use of the fact that JavaScript copies arrays by reference. So when switching to double
+   * channel mode, channel1 and channel3 will reference to the same underlying array, causing any
+   * operations on them to affect both channels. Meanwhile, channel2 will have its own array of
+   * colours, as Array.slice() returns a (shallow) copy of the array, effectively 'unbinding' it
+   * from the other channels.
+   * @param {*} options the new FadeControlOptions
+   */
+  handleChangeOptions(options) {
+    if (options.fadeMode !== this.state.options.fadeMode) {
+      const { channel1, channel2, channel3 } = this.state;
+      if (options.fadeMode === 1) { 
+        // set to single channel --> channel1 === channel2 === channel3
+        this.setState({ channel2: channel1, channel3: channel1 });
+      } else if (options.fadeMode === 2) { 
+        // set to double channel --> channel1 === channel3
+        this.setState({ channel2: channel2.slice(), channel3: channel1 });
+      } else {
+        // set to triple channel --> each channel has its own array
+        this.setState({ channel1: channel1.slice(), channel2: channel2.slice(), channel3: channel3.slice() })
+      }
+    }
+    this.setState({ options });
   }
 
   render() {
@@ -37,13 +73,14 @@ class FadeControls extends Component {
       <div>
         <FadeOptionsControl 
           options={this.state.options} 
-          onChange={options => this.setState({ options })} 
+          onChange={this.handleChangeOptions} 
         />
         <ThreeChannelMultiPicker
+          key={this.state.options.fadeMode}
           channel1={this.state.channel1}
           channel2={this.state.channel2}
           channel3={this.state.channel3}
-          onChange={(colors) => console.log(colors)} 
+          onChange={this.handleChangeColors} 
         />
       </div>
     );

@@ -3,9 +3,12 @@ export const toRgbString = (color) => {
 };
 
 export const toRgbStringsList = (colors) => {
+  if (colors.length === 1) {
+    return toRgbString(colors[0]) + ' 0%, ' + toRgbString(colors[0]) + ' 100%';
+  }
   const res = colors.reduce((result, color, index) => {
-    return result + toRgbString(color) + ' ' + (index / colors.length) * 100 + '%' + (index + 1 !== colors.length ? ', ' : '');
+    const percent = (index / (colors.length - 1)) * 100;
+    return result + toRgbString(color) + ' ' + percent + '%' + (index + 1 !== colors.length ? ', ' : '');
   }, '');
-  console.log(res);
   return res;
 };

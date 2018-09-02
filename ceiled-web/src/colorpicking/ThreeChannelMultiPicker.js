@@ -40,6 +40,7 @@ class ThreeChannelMultiPicker extends Component {
     const colors = this.state[chName];
     colors.push(color);
     this.setState({ [chName]: colors });
+    if (this.props.onChange) this.props.onChange(channelNr, colors);
   }
 
   render() {
