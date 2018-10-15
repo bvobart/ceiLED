@@ -7,6 +7,7 @@ import DebugDriver from './hardware/DebugDriver';
 import Pin from './hardware/Pin';
 import MessageHandler from './messages/MessageHandler';
 import FadePattern, { FadeType } from './patterns/FadePattern';
+import SolidPattern from './patterns/SolidPattern';
 
 const server = new WebSocket.Server({ port: 6565 });
 
@@ -28,9 +29,8 @@ console.log(".--------------------------.");
 console.log("| CeiLED Controller online |");
 console.log("'--------------------------'");
 
-if (process.argv[2] === '--debug') {
-  Pin.setDriver(new DebugDriver());
-}
+if (process.argv[2] === '--debug') Pin.setDriver(new DebugDriver());
+else Pin.initializeDriver();
 
 // (async () => {
 //   console.log('Starting fade timing tests');
@@ -55,15 +55,18 @@ if (process.argv[2] === '--debug') {
 //   console.log('Average deviation:', sumDeviation / tries);
 // })();
 
-const colors: Color[] = [Color.RED, Color.GREEN, Color.BLUE];
-const colors2: Color[] = [Color.GREEN, Color.BLUE, Color.RED];
-const colors3: Color[] = [Color.BLUE, Color.RED, Color.GREEN];
-const pattern: FadePattern = new FadePattern(colors, 100, 0, {
-  speed: 120,
-  channels: 3, 
-  fadeType: FadeType.NORMAL,
-  colors2,
-  colors3
-});
-pattern.show();
+const testColor: Color = new Color({ red: 65, green: 65, blue: 65 });
+const colors: Color[] = [Color.RED, Color.GREEN, testColor];
+// const colors2: Color[] = [Color.GREEN, Color.BLUE, Color.RED];
+// const colors3: Color[] = [Color.BLUE, Color.RED, Color.GREEN];
+// const pattern: FadePattern = new FadePattern(colors, 100, 0, {
+//   speed: 120,
+//   channels: 3, 
+//   fadeType: FadeType.NORMAL,
+//   colors2,
+//   colors3
+// });
+// pattern.show();
 
+const pattern: SolidPattern = new SolidPattern(colors, 100, 0);
+pattern.show();

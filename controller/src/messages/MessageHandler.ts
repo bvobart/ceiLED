@@ -46,7 +46,7 @@ class MessageHandler {
         this.activePattern.show();
         this.sendSuccess();
       } else {
-        const error: Error = new Error('Message is invalid: ' + message);
+        const error: Error = new Error('Message is invalid: ' + JSON.stringify(message));
         console.error('Error with request:', error);
         this.sendFail([error]);
       }

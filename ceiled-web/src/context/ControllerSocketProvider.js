@@ -6,17 +6,17 @@ class ControllerSocketProvider extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      enabled: false,
       address: null,
       socket: null,
+
       brightness: 0,
       roomLight: 0,
-      enable: () => this.setState({ enabled: true }),
-      disable: () => this.setState({ enabled: false }),
       setBrightness: (brightness) => this.setState({ brightness }),
       setRoomLight: (roomLight) => this.setState({ roomLight }),
-      close: this.close.bind(this),
+      
       open: this.open.bind(this),
+      close: this.close.bind(this),
+      getStatus: this.getStatus.bind(this),
       reconnect: this.reconnect.bind(this),
       send: this.send.bind(this)
     }
@@ -30,6 +30,15 @@ class ControllerSocketProvider extends Component {
       this.state.socket.close();
     }
   }
+  
+  /**
+   * Returns the current status of the socket connection to the controller.
+   * Returns one of WebSocket.OPEN, WebSocket.CLOSED etc.
+   */
+  getStatus() {
+    if (!this.state.socket) return WebSocket.CLOSED;
+    else return this.state.socket.readyState;
+  }
 
   /**
    * Opens a websocket connection to controller at the specified address. 
@@ -37,11 +46,17 @@ class ControllerSocketProvider extends Component {
    * @param {String} address
    */
   open(address) {
-    this.close();
-    this.setState({
-      socket: new WebSocket(address),
-      address: address
-    });
+    return new Promise((resolve, reject) => {
+      const newSocket = new WebSocket(address);
+      newSocket.addEventListener('open', () => resolve());
+      newSocket.addEventListener('error', (event) => reject(event));
+      
+      this.close();
+      this.setState({
+        socket: new WebSocket(address),
+        address: address
+      });
+    })
   }
 
   /**
@@ -57,12 +72,13 @@ class ControllerSocketProvider extends Component {
    * @param {String} message The message to be sent 
    */
   send(message) {
-    if (this.state.socket && this.state.socket.readyState === 1) {
-      this.state.socket.send(message);
+    if (this.state.socket && this.state.socket.readyState === WebSocket.OPEN) {
+      this.state.socket.send(typeof message === 'string' ? message : JSON.stringify(message));
     } else {
       console.error('Socket not connected!');
     }
   }
+
 
   render() {
     return (

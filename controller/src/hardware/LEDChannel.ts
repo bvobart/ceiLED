@@ -63,7 +63,7 @@ class LEDChannel {
    * Returns the colour this LED channel is currently displaying.
    */
   public getColor(): Color {
-    return new Color(this.red.value, this.green.value, this.blue.value);
+    return new Color({ red: this.red.value, green: this.green.value, blue: this.blue.value });
   }
 
   /**

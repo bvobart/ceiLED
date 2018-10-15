@@ -6,24 +6,32 @@ export enum JumpType {
   REVERSE_LINE = 'reverse-line'
 }
 
-export class JumpPatternOptions {
+export interface IJumpPatternOptions {
+  speed: number;
+  channels: number;
+  colors2: Color[];
+  colors3: Color[];
+  jumpType: JumpType;
+}
+
+export class JumpPatternOptions implements IJumpPatternOptions {
   public speed: number;
   public channels: number;
   public colors2: Color[];
   public colors3: Color[];
   public jumpType: JumpType;
 
-  constructor(
-    speed: number, 
-    channels: number, 
-    colors2: Color[], 
-    colors3: Color[], 
-    jumpType: JumpType
-  ) {
+  constructor({
+    speed, 
+    channels, 
+    colors2, 
+    colors3, 
+    jumpType
+  }: IJumpPatternOptions) {
     this.speed = speed;
     this.channels = channels;
-    this.colors2 = colors2;
-    this.colors3 = colors3;
+    this.colors2 = colors2.map(({ red, green, blue }: Color) => new Color({ red, green, blue }));
+    this.colors3 = colors3.map(({ red, green, blue }: Color) => new Color({ red, green, blue }));
     this.jumpType = jumpType;
   }
 

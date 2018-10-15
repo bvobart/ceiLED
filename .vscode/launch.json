@@ -55,6 +55,9 @@
       "preLaunchTask": "tsc: build - controller/tsconfig.json",
       "outFiles": [
         "${workspaceFolder}/controller/build/**/*.js"
+      ],
+      "args": [
+        "--debug"
       ]
     }
   ]

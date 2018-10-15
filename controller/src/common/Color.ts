@@ -1,21 +1,27 @@
+interface IColor {
+  red: number;
+  green: number;
+  blue: number;
+}
+
 /**
  * Represents a colour. A colour should have red, green and blue values between 0 and 255.
  */
-class Color {
+class Color implements IColor {
   /** The colour black. */
-  public static BLACK: Color = new Color(0, 0, 0);
+  public static BLACK: Color = new Color({ red: 0, green: 0, blue: 0 });
   /** The colour blue */
-  public static BLUE: Color = new Color(0, 0, 255);
+  public static BLUE: Color = new Color({ red: 0, green: 0, blue: 255 });
   /** The colour green */
-  public static GREEN: Color = new Color(0, 255, 0);
+  public static GREEN: Color = new Color({ red: 0, green: 255, blue: 0 });
   /** The colour purple */
-  public static PURPLE: Color = new Color(255, 0, 255);
+  public static PURPLE: Color = new Color({ red: 255, green: 0, blue: 255 });
   /** The colour red */
-  public static RED: Color = new Color(255, 0, 0);
+  public static RED: Color = new Color({ red: 255, green: 0, blue: 0 });
   /** The colour white */
-  public static WHITE: Color = new Color(255, 255, 255);
+  public static WHITE: Color = new Color({ red: 255, green: 255, blue: 255 });
   /** The colour of standard room lighting */
-  public static ROOMLIGHT: Color = new Color(255, 241, 224);
+  public static ROOMLIGHT: Color = new Color({ red: 255, green: 241, blue: 224 });
 
   public static isColor(x: any): x is Color {
     if (typeof x.red !== 'number' || typeof x.green !== 'number' || typeof x.blue !== 'number') {
@@ -31,7 +37,7 @@ class Color {
   /** The amount of blue in this colour. */
   public blue: number;
 
-  constructor(red: number, green: number, blue: number) {
+  constructor({ red, green, blue }: IColor) {
     if (red < 0 || red > 255) throw new Error('Red value not in range: ' + red);
     if (green < 0 || green > 255) throw new Error('Green value not in range: ' + green);
     if (blue < 0 || blue > 255) throw new Error('Blue value not in range: ' + blue);
@@ -51,11 +57,11 @@ class Color {
     if (brightness === 100) return this;
 
     const factor: number = brightness / 100;
-    return new Color(
-      this.red * factor,
-      this.green * factor,
-      this.blue * factor
-    );
+    return new Color({
+      red: this.red * factor,
+      green: this.green * factor,
+      blue: this.blue * factor
+    });
   }
 
   /**

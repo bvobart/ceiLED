@@ -7,24 +7,35 @@ export enum FadeType {
   REVERSE_LINE = 'reverse-line'
 }
 
-export class FadePatternOptions {
+export interface IFadePatternOptions {
+  speed: number;
+  channels: number;
+  colors2?: Color[];
+  colors3?: Color[];
+  fadeType: FadeType;
+}
+
+export class FadePatternOptions implements IFadePatternOptions {
   public speed: number;
   public channels: number;
   public colors2?: Color[];
   public colors3?: Color[];
   public fadeType: FadeType;
 
-  constructor(
-    speed: number, 
-    channels: number, 
-    colors2: Color[], 
-    colors3: Color[], 
-    fadeType: FadeType
-  ) {
+  constructor({
+    speed, 
+    channels, 
+    colors2, 
+    colors3, 
+    fadeType
+  }: IFadePatternOptions) {
     this.speed = speed;
     this.channels = channels;
-    this.colors2 = colors2;
-    this.colors3 = colors3;
+    this.colors2 = colors2 ? colors2 : []
+    this.colors3 = colors3 ? colors3 : []
     this.fadeType = fadeType;
+    
+    this.colors2.map(({ red, green, blue }: Color) => new Color({ red, green, blue }));
+    this.colors3.map(({ red, green, blue }: Color) => new Color({ red, green, blue }));
   }
 }

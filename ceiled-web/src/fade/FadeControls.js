@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
 import FadeOptionsControl from './FadeOptionsControl';
-import { withStyles } from '@material-ui/core';
+import { Button, withStyles } from '@material-ui/core';
 import ThreeChannelMultiPicker from '../colorpicking/ThreeChannelMultiPicker';
+import { ControllerPatternOptionsBuilder } from '../context/ControllerPatternOptionsBuilder';
+import { ControllerSocketContext } from '../context/ControllerSocketProvider';
+import { ControllerRequestBuilder } from '../context/ControllerRequestBuilder';
 
 const styles = theme => ({
-  
+  confirmButton: {
+    width: '100%'
+  }
 })
 
 class FadeControls extends Component {
@@ -34,10 +39,10 @@ class FadeControls extends Component {
 
     this.handleChangeColors = this.handleChangeColors.bind(this);
     this.handleChangeOptions = this.handleChangeOptions.bind(this);
+    this.handleConfirm = this.handleConfirm.bind(this);
   }
 
   handleChangeColors(channelNr, colors) {
-    // TODO: send colors to controller here
     this.setState({ ['channel' + channelNr]: colors });
   }
 
@@ -68,21 +73,54 @@ class FadeControls extends Component {
     this.setState({ options });
   }
 
+  handleConfirm({ brightness, getStatus, roomLight, send }) {
+    const { channel1, channel2, channel3, options } = this.state;
+    if (getStatus() === WebSocket.OPEN) {
+      const patternOptions = new ControllerPatternOptionsBuilder()
+        .for('fade')
+        .setSecondaryColors(options.fadeMode >= 2 ? channel2 : undefined)
+        .setTernaryColors(options.fadeMode >= 3 ? channel3 : undefined)
+        .setChannels(options.fadeMode)
+        .setSpeed(options.speed)
+        .build();
+      const request = new ControllerRequestBuilder()
+        .setType('fade')
+        .setBrightness(brightness)
+        .setRoomlight(roomLight)
+        .setColors(channel1)
+        .setPatternOptions(patternOptions)
+        .build();
+      send(request);
+    }
+  }
+
   render() {
+    const { classes } = this.props;
     return (
-      <div>
-        <FadeOptionsControl 
-          options={this.state.options} 
-          onChange={this.handleChangeOptions} 
-        />
-        <ThreeChannelMultiPicker
-          key={this.state.options.fadeMode}
-          channel1={this.state.channel1}
-          channel2={this.state.channel2}
-          channel3={this.state.channel3}
-          onChange={this.handleChangeColors} 
-        />
-      </div>
+      <ControllerSocketContext.Consumer>
+        {({ brightness, getStatus, roomLight, send }) => (
+          <div>
+            <FadeOptionsControl 
+              options={this.state.options} 
+              onChange={this.handleChangeOptions} 
+            />
+            <ThreeChannelMultiPicker
+              key={this.state.options.fadeMode}
+              channel1={this.state.channel1}
+              channel2={this.state.channel2}
+              channel3={this.state.channel3}
+              onChange={this.handleChangeColors} 
+            />
+            <Button 
+              className={classes.confirmButton} 
+              variant='outlined' 
+              onClick={() => this.handleConfirm({ brightness, getStatus, roomLight, send })}
+            >
+              Confirm
+            </Button>
+          </div>
+        )}
+      </ControllerSocketContext.Consumer>
     );
   }
 }

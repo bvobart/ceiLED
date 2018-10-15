@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import ThreeChannelPicker from '../colorpicking/ThreeChannelPicker';
+import { ControllerSocketContext } from '../context/ControllerSocketProvider';
+import { ControllerRequestBuilder } from '../context/ControllerRequestBuilder';
 
 class SolidControls extends Component {
   constructor(props) {
@@ -23,19 +25,39 @@ class SolidControls extends Component {
     };
   }
 
-  handleChangeColors(colors) {
-    // TODO: send to actual controller as well.
+  handleChangeColors(colorObj, { brightness, getStatus, roomLight, send, socket }) {
+    const colors = [colorObj.channel1, colorObj.channel2, colorObj.channel3];
+    if (getStatus() === WebSocket.OPEN) {
+      socket.addEventListener('message', (event) => console.log(event));
+      const request = new ControllerRequestBuilder()
+        .setType('solid')
+        .setBrightness(brightness)
+        .setRoomlight(roomLight)
+        .setColors(colors)
+        .build();
+      send(request);
+    }
     this.setState(colors);
   }
 
   render() {
     return (
-      <ThreeChannelPicker 
-        channel1={this.state.channel1} 
-        channel2={this.state.channel2} 
-        channel3={this.state.channel3}
-        onChange={this.handleChangeColors.bind(this)}
-      />
+      <ControllerSocketContext.Consumer>
+        {({ brightness, getStatus, roomLight, send, socket }) => 
+          <ThreeChannelPicker 
+            channel1={this.state.channel1} 
+            channel2={this.state.channel2} 
+            channel3={this.state.channel3}
+            onChange={(colors) => this.handleChangeColors(colors, { 
+              brightness, 
+              getStatus, 
+              roomLight, 
+              send,
+              socket
+            })}
+          />
+        }
+      </ControllerSocketContext.Consumer>
     );
   }
 }

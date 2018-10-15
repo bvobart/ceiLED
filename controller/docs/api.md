@@ -108,9 +108,9 @@ The JumpType enum has the following values, with the following descriptions.
 
 | JumpType | Description
 |----------|-------------
-| `NORMAL` | Will always jump exactly on a beat. If multiple channels are defined, then all channels will jump at the same time, using their own respective colours.
-| `LINE`   | Will always jump exactly on a beat. With one channel, this is the same as a normal jump. With two channels, the colours will jump from the outer channels, to the inner channel. With three channels, the colours will jump from channel 1 to channel 2 to channel 3, thus creating a sort of line. Technically only the original `colors` array is required for this, but if `colors2` and `colors3` are defined in the `patternOptions`, then those will be concatenated to the `colors` array.
-| `REVERSE_LINE` | Same as `LINE`, only in reverse.
+| `normal` | Will always jump exactly on a beat. If multiple channels are defined, then all channels will jump at the same time, using their own respective colours.
+| `line`   | Will always jump exactly on a beat. With one channel, this is the same as a normal jump. With two channels, the colours will jump from the outer channels, to the inner channel. With three channels, the colours will jump from channel 1 to channel 2 to channel 3, thus creating a sort of line. Technically only the original `colors` array is required for this, but if `colors2` and `colors3` are defined in the `patternOptions`, then those will be concatenated to the `colors` array.
+| `reverse-line` | Same as `line`, only in reverse.
 
 ### Fade (`fade`)
 
@@ -138,10 +138,10 @@ The FadeType enum has the following values, with the following descriptions.
 
 | FadeType | Description
 |----------|-------------
-| `NORMAL` | Will always start a fade on a beat. If multiple channels are defined, then all channels will start their fade at the same time, using their own respective colours.
-| `INVERTED` | Same as `NORMAL`, only the fades start in the middle of two beats.
-| `LINE`   | Will always start a fade on a beat. With one channel, this is the same as a normal fade. With two channels, the colours will fade from the outer channels, to the inner channel. With three channels, the colours will fade from channel 1 to channel 2 to channel 3, thus creating a sort of line. Technically only the original `colors` array is required for this, but if `colors2` and `colors3` are defined in the `patternOptions`, then those will be concatenated to the `colors` array.
-| `REVERSE_LINE` | Same as `LINE`, only in reverse.
+| `normal` | Will always start a fade on a beat. If multiple channels are defined, then all channels will start their fade at the same time, using their own respective colours.
+| `inverted` | Same as `NORMAL`, only the fades start in the middle of two beats.
+| `line`   | Will always start a fade on a beat. With one channel, this is the same as a normal fade. With two channels, the colours will fade from the outer channels, to the inner channel. With three channels, the colours will fade from channel 1 to channel 2 to channel 3, thus creating a sort of line. Technically only the original `colors` array is required for this, but if `colors2` and `colors3` are defined in the `patternOptions`, then those will be concatenated to the `colors` array.
+| `reverse-line` | Same as `LINE`, only in reverse.
 
 ### Flash (`flash`)
 

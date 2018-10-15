@@ -2,6 +2,7 @@ import Color from '../common/Color';
 import Pattern from '../patterns/Pattern';
 import SolidPattern from '../patterns/SolidPattern';
 
+import FadePattern from '../patterns/FadePattern';
 import { FadePatternOptions } from '../patterns/options/FadePatternOptions';
 import { JumpPatternOptions } from '../patterns/options/JumpPatternOptions';
 
@@ -53,14 +54,22 @@ export class CeiledRequest {
     brightness: number,
     roomLight: number,
     colors: Color[],
-    patternOptions?: JumpPatternOptions | FadePatternOptions
+    patternOptions?: any
   ) {
     this.type = type;
     this.brightness = brightness < 0 ? 0 : brightness > 100 ? 100 : brightness;
     this.roomLight = roomLight < 0 ? 0 : roomLight > 100 ? 100 : roomLight;
     // the colours that come in through the web socket have the attributes of Color, but not the methods.
-    this.colors = colors.map((value: Color) => new Color(value.red, value.green, value.blue));
-    this.patternOptions = patternOptions;
+    this.colors = colors.map(({ red, green, blue }: Color) => new Color({ red, green, blue }));
+    switch (type) {
+      case CeiledRequestType.FADE: 
+        this.patternOptions = new FadePatternOptions(patternOptions);
+        break;
+      case CeiledRequestType.JUMP: 
+        this.patternOptions = new JumpPatternOptions(patternOptions);
+        break;
+      default: break;
+    }
   }
 
   /**
@@ -71,6 +80,10 @@ export class CeiledRequest {
     switch (this.type) {
       case CeiledRequestType.SOLID:
         return new SolidPattern(this.colors, this.brightness, this.roomLight);
+      case CeiledRequestType.FADE:
+        if (this.patternOptions instanceof FadePatternOptions)
+          return new FadePattern(this.colors, this.brightness, this.roomLight, this.patternOptions)
+        else throw new TypeError(`Wrong pattern options given, FadePatternOptions expected: ${JSON.stringify(this.patternOptions)}`);
       default:
         throw new TypeError('Unknown pattern type: ' + this.type);
     }

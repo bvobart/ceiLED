@@ -18,24 +18,21 @@ class Pin {
       frequency: 1000,
       debug: false
     };
-    try {
-      Pin.driver = new Pca9685Driver(options, (error: any) => {
-        if (error) {
-          console.error("Error initialising driver!");
-          console.error(error);
-          throw error;
-        }
-      });
-    } catch (error) {
-      console.warn(".--------------------------.");
-      console.warn("|-------- WARNING! --------|");
-      console.warn("|--------------------------|");
-      console.warn("|- Now using debug driver -|");
-      console.warn("|- No actual LEDs will be -|");
-      console.warn("|------- controlled -------|");
-      console.warn("'--------------------------'");
-      this.driver = new DebugDriver();
-    }
+    Pin.driver = new Pca9685Driver(options, (error: any) => {
+      if (error) {
+        console.error("Error initialising driver!");
+        console.error(error);
+
+        console.warn(".--------------------------.");
+        console.warn("|-------- WARNING! --------|");
+        console.warn("|--------------------------|");
+        console.warn("|- Now using debug driver -|");
+        console.warn("|- No actual LEDs will be -|");
+        console.warn("|------- controlled -------|");
+        console.warn("'--------------------------'");
+        Pin.driver = new DebugDriver();
+      }
+    });
   }
 
   /**
@@ -47,6 +44,8 @@ class Pin {
     console.warn("|-------- WARNING! --------|");
     console.warn("|-----       -        -----|");
     console.warn("|--- Pin driver changed ---|");
+    if (driver instanceof Pca9685Driver) console.warn("| Now using: PCA9685Driver |");
+    else if (driver instanceof DebugDriver) console.warn("|- Now using: DebugDriver -|");
     console.warn("'------------ -------------'");
     Pin.driver = driver;
   }
@@ -79,10 +78,8 @@ class Pin {
 
     newValue = newValue;
     this._value = newValue;
-    Pin.driver.setDutyCycle(this.number, Math.round((newValue / 255) * 1000) / 1000);
+    if (Pin.driver) Pin.driver.setDutyCycle(this.number, Math.round((newValue / 255) * 1000) / 1000);
   }
 }
-
-Pin.initializeDriver();
 
 export default Pin;
