@@ -1,4 +1,6 @@
+import { readFileSync } from 'fs';
 import { IncomingMessage } from 'http';
+import { createServer } from 'https';
 import * as WebSocket from 'ws';
 
 import Color from './common/Color';
@@ -9,28 +11,40 @@ import MessageHandler from './messages/MessageHandler';
 import FadePattern, { FadeType } from './patterns/FadePattern';
 import SolidPattern from './patterns/SolidPattern';
 
-const server = new WebSocket.Server({ port: 6565 });
+const port = process.env.PORT || 6565;
+const keyFile = process.env.KEY_FILE || 'localhost.key.pem';
+const certFile = process.env.CERT_FILE || 'localhost.cert.pem';
 
-server.on('connection', (ws: WebSocket, req: IncomingMessage) => {
+// Statically initialise ChannelStore and the accompanying channels.
+ChannelStore.getInstance();
+// Initialise pin driver.
+if (process.argv[2] === '--debug') Pin.setDriver(new DebugDriver());
+else Pin.initializeDriver();
+
+
+const httpsServer = createServer({
+  key: readFileSync(__dirname + '/../' + keyFile),
+  cert: readFileSync(__dirname + '/../' + certFile)
+})
+const wsServer = new WebSocket.Server({ server: httpsServer });
+
+wsServer.on('connection', (ws: WebSocket, req: IncomingMessage) => {
   const clientIP: string = req.connection.remoteAddress;
   const msgHandler: MessageHandler = new MessageHandler(ws);
   console.log('Client with IP', clientIP, 'connected.');
   ws.on('close', () => console.log('Client with IP', clientIP, 'disconnected'));
 });
 
-server.on('error', (error: Error) => {
-  console.log("Error occurred: ", error);
+wsServer.on('error', (error: Error) => {
+  console.error("Error occurred: ", error);
 });
 
-// Statically initialise ChannelStore and the accompanying channels.
-ChannelStore.getInstance();
+httpsServer.listen(port);
 
 console.log(".--------------------------.");
 console.log("| CeiLED Controller online |");
 console.log("'--------------------------'");
 
-if (process.argv[2] === '--debug') Pin.setDriver(new DebugDriver());
-else Pin.initializeDriver();
 
 // (async () => {
 //   console.log('Starting fade timing tests');

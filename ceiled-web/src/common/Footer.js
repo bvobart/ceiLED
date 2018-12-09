@@ -54,7 +54,7 @@ class Footer extends Component {
 
   handleConnect() {
     if (this.state.address) {
-      const address = 'ws://' + this.state.address + ':6565';
+      const address = 'wss://' + this.state.address + ':6565';
       this.open(address)
       .then(() => {
         console.log('Connected to', address);
