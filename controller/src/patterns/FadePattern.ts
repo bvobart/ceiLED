@@ -1,5 +1,5 @@
 import Color from '../common/Color';
-import ChannelStore from '../hardware/ChannelStore';
+import { settings } from '../server';
 import { FadePatternOptions, FadeType } from './options/FadePatternOptions';
 import Pattern from './Pattern';
 
@@ -56,9 +56,9 @@ class FadePattern implements Pattern {
    * Will fade 'normally' across all colours. This method blocks.
    */
   public async fadeNormalOnce(): Promise<void> {
-    let prevColor1: Color = ChannelStore.getInstance().channel1.getColor();
-    let prevColor2: Color = ChannelStore.getInstance().channel2.getColor();
-    let prevColor3: Color = ChannelStore.getInstance().channel3.getColor();
+    let prevColor1: Color = settings.channelStore.channel1.getColor();
+    let prevColor2: Color = settings.channelStore.channel2.getColor();
+    let prevColor3: Color = settings.channelStore.channel3.getColor();
     let ch2Color: Color;
     let ch3Color: Color;
 
@@ -82,9 +82,9 @@ class FadePattern implements Pattern {
       const duration: number = 60 / this.speed;
 
       await Promise.all([
-        ChannelStore.getInstance().channel1.setFade(prevColor1, ch1Color, duration),
-        ChannelStore.getInstance().channel2.setFade(prevColor2, ch2Color, duration),
-        ChannelStore.getInstance().channel3.setFade(prevColor3, ch3Color, duration),
+        settings.channelStore.channel1.setFade(prevColor1, ch1Color, duration),
+        settings.channelStore.channel2.setFade(prevColor2, ch2Color, duration),
+        settings.channelStore.channel3.setFade(prevColor3, ch3Color, duration),
       ]);
 
       prevColor1 = ch1Color;

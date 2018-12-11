@@ -1,16 +1,11 @@
+import { StatusType } from '../MessageHandler';
 import CeiledError from './CeiledError';
 
-export enum CeiledResponseType {
-  SUCCES = 'success',
-  FAIL = 'fail',
-  ERROR = 'error'
-}
-
 export class CeiledResponse {
-  public status: CeiledResponseType;
+  public status: StatusType;
   public errors: CeiledError[];
 
-  constructor(status: CeiledResponseType, errors?: Error[]) {
+  constructor(status: StatusType, errors?: Error[]) {
     this.status = status;
     this.errors = errors ? errors.map((value: Error) => new CeiledError(value)) : undefined;
   }

@@ -1,10 +1,10 @@
-import Color from '../common/Color';
-import Pattern from '../patterns/Pattern';
-import SolidPattern from '../patterns/SolidPattern';
+import Color from '../../common/Color';
+import Pattern from '../../patterns/Pattern';
+import SolidPattern from '../../patterns/SolidPattern';
 
-import FadePattern from '../patterns/FadePattern';
-import { FadePatternOptions } from '../patterns/options/FadePatternOptions';
-import { JumpPatternOptions } from '../patterns/options/JumpPatternOptions';
+import FadePattern from '../../patterns/FadePattern';
+import { FadePatternOptions } from '../../patterns/options/FadePatternOptions';
+import { JumpPatternOptions } from '../../patterns/options/JumpPatternOptions';
 
 /**
  * Types of requests that can be made. These are the supported patterns, described in the API
@@ -28,7 +28,7 @@ export class CeiledRequest {
    * It does not check whether the attributes contain the right values!
    * @param x the argument to check
    */
-  public static isRequest(x: any): x is Request {
+  public static isRequest(x: any): x is CeiledRequest {
     if (typeof x.type !== 'string' 
         || typeof x.brightness !== 'number' 
         || typeof x.roomLight !== 'number' 

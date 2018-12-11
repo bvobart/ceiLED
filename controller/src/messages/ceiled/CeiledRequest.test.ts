@@ -1,4 +1,4 @@
-import Color from '../common/Color';
+import Color from '../../common/Color';
 import { CeiledRequest, CeiledRequestType } from './CeiledRequest';
 
 describe('Request', () => {

@@ -1,5 +1,6 @@
 import Color from '../common/Color';
 import ChannelStore from '../hardware/ChannelStore';
+import { settings } from '../server';
 import Pattern from './Pattern';
 
 /**
@@ -26,7 +27,7 @@ class SolidPattern implements Pattern {
            .withBrightness(this.brightness)
     );
 
-    const store: ChannelStore = ChannelStore.getInstance();
+    const store: ChannelStore = settings.channelStore;
     store.channel1.setColor(this.colors[0]);
     store.channel2.setColor(this.colors[1] ? this.colors[1] : this.colors[0]);
     store.channel3.setColor(this.colors[2] ? this.colors[2] : this.colors[0]);

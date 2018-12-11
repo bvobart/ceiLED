@@ -10,7 +10,7 @@ class DebugDriver {
   public setDutyCycle(pinNr: number, dutyCycle: number) {
     if (pinNr < 0 || pinNr >= this.pinValues.length) throw new Error('Invalid pin number! ' + pinNr);
     this.pinValues[pinNr] = Math.round(dutyCycle * 255);
-    this.prettyPrintValues();
+    if (!process.env.TEST) this.prettyPrintValues();
   }
 
   public prettyPrintValues() {

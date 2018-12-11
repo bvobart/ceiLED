@@ -1,5 +1,9 @@
-import LEDChannel from './LEDChannel';
+// this import and usage seems silly and useless, but it breaks a circular import in Jest.
+import { settings } from '../server';
+settings.getDriver();
+
 import Color from '../common/Color';
+import LEDChannel from './LEDChannel';
 
 describe('LEDChannel', () => {
   let channel: LEDChannel;
