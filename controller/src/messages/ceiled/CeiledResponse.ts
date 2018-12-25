@@ -1,5 +1,5 @@
+import CeiledError from '../CeiledError';
 import { StatusType } from '../MessageHandler';
-import CeiledError from './CeiledError';
 
 export class CeiledResponse {
   public status: StatusType;

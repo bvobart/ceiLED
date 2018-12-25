@@ -32,7 +32,7 @@
     "@types/bluebird-global": "^3.5.6",
     "@types/i2c-bus": "^1.0.18",
     "@types/jest": "^23.3.1",
-    "@types/node": "^10.5.4",
+    "@types/node": "^10.12.18",
     "@types/ws": "^5.1.2",
     "jest": "^23.4.2",
     "nodemon": "^1.18.3",

@@ -1,6 +1,6 @@
 import Color from "../../common/Color";
+import CeiledError from "../CeiledError";
 import { OutgoingMessage, StatusType } from "../MessageHandler";
-import CeiledError from "./CeiledError";
 import CeiledMessageHandler from "./CeiledMessageHandler";
 import { CeiledRequest, CeiledRequestType } from "./CeiledRequest";
 import { CeiledResponse } from "./CeiledResponse";
