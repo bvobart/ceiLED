@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
+import { withCookies } from 'react-cookie';
 import FadeOptionsControl from './FadeOptionsControl';
 import { Button, withStyles } from '@material-ui/core';
 import ThreeChannelMultiPicker from '../colorpicking/ThreeChannelMultiPicker';
-import { ControllerPatternOptionsBuilder } from '../context/ControllerPatternOptionsBuilder';
 import { ControllerSocketContext } from '../context/ControllerSocketProvider';
-import { ControllerRequestBuilder } from '../context/ControllerRequestBuilder';
+import { CeiledPatternOptionsBuilder } from '../context/CeiledPatternOptionsBuilder';
+import { CeiledRequestBuilder } from '../context/CeiledRequestBuilder';
 
 const styles = theme => ({
   confirmButton: {
@@ -74,21 +75,23 @@ class FadeControls extends Component {
   }
 
   handleConfirm({ brightness, getStatus, roomLight, send }) {
+    const { cookies } = this.props;
     const { channel1, channel2, channel3, options } = this.state;
     if (getStatus() === WebSocket.OPEN) {
-      const patternOptions = new ControllerPatternOptionsBuilder()
+      const patternOptions = new CeiledPatternOptionsBuilder()
         .for('fade')
         .setSecondaryColors(options.fadeMode >= 2 ? channel2 : undefined)
         .setTernaryColors(options.fadeMode >= 3 ? channel3 : undefined)
         .setChannels(options.fadeMode)
         .setSpeed(options.speed)
         .build();
-      const request = new ControllerRequestBuilder()
+      const request = new CeiledRequestBuilder()
         .setType('fade')
         .setBrightness(brightness)
         .setRoomlight(roomLight)
         .setColors(channel1)
         .setPatternOptions(patternOptions)
+        .setAuthToken(cookies.get('authToken'))
         .build();
       send(request);
     }
@@ -125,4 +128,4 @@ class FadeControls extends Component {
   }
 }
 
-export default withStyles(styles)(FadeControls);
+export default withStyles(styles)(withCookies(FadeControls));

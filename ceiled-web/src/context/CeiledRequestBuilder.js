@@ -1,13 +1,20 @@
-export class ControllerRequestBuilder {
+export class CeiledRequestBuilder {
   type;
   brightness;
   roomLight;
   colors;
   patternOptions;
 
+  authToken;
+
   constructor() {
     this.colors = [];
     this.patternOptions = {}
+  }
+
+  setAuthToken(token) {
+    this.authToken = token;
+    return this;
   }
 
   setType(type) {
@@ -43,9 +50,10 @@ export class ControllerRequestBuilder {
         roomLight: this.roomLight,
         colors: this.colors,
         patternOptions: this.patternOptions,
-      }
+      },
+      authToken: this.authToken
     }
   }
 }
 
-export default ControllerRequestBuilder;
+export default CeiledRequestBuilder;

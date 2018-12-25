@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
+import { withCookies } from 'react-cookie';
 import ThreeChannelPicker from '../colorpicking/ThreeChannelPicker';
 import { ControllerSocketContext } from '../context/ControllerSocketProvider';
-import { ControllerRequestBuilder } from '../context/ControllerRequestBuilder';
+import { CeiledRequestBuilder } from '../context/CeiledRequestBuilder';
 
 class SolidControls extends Component {
   constructor(props) {
@@ -29,11 +30,12 @@ class SolidControls extends Component {
     const colors = [colorObj.channel1, colorObj.channel2, colorObj.channel3];
     if (getStatus() === WebSocket.OPEN) {
       socket.addEventListener('message', (event) => console.log(event));
-      const request = new ControllerRequestBuilder()
+      const request = new CeiledRequestBuilder()
         .setType('solid')
         .setBrightness(brightness)
         .setRoomlight(roomLight)
         .setColors(colors)
+        .setAuthToken(this.props.cookies.get('authToken'))
         .build();
       send(request);
     }
@@ -62,4 +64,4 @@ class SolidControls extends Component {
   }
 }
 
-export default SolidControls;
+export default withCookies(SolidControls);

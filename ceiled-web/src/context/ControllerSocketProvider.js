@@ -53,7 +53,7 @@ class ControllerSocketProvider extends Component {
       
       this.close();
       this.setState({
-        socket: new WebSocket(address),
+        socket: newSocket,
         address: address
       });
     })
