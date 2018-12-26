@@ -1,5 +1,7 @@
+import { isAuthorised } from "../../auth/auth";
 import { settings } from "../../server";
-import CeiledError from "../CeiledError";
+import CeiledError from "../common/CeiledError";
+import UnauthorisedResponse from "../common/UnauthorisedResponse";
 import { IncomingMessage, MessageHandler, OutgoingMessage, StatusType } from "../MessageHandler";
 import { SettingsErrorResponse } from "./SettingsErrorResponse";
 import { SettingsMessage } from "./SettingsMessage";
@@ -19,11 +21,15 @@ export class SettingsMessageHandler implements MessageHandler {
         case "get":
           return new SettingsSuccessResponse(SettingsMessage.buildGet(settings));
         case "set":
-          // TODO: check authToken
+          if (!message.authToken || !isAuthorised(message.authToken)) {
+            return new UnauthorisedResponse();
+          }
+
           settings.brightness = inRange(req.brightness, 0, 100);
           settings.roomLight = inRange(req.roomLight, 0, 100);
           settings.flux = inRange(req.flux, -1, 5);
           if (req.driver) settings.setDriver(req.driver);
+
           return new SettingsSuccessResponse();
         default:
           const error: Error = new Error("Invalid action: " + message.settings.action);

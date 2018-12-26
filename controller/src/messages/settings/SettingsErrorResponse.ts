@@ -1,4 +1,4 @@
-import CeiledError from "../CeiledError";
+import CeiledError from "../common/CeiledError";
 import { OutgoingMessage, StatusType } from "../MessageHandler";
 
 export class SettingsErrorResponse implements OutgoingMessage {

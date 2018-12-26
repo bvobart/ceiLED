@@ -1,5 +1,5 @@
 import Color from "../../common/Color";
-import CeiledError from "../CeiledError";
+import CeiledError from "../common/CeiledError";
 import { OutgoingMessage, StatusType } from "../MessageHandler";
 import CeiledMessageHandler from "./CeiledMessageHandler";
 import { CeiledRequest, CeiledRequestType } from "./CeiledRequest";
@@ -17,7 +17,7 @@ describe('MessageHandler', () => {
         65,
         colors
       );
-      const message: any = { data: request }
+      const message: any = { data: request, authToken: 'test' }
       const response: OutgoingMessage = handler.handle(message);
       const expected: CeiledResponse = new CeiledResponse(StatusType.SUCCES);
       expect(response).toEqual(expected);
@@ -30,7 +30,8 @@ describe('MessageHandler', () => {
           brightness: 0,
           roomLight: 0,
           colors: []
-        }
+        },
+        authToken: 'test'
       };
       const response: OutgoingMessage = handler.handle(message);
       const expected: CeiledResponse = {

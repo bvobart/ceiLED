@@ -1,4 +1,4 @@
-import CeiledError from "./CeiledError";
+import CeiledError from "./common/CeiledError";
 import SettingsMessage from "./settings/SettingsMessage";
 
 /**
@@ -30,7 +30,8 @@ export interface IncomingMessage {
 export enum StatusType {
   SUCCES = 'success',
   FAIL = 'fail',
-  ERROR = 'error'
+  ERROR = 'error',
+  UNAUTHORISED = 'unauthorised'
 }
 
 /**

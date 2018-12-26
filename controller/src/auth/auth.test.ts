@@ -1,6 +1,8 @@
 import { MongoClient } from "mongodb";
 import { isAuthorised } from "./auth";
 
+jest.unmock('./auth');
+
 describe('auth', () => {
   describe('isAuthorised', () => {
     it('rejects a fake token', async done => {

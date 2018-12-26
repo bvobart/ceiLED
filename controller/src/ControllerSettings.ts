@@ -64,6 +64,7 @@ export class ControllerSettings {
 }
 
 const printUsingDebug = (): void => {
+  if (process.env.TEST) return;
   console.warn(".--------------------------.")
   console.warn("|-------- WARNING! --------|");
   console.warn("|-----       -        -----|");
@@ -73,6 +74,7 @@ const printUsingDebug = (): void => {
 }
 
 const printUsingPca9685 = (): void => {
+  if (process.env.TEST) return;
   console.warn(".--------------------------.")
   console.warn("|-------- WARNING! --------|");
   console.warn("|-----       -        -----|");

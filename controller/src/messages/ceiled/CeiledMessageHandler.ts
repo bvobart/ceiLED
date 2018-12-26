@@ -1,4 +1,6 @@
+import { isAuthorised } from '../../auth/auth';
 import Pattern from '../../patterns/Pattern';
+import UnauthorisedResponse from '../common/UnauthorisedResponse';
 import { IncomingMessage, MessageHandler, OutgoingMessage, StatusType } from '../MessageHandler';
 import { CeiledRequest } from './CeiledRequest';
 import { CeiledResponse } from './CeiledResponse';
@@ -27,6 +29,10 @@ class CeiledMessageHandler implements MessageHandler {
     if (!message.data) return null;
 
     if (CeiledRequest.isRequest(message.data)) {
+      if (!message.authToken || !isAuthorised(message.authToken)) {
+        return new UnauthorisedResponse();
+      }
+
       const request: CeiledRequest = new CeiledRequest(
         message.data.type,
         message.data.brightness,
