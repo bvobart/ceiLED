@@ -48,9 +48,9 @@ const launch = async (): Promise<void> => {
       try {
         const message = JSON.parse(payload);
   
-        handlers.forEach((handler: MessageHandler) => {
-          const response: OutgoingMessage = handler.handle(message);
-          ws.emit(JSON.stringify(response));
+        handlers.forEach(async (handler: MessageHandler) => {
+          const response: OutgoingMessage = await handler.handle(message);
+          ws.send(JSON.stringify(response));
         });
       } catch (error) {
         console.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

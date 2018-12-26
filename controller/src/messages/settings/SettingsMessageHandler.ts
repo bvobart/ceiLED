@@ -1,4 +1,4 @@
-import { isAuthorised } from "../../auth/auth";
+import { getNameFromToken, isAuthorised  } from "../../auth/auth";
 import { settings } from "../../server";
 import CeiledError from "../common/CeiledError";
 import UnauthorisedResponse from "../common/UnauthorisedResponse";
@@ -13,27 +13,28 @@ import { SettingsSuccessResponse } from "./SettingsSuccessResponse";
  */
 export class SettingsMessageHandler implements MessageHandler {
   
-  public handle(message: IncomingMessage): OutgoingMessage {
-    if (!message.settings) return null;
+  public async handle(message: IncomingMessage): Promise<OutgoingMessage> {
+    if (!message.settings) return Promise.resolve(null);
     if (SettingsMessage.isMessage(message.settings)) {
       const req: SettingsMessage = message.settings;
       switch (req.action) {
         case "get":
-          return new SettingsSuccessResponse(SettingsMessage.buildGet(settings));
+          return Promise.resolve(new SettingsSuccessResponse(SettingsMessage.buildGet(settings)));
         case "set":
-          if (!message.authToken || !isAuthorised(message.authToken)) {
-            return new UnauthorisedResponse();
+          if (!message.authToken || !await isAuthorised(message.authToken)) {
+            return Promise.resolve(new UnauthorisedResponse());
           }
+          if (!process.env.TEST) console.log('SettingsRequest received from ', await getNameFromToken(message.authToken) + '\n');
 
           settings.brightness = inRange(req.brightness, 0, 100);
           settings.roomLight = inRange(req.roomLight, 0, 100);
           settings.flux = inRange(req.flux, -1, 5);
           if (req.driver) settings.setDriver(req.driver);
 
-          return new SettingsSuccessResponse();
+          return Promise.resolve(new SettingsSuccessResponse());
         default:
           const error: Error = new Error("Invalid action: " + message.settings.action);
-          return new SettingsErrorResponse([new CeiledError(error)]);
+          return Promise.resolve(new SettingsErrorResponse([new CeiledError(error)]));
       }
     }
     return null;

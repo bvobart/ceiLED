@@ -10,5 +10,11 @@ import AuthRepository from "./AuthRepository";
 export const isAuthorised = async (authToken: string, db?: Db): Promise<boolean> => {
   const repo = new AuthRepository(db);
   const auth = await repo.findByToken(authToken);
-  return auth ? true : false;
+  return auth ? Promise.resolve(true) : Promise.resolve(false);
+}
+
+export const getNameFromToken = async (authToken: string, db?: Db): Promise<string> => {
+  const repo = new AuthRepository(db);
+  const auth = await repo.findByToken(authToken);
+  return auth ? Promise.resolve(auth.name) : Promise.reject('Unauthorised');
 }

@@ -17,6 +17,9 @@ const styles = theme => ({
     display: 'flex',
     flexDirection: 'column',
     width: '100%'
+  },
+  slider: {
+    padding: '16px 0px'
   }
 })
 
@@ -52,6 +55,7 @@ class GlobalControls extends Component {
             <div className={classes.captionedSlider}>
               <Typography variant='caption'>Brightness</Typography>
               <Slider 
+                className={classes.slider}
                 step={1} 
                 value={this.state.brightness} 
                 onChange={(e, brightness) => this.handleBrightnessChange(brightness, setBrightness)}
@@ -60,6 +64,7 @@ class GlobalControls extends Component {
             <div className={classes.captionedSlider}>
               <Typography variant='caption'>Room light</Typography>
               <Slider 
+                className={classes.slider}
                 step={1} 
                 value={this.state.roomLight} 
                 onChange={(e, roomLight) => this.handleRoomLightChange(roomLight, setRoomLight)}

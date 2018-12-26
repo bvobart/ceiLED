@@ -1,4 +1,4 @@
-import { isAuthorised } from '../../auth/auth';
+import { getNameFromToken, isAuthorised } from '../../auth/auth';
 import Pattern from '../../patterns/Pattern';
 import UnauthorisedResponse from '../common/UnauthorisedResponse';
 import { IncomingMessage, MessageHandler, OutgoingMessage, StatusType } from '../MessageHandler';
@@ -25,13 +25,14 @@ class CeiledMessageHandler implements MessageHandler {
    * details about the messages it handles.
    * @param payload The payload of the message.
    */
-  public handle(message: IncomingMessage): OutgoingMessage {
+  public async handle(message: IncomingMessage): Promise<OutgoingMessage> {
     if (!message.data) return null;
 
     if (CeiledRequest.isRequest(message.data)) {
-      if (!message.authToken || !isAuthorised(message.authToken)) {
-        return new UnauthorisedResponse();
+      if (!message.authToken || !await isAuthorised(message.authToken)) {
+        return Promise.resolve(new UnauthorisedResponse());
       }
+      if (!process.env.TEST) console.log('CeiledRequest received from ', await getNameFromToken(message.authToken) + '\n');
 
       const request: CeiledRequest = new CeiledRequest(
         message.data.type,
@@ -46,11 +47,11 @@ class CeiledMessageHandler implements MessageHandler {
 
       this.activePattern = pattern;
       this.activePattern.show();
-      return new CeiledResponse(StatusType.SUCCES);
+      return Promise.resolve(new CeiledResponse(StatusType.SUCCES));
     } else {
       const error: Error = new Error('Message is invalid: ' + JSON.stringify(message));
       console.error('Message is invalid: ', message);
-      return new CeiledResponse(StatusType.FAIL, [error]);
+      return Promise.resolve(new CeiledResponse(StatusType.FAIL, [error]));
     }
   }
 }

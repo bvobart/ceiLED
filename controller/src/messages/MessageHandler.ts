@@ -6,7 +6,7 @@ import SettingsMessage from "./settings/SettingsMessage";
  * and either returns an outgoing message, or null if no response should be sent.
  */
 export interface MessageHandler {
-  handle(message: IncomingMessage): OutgoingMessage
+  handle(message: IncomingMessage): Promise<OutgoingMessage>
 }
 
 

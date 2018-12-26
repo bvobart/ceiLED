@@ -29,7 +29,7 @@ class SolidControls extends Component {
   handleChangeColors(colorObj, { brightness, getStatus, roomLight, send, socket }) {
     const colors = [colorObj.channel1, colorObj.channel2, colorObj.channel3];
     if (getStatus() === WebSocket.OPEN) {
-      socket.addEventListener('message', (event) => console.log(event));
+      socket.addEventListener('message', (event) => console.log(JSON.parse(event.data)));
       const request = new CeiledRequestBuilder()
         .setType('solid')
         .setBrightness(brightness)

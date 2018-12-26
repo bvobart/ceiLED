@@ -49,6 +49,7 @@ class ControllerSocketProvider extends Component {
     return new Promise((resolve, reject) => {
       const newSocket = new WebSocket(address);
       newSocket.addEventListener('open', () => resolve());
+      // TODO: add event listener for unauthorised messages, so we can show a pop up or header stating this
       newSocket.addEventListener('error', (event) => reject(event));
       
       this.close();
