@@ -6,11 +6,11 @@ import { CeiledRequest } from './CeiledRequest';
 import { CeiledResponse } from './CeiledResponse';
 
 /**
- * A MessageHandler contains a `handle` method that is able to handle the messages that come in through 
+ * A MessageHandler contains a `handle` method that is able to handle the messages that come in through
  * the web socket. These messages have the form as described in the API documentation.
- * 
+ *
  * MessageHandler mainly functions as an interface to the websocket: listening for messages and
- * sending responses in return. The translation of a Request to a Pattern is delegated to the 
+ * sending responses in return. The translation of a Request to a Pattern is delegated to the
  * CeiledRequest class.
  */
 class CeiledMessageHandler implements MessageHandler {
@@ -29,17 +29,19 @@ class CeiledMessageHandler implements MessageHandler {
     if (!message.data) return null;
 
     if (CeiledRequest.isRequest(message.data)) {
-      if (!message.authToken || !await isAuthorised(message.authToken)) {
+      if (!message.authToken || !(await isAuthorised(message.authToken))) {
         return Promise.resolve(new UnauthorisedResponse());
       }
-      if (!process.env.TEST) console.log('CeiledRequest received from ', await getNameFromToken(message.authToken) + '\n');
+      if (!process.env.TEST)
+        console.log(
+          'CeiledRequest received from ',
+          (await getNameFromToken(message.authToken)) + '\n',
+        );
 
       const request: CeiledRequest = new CeiledRequest(
         message.data.type,
-        message.data.brightness,
-        message.data.roomLight,
         message.data.colors,
-        message.data.patternOptions
+        message.data.patternOptions,
       );
       const pattern: Pattern = request.toPattern();
 

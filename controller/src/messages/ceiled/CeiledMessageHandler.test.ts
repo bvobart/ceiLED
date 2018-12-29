@@ -1,44 +1,41 @@
-import Color from "../../common/Color";
-import CeiledError from "../common/CeiledError";
-import { OutgoingMessage, StatusType } from "../MessageHandler";
-import CeiledMessageHandler from "./CeiledMessageHandler";
-import { CeiledRequest, CeiledRequestType } from "./CeiledRequest";
-import { CeiledResponse } from "./CeiledResponse";
+import Color from '../../common/Color';
+import CeiledError from '../common/CeiledError';
+import { OutgoingMessage, StatusType } from '../MessageHandler';
+import CeiledMessageHandler from './CeiledMessageHandler';
+import { CeiledRequest, CeiledRequestType } from './CeiledRequest';
+import { CeiledResponse } from './CeiledResponse';
 
-describe('MessageHandler', () => {
+jest.mock('../../auth/auth');
+
+describe('CeiledMessageHandler', () => {
   describe('handle', () => {
     const handler: CeiledMessageHandler = new CeiledMessageHandler();
 
-    it('handles a correct message', () => {
-      const colors: Color[] = [ Color.BLACK, Color.WHITE ];
-      const request: CeiledRequest = new CeiledRequest(
-        CeiledRequestType.SOLID,
-        65,
-        65,
-        colors
-      );
-      const message: any = { data: request, authToken: 'test' }
-      const response: OutgoingMessage = handler.handle(message);
+    it('handles a correct message', async done => {
+      const colors: Color[] = [Color.BLACK, Color.WHITE];
+      const request: CeiledRequest = new CeiledRequest(CeiledRequestType.SOLID, colors);
+      const message: any = { data: request, authToken: 'test' };
+      const response: OutgoingMessage = await handler.handle(message);
       const expected: CeiledResponse = new CeiledResponse(StatusType.SUCCES);
       expect(response).toEqual(expected);
+      done();
     });
 
-    it('calls sendFail when the message is not constructed properly', () => {
+    it('calls sendFail when the message is not constructed properly', async done => {
       const message: any = {
         data: {
           type: 'jemoeder',
-          brightness: 0,
-          roomLight: 0,
-          colors: []
+          colors: [],
         },
-        authToken: 'test'
+        authToken: 'test',
       };
-      const response: OutgoingMessage = handler.handle(message);
+      const response: OutgoingMessage = await handler.handle(message);
       const expected: CeiledResponse = {
         status: StatusType.FAIL,
-        errors: [expect.any(CeiledError)]
-      }
+        errors: [expect.any(CeiledError)],
+      };
       expect(response).toEqual(expected);
-    })
+      done();
+    });
   });
 });

@@ -8,18 +8,14 @@ class FadePattern implements Pattern {
   private colors1: Color[];
   private colors2: Color[];
   private colors3: Color[];
-  private brightness: number;
-  private roomLight: number;
   private speed: number;
   private type: FadeType;
   private shouldShow: boolean;
 
-  constructor(colors: Color[], brightness: number, roomLight: number, options: FadePatternOptions) {
+  constructor(colors: Color[], options: FadePatternOptions) {
     this.channels = options.channels;
     this.colors1 = colors;
-    this.brightness = brightness;
-    this.roomLight = roomLight;
-    this.speed = options.speed;
+    this.speed = options.speed ? options.speed : 0.1;
     this.type = options.fadeType;
 
     if (this.type === FadeType.NORMAL || this.type === FadeType.INVERTED) {
@@ -28,6 +24,12 @@ class FadePattern implements Pattern {
     } else {
       this.colors1 = this.colors1.concat(options.colors2, options.colors3);
     }
+
+    const applyGlobals = (color: Color) =>
+      color.withBrightness(settings.brightness).withRoomLight(settings.roomLight);
+    this.colors1.map(applyGlobals);
+    this.colors2.map(applyGlobals);
+    this.colors3.map(applyGlobals);
   }
 
   public async show(): Promise<void> {
@@ -42,10 +44,11 @@ class FadePattern implements Pattern {
             await this.fadeInvertedOnce();
             break;
           default:
-            throw Error('Unknown FadeType: ' + this.type);
+            reject('Unknown FadeType: ' + this.type);
         }
       }
-    })
+      return resolve();
+    });
   }
 
   public async stop(): Promise<void> {
@@ -59,11 +62,12 @@ class FadePattern implements Pattern {
     let prevColor1: Color = settings.channelStore.channel1.getColor();
     let prevColor2: Color = settings.channelStore.channel2.getColor();
     let prevColor3: Color = settings.channelStore.channel3.getColor();
+    let ch1Color: Color;
     let ch2Color: Color;
     let ch3Color: Color;
 
     for (let index = 0; index < this.colors1.length; index++) {
-      const ch1Color: Color = this.colors1[index];
+      ch1Color = this.colors1[index];
 
       if (this.channels === 2) {
         // on 2 channels: channel 1 and 3 have the same colour, channel 2 has its own colour.
