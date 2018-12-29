@@ -27,6 +27,9 @@ const styles = theme => ({
         backgroundColor: theme.palette.action.selected
       }
     }
+  },
+  slider: {
+    padding: '16px 0px'
   }
 });
 
@@ -68,7 +71,7 @@ class JumpOptionsControl extends Component {
           <Typography variant='caption'>Speed</Typography>
           <div className={classes.inputBox}>
             <Typography variant='caption'>{speed} BPM</Typography>
-            <Slider value={speed} min={30} max={300} step={1} onChange={this.handleSpeedChange.bind(this)} />
+            <Slider className={classes.slider} value={speed} min={1} max={300} step={1} onChange={this.handleSpeedChange.bind(this)} />
           </div>
         </div>
       </div>

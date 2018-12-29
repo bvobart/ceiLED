@@ -14,10 +14,14 @@ const styles = theme => ({
     display: 'flex',
     marginTop: 4
   },
+  slider: {
+    padding: '16px 0px'
+  }
 });
 
 const ColorSlider = (props) => (
-  <Slider 
+  <Slider
+    className={props.className}
     step={1} 
     min={0} 
     max={255} 
@@ -78,9 +82,9 @@ class CustomColorPanel extends Component {
     return (
       <Paper square className={classes.root}>
         <div>
-          <ColorSlider value={this.state.red} onChange={this.handleChangeRed} />
-          <ColorSlider value={this.state.green} onChange={this.handleChangeGreen} />
-          <ColorSlider value={this.state.blue} onChange={this.handleChangeBlue} />
+          <ColorSlider className={classes.slider} value={this.state.red} onChange={this.handleChangeRed} />
+          <ColorSlider className={classes.slider} value={this.state.green} onChange={this.handleChangeGreen} />
+          <ColorSlider className={classes.slider} value={this.state.blue} onChange={this.handleChangeBlue} />
         </div>
         <Tile label={label} className={classes.tile} color={this.state} onClick={this.handleClick} />
       </Paper>
