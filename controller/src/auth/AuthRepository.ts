@@ -1,7 +1,7 @@
-import { Db, ObjectId } from "mongodb";
-import { db } from "../server";
+import { Db, ObjectId } from 'mongodb';
+import { db } from '../server';
 
-const collectionName = "authorisedTokens";
+const collectionName: string = 'authorisedTokens';
 
 export interface Auth {
   id: ObjectId;
@@ -10,7 +10,7 @@ export interface Auth {
 }
 
 export class AuthRepository {
-  private db: Db
+  private db: Db;
 
   constructor(dbParam?: Db) {
     this.db = dbParam || db;
@@ -23,8 +23,8 @@ export class AuthRepository {
   public create(token: string, name: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
-        const res = await this.db.collection(collectionName).insertOne({ token, name })
-        return res.result.ok ? resolve() : reject("Auth token was not inserted for some reason");
+        const res = await this.db.collection(collectionName).insertOne({ token, name });
+        return res.result.ok ? resolve() : reject('Auth token was not inserted for some reason');
       } catch (error) {
         return reject(error);
       }
