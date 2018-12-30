@@ -1,7 +1,5 @@
 export class CeiledRequestBuilder {
   type;
-  brightness;
-  roomLight;
   colors;
   patternOptions;
 
@@ -22,16 +20,6 @@ export class CeiledRequestBuilder {
     return this;
   }
 
-  setBrightness(brightness) {
-    this.brightness = brightness;
-    return this;
-  }
-
-  setRoomlight(roomLight) {
-    this.roomLight = roomLight;
-    return this;
-  }
-
   setColors(colors) {
     this.colors = colors;
     return this;
@@ -46,8 +34,6 @@ export class CeiledRequestBuilder {
     return {
       data: {
         type: this.type,
-        brightness: this.brightness,
-        roomLight: this.roomLight,
         colors: this.colors,
         patternOptions: this.patternOptions,
       },

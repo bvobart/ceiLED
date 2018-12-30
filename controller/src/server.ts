@@ -7,6 +7,7 @@ import { ControllerSettings, DriverType } from './ControllerSettings';
 import CeiledMessageHandler from './messages/ceiled/CeiledMessageHandler';
 import { CeiledResponse } from './messages/ceiled/CeiledResponse';
 import { MessageHandler, OutgoingMessage, StatusType } from './messages/MessageHandler';
+import SettingsMessageHandler from './messages/settings/SettingsMessageHandler';
 
 import FadePattern, { FadeType } from './patterns/FadePattern';
 import SolidPattern from './patterns/SolidPattern';
@@ -39,11 +40,13 @@ const launch = async (): Promise<void> => {
 
   const server = new WebSocket.Server({ port: 6565 });
   const ceiledHandler: CeiledMessageHandler = new CeiledMessageHandler();
+  const settingsHandler: SettingsMessageHandler = new SettingsMessageHandler();
 
   const onConnection = (ws: WebSocket, req: IncomingMessage) => {
     const handlers: MessageHandler[] = [];
     const clientIP: string = req.connection.remoteAddress;
     handlers.push(ceiledHandler);
+    handlers.push(settingsHandler);
 
     console.log('Client with IP', clientIP, 'connected.');
 
@@ -53,7 +56,7 @@ const launch = async (): Promise<void> => {
 
         handlers.forEach(async (handler: MessageHandler) => {
           const response: OutgoingMessage = await handler.handle(message);
-          ws.send(JSON.stringify(response));
+          if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(response));
         });
       } catch (error) {
         console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');

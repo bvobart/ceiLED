@@ -74,7 +74,7 @@ class FadeControls extends Component {
     this.setState({ options });
   }
 
-  handleConfirm({ brightness, getStatus, roomLight, send }) {
+  handleConfirm({ getStatus, send }) {
     const { cookies } = this.props;
     const { channel1, channel2, channel3, options } = this.state;
     if (getStatus() === WebSocket.OPEN) {
@@ -87,8 +87,6 @@ class FadeControls extends Component {
         .build();
       const request = new CeiledRequestBuilder()
         .setType('fade')
-        .setBrightness(brightness)
-        .setRoomlight(roomLight)
         .setColors(channel1)
         .setPatternOptions(patternOptions)
         .setAuthToken(cookies.get('authToken'))
@@ -101,7 +99,7 @@ class FadeControls extends Component {
     const { classes } = this.props;
     return (
       <ControllerSocketContext.Consumer>
-        {({ brightness, getStatus, roomLight, send }) => (
+        {({ getStatus, send }) => (
           <div>
             <FadeOptionsControl 
               options={this.state.options} 
@@ -117,7 +115,7 @@ class FadeControls extends Component {
             <Button 
               className={classes.confirmButton} 
               variant='outlined' 
-              onClick={() => this.handleConfirm({ brightness, getStatus, roomLight, send })}
+              onClick={() => this.handleConfirm({ getStatus, send })}
             >
               Confirm
             </Button>

@@ -26,14 +26,12 @@ class SolidControls extends Component {
     };
   }
 
-  handleChangeColors(colorObj, { brightness, getStatus, roomLight, send, socket }) {
+  handleChangeColors(colorObj, { getStatus, send, socket }) {
     const colors = [colorObj.channel1, colorObj.channel2, colorObj.channel3];
     if (getStatus() === WebSocket.OPEN) {
       socket.addEventListener('message', (event) => console.log(JSON.parse(event.data)));
       const request = new CeiledRequestBuilder()
         .setType('solid')
-        .setBrightness(brightness)
-        .setRoomlight(roomLight)
         .setColors(colors)
         .setAuthToken(this.props.cookies.get('authToken'))
         .build();
@@ -45,15 +43,13 @@ class SolidControls extends Component {
   render() {
     return (
       <ControllerSocketContext.Consumer>
-        {({ brightness, getStatus, roomLight, send, socket }) => 
+        {({ getStatus, send, socket }) => 
           <ThreeChannelPicker 
             channel1={this.state.channel1} 
             channel2={this.state.channel2} 
             channel3={this.state.channel3}
             onChange={(colors) => this.handleChangeColors(colors, { 
-              brightness, 
               getStatus, 
-              roomLight, 
               send,
               socket
             })}
