@@ -11,7 +11,12 @@ jobs:
   include:
     - stage: build
       install: cd controller && yarn install
-      script: cd controller && yarn build
+      script: yarn build
+
+    - stage: build
+      install: cd ceiled-web && yarn install
+      script: yarn build
+      
     - stage: test
       install: cd controller && yarn install
-      script: cd controller && yarn test
+      script: yarn test
