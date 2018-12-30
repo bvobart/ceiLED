@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+  - 10
+cache: yarn
+
+stages:
+  - build
+  - test
+
+jobs:
+  include:
+    - stage: build
+      install: cd controller && yarn install
+      script: cd controller && yarn build
+    - stage: test
+      install: cd controller && yarn install
+      script: cd controller && yarn test
