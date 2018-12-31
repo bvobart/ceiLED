@@ -50,9 +50,10 @@ class Header extends Component {
   refresh() {
     const status = this.getStatus();
     if (status === WebSocket.CLOSED) {
-      this.open(this.address ? this.address : 'ws://localhost:6565').then(() => 
-        this.setState({ status: this.getStatus() })
-      );
+      const defaultAddress = process.env.NODE_ENV === 'development' ? 'ws://localhost/ceiled-api' : 'ws://192.168.0.165/ceiled-api'
+      this.open(this.address ? this.address : defaultAddress)
+        .catch((reason) => {}) // error is generally printed out to the console already anyways.
+        .then(() => this.setState({ status: this.getStatus() }));
     }
     this.setState({ status });
   }
@@ -62,7 +63,7 @@ class Header extends Component {
 
     return (
       <ControllerSocketContext.Consumer>
-        {({ address, getStatus, open, send, turnOff }) => {
+        {({ address, connected, getStatus, open, send, turnOff }) => {
           this.address = address;
           this.getStatus = getStatus;
           this.open = open;
@@ -74,7 +75,7 @@ class Header extends Component {
               subheader='Controlling LEDs on a ceiling near you'
               action={
                 <IconButton 
-                    color={getStatus() === WebSocket.OPEN ? 'secondary' : 'primary'} 
+                    color={connected ? 'secondary' : 'primary'} 
                     classes={{ 
                       root: classes.powerButtonRoot, 
                       colorPrimary: classes.powerButtonPrimary, 

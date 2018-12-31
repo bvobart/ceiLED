@@ -28,5 +28,10 @@
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
     "serve": "serve -s build"
+  },
+  "proxy": {
+    "/ceiled-api": {
+      "target": "ws://localhost:6565"
+    }
   }
 }
