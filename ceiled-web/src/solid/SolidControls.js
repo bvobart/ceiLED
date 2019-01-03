@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
+import { withCookies } from 'react-cookie';
 import ThreeChannelPicker from '../colorpicking/ThreeChannelPicker';
 import { ControllerSocketContext } from '../context/ControllerSocketProvider';
-import { ControllerRequestBuilder } from '../context/ControllerRequestBuilder';
+import { CeiledRequestBuilder } from '../context/CeiledRequestBuilder';
 
 class SolidControls extends Component {
   constructor(props) {
@@ -25,15 +26,14 @@ class SolidControls extends Component {
     };
   }
 
-  handleChangeColors(colorObj, { brightness, getStatus, roomLight, send, socket }) {
+  handleChangeColors(colorObj, { getStatus, send, socket }) {
     const colors = [colorObj.channel1, colorObj.channel2, colorObj.channel3];
     if (getStatus() === WebSocket.OPEN) {
-      socket.addEventListener('message', (event) => console.log(event));
-      const request = new ControllerRequestBuilder()
+      socket.addEventListener('message', (event) => console.log(JSON.parse(event.data)));
+      const request = new CeiledRequestBuilder()
         .setType('solid')
-        .setBrightness(brightness)
-        .setRoomlight(roomLight)
         .setColors(colors)
+        .setAuthToken(this.props.cookies.get('authToken'))
         .build();
       send(request);
     }
@@ -43,15 +43,13 @@ class SolidControls extends Component {
   render() {
     return (
       <ControllerSocketContext.Consumer>
-        {({ brightness, getStatus, roomLight, send, socket }) => 
+        {({ getStatus, send, socket }) => 
           <ThreeChannelPicker 
             channel1={this.state.channel1} 
             channel2={this.state.channel2} 
             channel3={this.state.channel3}
             onChange={(colors) => this.handleChangeColors(colors, { 
-              brightness, 
               getStatus, 
-              roomLight, 
               send,
               socket
             })}
@@ -62,4 +60,4 @@ class SolidControls extends Component {
   }
 }
 
-export default SolidControls;
+export default withCookies(SolidControls);

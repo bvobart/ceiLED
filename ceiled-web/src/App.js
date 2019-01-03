@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { CookiesProvider, withCookies } from 'react-cookie';
 import { hot } from 'react-hot-loader';
 import compose from 'recompose/compose';
 import { theme } from './theme';
@@ -24,8 +25,15 @@ const styles = theme => ({
 
 class App extends Component {
   render() {
-    const { classes } = this.props;
+    const { classes, cookies } = this.props;
     const isMobile = this.props.width === 'sm' || this.props.width === 'xs' ? window.innerWidth : 960;
+
+    if (!cookies.get('authToken')) {
+      const tokens = new Uint32Array(8);
+      crypto.getRandomValues(tokens);
+      const authToken = tokens.reduce((token, current) => token += current, "");
+      cookies.set('authToken', authToken);
+    }
     
     return (
       <Paper className={classes.root} style={{ width: isMobile }}>
@@ -39,12 +47,14 @@ class App extends Component {
   }
 }
 
-const StyledApp = compose(withStyles(styles), withWidth())(App);
+const StyledApp = compose(withStyles(styles), withWidth(), withCookies)(App);
 const HotStyledApp = hot(module)(() => 
-  <MuiThemeProvider theme={theme}>
-    <CssBaseline />
-    <StyledApp />
-  </MuiThemeProvider>
+  <CookiesProvider>
+    <MuiThemeProvider theme={theme}>
+      <CssBaseline />
+      <StyledApp />
+    </MuiThemeProvider>
+  </CookiesProvider>
 );
 
 export default HotStyledApp;

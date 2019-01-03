@@ -1,5 +1,6 @@
 import Color from '../common/Color';
 import ChannelStore from '../hardware/ChannelStore';
+import { settings } from '../server';
 import Pattern from './Pattern';
 
 /**
@@ -7,13 +8,9 @@ import Pattern from './Pattern';
  */
 class SolidPattern implements Pattern {
   private colors: Color[];
-  private brightness: number;
-  private roomLight: number;
 
-  constructor(colors: Color[], brightness: number, roomLight: number) {
+  constructor(colors: Color[]) {
     this.colors = colors;
-    this.brightness = brightness;
-    this.roomLight = roomLight;
   }
 
   /**
@@ -21,12 +18,11 @@ class SolidPattern implements Pattern {
    */
   public show(): void {
     this.colors.splice(3);
-    this.colors.map((color: Color) => 
-      color.withRoomLight(this.roomLight)
-           .withBrightness(this.brightness)
+    this.colors.map((color: Color) =>
+      color.withRoomLight(settings.roomLight).withBrightness(settings.brightness),
     );
 
-    const store: ChannelStore = ChannelStore.getInstance();
+    const store: ChannelStore = settings.channelStore;
     store.channel1.setColor(this.colors[0]);
     store.channel2.setColor(this.colors[1] ? this.colors[1] : this.colors[0]);
     store.channel3.setColor(this.colors[2] ? this.colors[2] : this.colors[0]);

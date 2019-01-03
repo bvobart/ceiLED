@@ -19,7 +19,7 @@ class Tile extends Component {
         className={this.props.className}
         style={tileStyle} 
         onClick={() => this.props.onClick && this.props.onClick(this.props.color)}
-        variant='flat'
+        variant='text'
       >
         <div>{this.props.label}</div>
       </Button>

@@ -39,30 +39,57 @@ const styles = theme => ({
 });
 
 class Header extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      status: WebSocket.CLOSED
+    }
+    this.refresh = this.refresh.bind(this);
+  }
+  
+  refresh() {
+    const status = this.getStatus();
+    if (status === WebSocket.CLOSED) {
+      const defaultAddress = process.env.NODE_ENV === 'development' ? 'ws://localhost/ceiled-api' : 'ws://192.168.0.165/ceiled-api'
+      this.open(this.address ? this.address : defaultAddress)
+        .catch((reason) => {}) // error is generally printed out to the console already anyways.
+        .then(() => this.setState({ status: this.getStatus() }));
+    }
+    this.setState({ status });
+  }
+
   render() {
     const { classes } = this.props;
 
     return (
       <ControllerSocketContext.Consumer>
-        {({ enabled, enable, disable }) => (
-          <CardHeader 
-            title='CeiLED'
-            subheader='Controlling LEDs on a ceiling near you'
-            action={
-              <IconButton 
-                  color={enabled ? 'secondary' : 'primary'} 
-                  classes={{ 
-                    root: classes.powerButtonRoot, 
-                    colorPrimary: classes.powerButtonPrimary, 
-                    colorSecondary: classes.powerButtonSecondary 
-                  }}
-                  onClick={() => enabled ? disable() : enable()}
-              >
-                <PowerSettingsNewIcon className={classes.powerIcon} />
-              </IconButton>
-            }
-          />
-        )}
+        {({ address, connected, getStatus, open, send, turnOff }) => {
+          this.address = address;
+          this.getStatus = getStatus;
+          this.open = open;
+          this.send = send;
+          this.turnOff = turnOff;
+          return (
+            <CardHeader 
+              title='CeiLED'
+              subheader='Controlling LEDs on a ceiling near you'
+              action={
+                <IconButton 
+                    color={connected ? 'secondary' : 'primary'} 
+                    classes={{ 
+                      root: classes.powerButtonRoot, 
+                      colorPrimary: classes.powerButtonPrimary, 
+                      colorSecondary: classes.powerButtonSecondary 
+                    }}
+                    onClick={this.refresh}
+                    onDoubleClick={turnOff}
+                >
+                  <PowerSettingsNewIcon className={classes.powerIcon} />
+                </IconButton>
+              }
+            />
+          );
+        }}
       </ControllerSocketContext.Consumer>
     )
   }

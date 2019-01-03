@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { withCookies } from 'react-cookie';
+import CeiledRequestBuilder from './CeiledRequestBuilder';
 
 export const ControllerSocketContext = React.createContext();
 
@@ -8,17 +10,14 @@ class ControllerSocketProvider extends Component {
     this.state = {
       address: null,
       socket: null,
+      connected: false,
 
-      brightness: 0,
-      roomLight: 0,
-      setBrightness: (brightness) => this.setState({ brightness }),
-      setRoomLight: (roomLight) => this.setState({ roomLight }),
-      
       open: this.open.bind(this),
       close: this.close.bind(this),
       getStatus: this.getStatus.bind(this),
       reconnect: this.reconnect.bind(this),
-      send: this.send.bind(this)
+      send: this.send.bind(this),
+      turnOff: this.turnOff.bind(this)
     }
   }
 
@@ -28,6 +27,21 @@ class ControllerSocketProvider extends Component {
   close() {
     if (this.state.socket) {
       this.state.socket.close();
+      this.setState({ connected: false });
+    }
+  }
+
+  /**
+   * Turns the lights to black and closes the connection to the controller. Good night ;)
+   */
+  turnOff() {
+    if (this.state.socket) {
+      this.send(new CeiledRequestBuilder()
+        .setType('solid')
+        .setColors([{ red: 0, green: 0, blue: 0 }])
+        .setAuthToken(this.props.cookies.get('authToken'))
+      );
+      this.close();
     }
   }
   
@@ -48,12 +62,16 @@ class ControllerSocketProvider extends Component {
   open(address) {
     return new Promise((resolve, reject) => {
       const newSocket = new WebSocket(address);
-      newSocket.addEventListener('open', () => resolve());
+      newSocket.addEventListener('open', () => {
+        this.setState({ connected: true });
+        return resolve();
+      });
+      // TODO: add event listener for unauthorised messages, so we can show a pop up or header stating this
       newSocket.addEventListener('error', (event) => reject(event));
       
       this.close();
       this.setState({
-        socket: new WebSocket(address),
+        socket: newSocket,
         address: address
       });
     })
@@ -89,4 +107,4 @@ class ControllerSocketProvider extends Component {
   }
 }
 
-export default ControllerSocketProvider;
+export default withCookies(ControllerSocketProvider);

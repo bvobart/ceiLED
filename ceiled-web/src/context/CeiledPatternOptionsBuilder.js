@@ -1,4 +1,4 @@
-export class ControllerPatternOptionsBuilder {
+export class CeiledPatternOptionsBuilder {
   speed;
   channels;
   colors2;
@@ -71,4 +71,4 @@ export class ControllerPatternOptionsBuilder {
   }
 }
 
-export default ControllerPatternOptionsBuilder;
+export default CeiledPatternOptionsBuilder;
