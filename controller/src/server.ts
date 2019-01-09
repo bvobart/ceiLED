@@ -13,7 +13,7 @@ import SettingsMessageHandler from './messages/settings/SettingsMessageHandler';
 import SolidPattern from './patterns/SolidPattern';
 
 export const test = process.env.TEST || false;
-export const debug = process.argv[2] === 'debug';
+export const debug = process.env.DEBUG || false;
 
 // Controller settings
 export const defaultSettings: ControllerSettings = new ControllerSettings({
