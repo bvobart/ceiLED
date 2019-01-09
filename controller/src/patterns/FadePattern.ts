@@ -26,7 +26,10 @@ class FadePattern implements Pattern {
     }
 
     const applyGlobals = (color: Color) =>
-      color.withBrightness(settings.brightness).withRoomLight(settings.roomLight);
+      color
+        .withBrightness(settings.brightness)
+        .withRoomLight(settings.roomLight)
+        .withFlux(settings.flux);
     this.colors1.map(applyGlobals);
     this.colors2.map(applyGlobals);
     this.colors3.map(applyGlobals);

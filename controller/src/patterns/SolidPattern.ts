@@ -19,7 +19,10 @@ class SolidPattern implements Pattern {
   public show(): void {
     this.colors.splice(3);
     this.colors.map((color: Color) =>
-      color.withRoomLight(settings.roomLight).withBrightness(settings.brightness),
+      color
+        .withRoomLight(settings.roomLight)
+        .withBrightness(settings.brightness)
+        .withFlux(settings.flux),
     );
 
     const store: ChannelStore = settings.channelStore;
