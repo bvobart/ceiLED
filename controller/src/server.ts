@@ -69,7 +69,9 @@ const launch = async (): Promise<void> => {
         const message = JSON.parse(payload);
         const handleMessage = async (handler: MessageHandler) => {
           const response: OutgoingMessage = await handler.handle(message);
-          if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(response));
+          if (response && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(response));
+          }
         };
         await Promise.all(handlers.map(handleMessage));
       } catch (error) {

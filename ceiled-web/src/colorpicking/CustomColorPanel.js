@@ -15,7 +15,7 @@ const styles = theme => ({
     marginTop: 4
   },
   slider: {
-    padding: '16px 0px'
+    padding: '16px 8px'
   }
 });
 
@@ -46,9 +46,11 @@ class CustomColorPanel extends Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    if (props.color.red !== state.red 
-        || props.color.green !== state.green 
-        || props.color.blue !== state.blue
+    if (props.color 
+      && (props.color.red !== state.red 
+          || props.color.green !== state.green 
+          || props.color.blue !== state.blue
+         )
     ) {
       return props.color;
     }

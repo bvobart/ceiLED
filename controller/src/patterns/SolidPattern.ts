@@ -18,11 +18,11 @@ class SolidPattern implements Pattern {
    */
   public show(): void {
     this.colors.splice(3);
-    this.colors.map((color: Color) =>
+    this.colors = this.colors.map((color: Color) =>
       color
         .withRoomLight(settings.roomLight)
-        .withBrightness(settings.brightness)
-        .withFlux(settings.flux),
+        .withFlux(settings.flux)
+        .withBrightness(settings.brightness),
     );
 
     const store: ChannelStore = settings.channelStore;

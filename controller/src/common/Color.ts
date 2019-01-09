@@ -73,14 +73,14 @@ class Color implements IColor {
   }
 
   /**
-   * Mixes this colour with another colour, essentially averaging the two.
+   * Mixes this colour with another colour.
    * @param color color to mix with
    */
   public blend(color: Color): Color {
     return new Color({
-      red: Math.round((this.red + color.red) / 2),
-      green: Math.round((this.green + color.green) / 2),
-      blue: Math.round((this.blue + color.blue) / 2),
+      red: Math.round(this.red * (color.red / 255)),
+      green: Math.round(this.green * (color.green / 255)),
+      blue: Math.round(this.blue * (color.blue / 255)),
     });
   }
 
@@ -111,6 +111,7 @@ class Color implements IColor {
     if (roomLight === 0) return this;
     if (roomLight === 100) return Color.ROOMLIGHT;
 
+    // TODO: fix roomlight application
     const factor: number = roomLight / 100;
     return new Color({
       red: this.red * factor,

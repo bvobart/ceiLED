@@ -33,6 +33,9 @@ export class SettingsMessageHandler implements MessageHandler {
           settings.flux = inRange(req.flux, -1, 5);
           if (req.driver) settings.setDriver(req.driver);
 
+          // TODO: call show() again on currently active pattern.
+          // TODO: move activePattern from CeiledMessageHandler to ControllerSettings
+
           return Promise.resolve(new SettingsSuccessResponse());
         default:
           const error: Error = new Error('Invalid action: ' + message.settings.action);

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { CardContent, Typography, TextField, withStyles, Button } from '@material-ui/core';
 import { ControllerSocketContext } from '../context/ControllerSocketProvider';
+import { getApiUrl } from './utils';
 
 const styles = theme => ({
   root: {
@@ -54,7 +55,8 @@ class Footer extends Component {
 
   handleConnect() {
     if (this.state.address) {
-      const address = 'wss://' + this.state.address + '/ceiled-api';
+      const secure = process.env.NODE_ENV !== 'development';
+      const address = getApiUrl(this.state.address, secure);
       this.open(address)
       .then(() => {
         console.log('Connected to', address);
