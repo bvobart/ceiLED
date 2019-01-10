@@ -34,7 +34,7 @@ class Footer extends Component {
     super(props);
     this.state = {
       addressDisabled: false,
-      address: process.env.NODE_ENV === 'development' ? 'localhost:3000' : '192.168.0.165',
+      address: process.env.NODE_ENV === 'development' ? 'localhost:3000' : 'bart.vanoort.is',
       status: Status.closed,
     }
   }
