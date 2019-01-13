@@ -12,6 +12,9 @@ describe('SolidPattern', () => {
       channel3: { setColor: jest.fn() },
     };
     settings.channelStore = storeMock;
+    settings.brightness = 100;
+    settings.roomLight = 0;
+    settings.flux = 0;
   });
 
   it('shows one solid colour', () => {

@@ -4,10 +4,12 @@ import { isAuthorised } from './auth';
 jest.unmock('./auth');
 
 describe('auth', () => {
+  const address: string = process.env.CI ? 'mongodb://127.0.0.1' : 'mongodb://localhost:27017';
+
   describe('isAuthorised', () => {
     it('rejects a fake token', async done => {
       const dbClient = await MongoClient.connect(
-        'mongodb://localhost:27017',
+        address,
         { useNewUrlParser: true },
       );
       const db = dbClient.db('ceiled');
@@ -19,7 +21,7 @@ describe('auth', () => {
 
     it.skip('accepts a correct token', async done => {
       const dbClient = await MongoClient.connect(
-        'mongodb://localhost:27017',
+        address,
         { useNewUrlParser: true },
       );
       const db = dbClient.db('ceiled');
