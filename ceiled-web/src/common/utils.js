@@ -12,3 +12,14 @@ export const toRgbStringsList = (colors) => {
   }, '');
   return res;
 };
+
+/**
+ * Given a host name and a boolean to indicate whether a secure connection should be made or not,
+ * creates a URL that points to the CeiLED API.
+ * @param {String} host Host name, including optional port
+ * @param {Boolean} secure iff true use WSS, else use WS
+ */
+export const getApiUrl = (host, secure) => {
+  const prefix = secure ? 'wss' : 'ws';
+  return prefix + '://' + host + '/ceiled-api';
+}

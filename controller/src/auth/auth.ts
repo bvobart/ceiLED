@@ -1,5 +1,5 @@
-import { Db } from "mongodb";
-import AuthRepository from "./AuthRepository";
+import { Db } from 'mongodb';
+import AuthRepository from './AuthRepository';
 
 /**
  * Checks whether a token is authorised to modify settings on the controller.
@@ -11,10 +11,10 @@ export const isAuthorised = async (authToken: string, db?: Db): Promise<boolean>
   const repo = new AuthRepository(db);
   const auth = await repo.findByToken(authToken);
   return auth ? Promise.resolve(true) : Promise.resolve(false);
-}
+};
 
 export const getNameFromToken = async (authToken: string, db?: Db): Promise<string> => {
   const repo = new AuthRepository(db);
   const auth = await repo.findByToken(authToken);
   return auth ? Promise.resolve(auth.name) : Promise.reject('Unauthorised');
-}
+};

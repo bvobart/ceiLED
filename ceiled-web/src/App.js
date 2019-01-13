@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { CookiesProvider, withCookies } from 'react-cookie';
-import { hot } from 'react-hot-loader';
 import compose from 'recompose/compose';
 import { theme } from './theme';
 
@@ -48,13 +47,13 @@ class App extends Component {
 }
 
 const StyledApp = compose(withStyles(styles), withWidth(), withCookies)(App);
-const HotStyledApp = hot(module)(() => 
+const CompleteStyledApp = () => 
   <CookiesProvider>
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
       <StyledApp />
     </MuiThemeProvider>
   </CookiesProvider>
-);
+;
 
-export default HotStyledApp;
+export default CompleteStyledApp;

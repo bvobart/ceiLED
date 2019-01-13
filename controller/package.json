@@ -14,7 +14,7 @@
     "url": "git+https://github.com/bvobart/ceiLED.git"
   },
   "scripts": {
-    "start": "nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts",
+    "start": "INSECURE=true nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts",
     "build": "tsc",
     "serve": "nodemon build/server.js",
     "test": "TEST=true jest --coverage --detectOpenHandles --forceExit"

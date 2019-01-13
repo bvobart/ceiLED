@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { CardContent, Typography, TextField, withStyles, Button } from '@material-ui/core';
 import { ControllerSocketContext } from '../context/ControllerSocketProvider';
+import { getApiUrl } from './utils';
 
 const styles = theme => ({
   root: {
@@ -33,7 +34,7 @@ class Footer extends Component {
     super(props);
     this.state = {
       addressDisabled: false,
-      address: 'localhost',
+      address: process.env.NODE_ENV === 'development' ? 'localhost:3000' : 'bart.vanoort.is',
       status: Status.closed,
     }
   }
@@ -54,7 +55,8 @@ class Footer extends Component {
 
   handleConnect() {
     if (this.state.address) {
-      const address = 'ws://' + this.state.address + ':6565';
+      const secure = process.env.NODE_ENV !== 'development';
+      const address = getApiUrl(this.state.address, secure);
       this.open(address)
       .then(() => {
         console.log('Connected to', address);
@@ -62,6 +64,7 @@ class Footer extends Component {
       })
       .catch((event) => {
         console.error('Error connecting to controller. Is the address correct?');
+        console.error(event);
         this.setState({ status: Status.error });
       });
 
@@ -75,7 +78,7 @@ class Footer extends Component {
   
   render() {
     const { classes } = this.props;
-    const { addressDisabled, status} = this.state;
+    const { addressDisabled, address, status} = this.state;
 
     return (
       <ControllerSocketContext.Consumer>
@@ -109,6 +112,7 @@ class Footer extends Component {
                   onKeyDown={(event) => event.key === 'Enter' ? this.handleConnect() : undefined }
                   onDoubleClick={(event) => this.setState({ addressDisabled: !addressDisabled })}
                   style={{ paddingRight: 10 }}
+                  value={address}
                 ></TextField>
                 <Button
                   variant='outlined' 
