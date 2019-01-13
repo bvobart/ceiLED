@@ -26,10 +26,13 @@ class FadePattern implements Pattern {
     }
 
     const applyGlobals = (color: Color) =>
-      color.withBrightness(settings.brightness).withRoomLight(settings.roomLight);
-    this.colors1.map(applyGlobals);
-    this.colors2.map(applyGlobals);
-    this.colors3.map(applyGlobals);
+      color
+        .withRoomLight(settings.roomLight)
+        .withFlux(settings.flux)
+        .withBrightness(settings.brightness);
+    this.colors1 = this.colors1.map(applyGlobals);
+    this.colors2 = this.colors2.map(applyGlobals);
+    this.colors3 = this.colors3.map(applyGlobals);
   }
 
   public async show(): Promise<void> {

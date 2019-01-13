@@ -67,6 +67,7 @@ class ControllerSocketProvider extends Component {
         return resolve();
       });
       // TODO: add event listener for unauthorised messages, so we can show a pop up or header stating this
+      newSocket.addEventListener('message', (event) => console.log(JSON.parse(event.data)));
       newSocket.addEventListener('error', (event) => reject(event));
       
       this.close();

@@ -1,5 +1,5 @@
-import { OutgoingMessage, StatusType } from "../MessageHandler";
-import CeiledError from "./CeiledError";
+import { OutgoingMessage, StatusType } from '../MessageHandler';
+import CeiledError from './CeiledError';
 
 export class UnauthorisedResponse implements OutgoingMessage {
   public status: StatusType = StatusType.UNAUTHORISED;

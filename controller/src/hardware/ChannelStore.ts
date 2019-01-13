@@ -16,7 +16,6 @@ class ChannelStore {
     this.channel2 = new LEDChannel(2);
     this.channel3 = new LEDChannel(3);
   }
-
 }
 
 export default ChannelStore;

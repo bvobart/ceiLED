@@ -6,6 +6,7 @@ import { fade } from '@material-ui/core/styles/colorManipulator';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNewRounded';
 
 import { ControllerSocketContext } from '../context/ControllerSocketProvider';
+import { getApiUrl } from './utils';
 
 const styles = theme => ({
   powerIcon: {
@@ -50,7 +51,9 @@ class Header extends Component {
   refresh() {
     const status = this.getStatus();
     if (status === WebSocket.CLOSED) {
-      const defaultAddress = process.env.NODE_ENV === 'development' ? 'ws://localhost/ceiled-api' : 'ws://192.168.0.165/ceiled-api'
+      const defaultAddress = process.env.NODE_ENV === 'development' 
+        ? getApiUrl('localhost:3000') 
+        : getApiUrl('bart.vanoort.is');
       this.open(this.address ? this.address : defaultAddress)
         .catch((reason) => {}) // error is generally printed out to the console already anyways.
         .then(() => this.setState({ status: this.getStatus() }));

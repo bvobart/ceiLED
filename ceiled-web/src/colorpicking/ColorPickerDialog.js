@@ -1,6 +1,22 @@
 import React, { Component } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogActions, Button, withStyles } from '@material-ui/core';
 import ColorPicker from './ColorPicker';
+
+const styles = theme => ({
+  actions: {
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  dialogPaper: {
+    margin: 0,
+    overflowX: 'hidden',
+    minWidth: window.innerWidth,
+    [theme.breakpoints.up('sm')]: {
+      minWidth: 600,
+      maxWidth: 600
+    }
+  }
+});
 
 class ColorPickerDialog extends Component {
   constructor(props) {
@@ -26,24 +42,29 @@ class ColorPickerDialog extends Component {
   }
 
   render() {
-    const { fullScreen, open, onClose } = this.props;
+    const { classes, fullScreen, open, onClose } = this.props;
     const { color } = this.state;
 
     return (
-      <Dialog 
+      <Dialog
+        classes={{
+          paper: classes.dialogPaper,
+        }}
         fullScreen={fullScreen}
         open={open}
+        onBackdropClick={this.handleConfirm}
         onClose={onClose}
       >
         <DialogTitle>Pick a colour</DialogTitle>
-        <DialogContent>
-          <ColorPicker 
-            color={color} 
-            onChange={(color) => this.setState({ color })} 
-            onConfirm={(color) => this.setState({ color })} 
-          />
-        </DialogContent>
-        <DialogActions style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <ColorPicker 
+          color={color}
+          onChange={(color) => this.setState({ color })} 
+          onConfirm={(color) => {
+            this.setState({ color });
+            this.handleConfirm();
+          }} 
+        />
+        <DialogActions className={classes.actions}>
           <Button onClick={this.handleConfirm}>Confirm</Button>
           <Button onClick={this.handleDelete}>Delete</Button>
         </DialogActions>
@@ -52,4 +73,4 @@ class ColorPickerDialog extends Component {
   }
 }
 
-export default ColorPickerDialog;
+export default withStyles(styles)(ColorPickerDialog);

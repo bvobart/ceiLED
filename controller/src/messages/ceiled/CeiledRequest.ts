@@ -45,7 +45,14 @@ export class CeiledRequest {
   constructor(type: CeiledRequestType, colors: Color[], patternOptions?: any) {
     this.type = type;
     // the colours that come in through the web socket have the attributes of Color, but not the methods.
-    this.colors = colors.map(({ red, green, blue }: Color) => new Color({ red, green, blue }));
+    this.colors = colors.map(asColor);
+    if (patternOptions && patternOptions.colors2 instanceof Array) {
+      patternOptions.colors2 = patternOptions.colors2.map(asColor);
+    }
+    if (patternOptions && patternOptions.colors3 instanceof Array) {
+      patternOptions.colors3 = patternOptions.colors3.map(asColor);
+    }
+
     switch (type) {
       case CeiledRequestType.FADE:
         this.patternOptions = new FadePatternOptions(patternOptions);
@@ -80,3 +87,6 @@ export class CeiledRequest {
     }
   }
 }
+
+// Transforms an object with the shape of a Color object to an actual Color object.
+const asColor = ({ red, green, blue }: Color) => new Color({ red, green, blue });

@@ -4,7 +4,6 @@ import { settings } from '../server';
  * Class to represent and control a pin on the Up Squared.
  */
 class Pin {
-
   /** Pin number. */
   public number: number;
 
