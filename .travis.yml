@@ -20,3 +20,5 @@ jobs:
     - stage: test
       install: cd controller && yarn install
       script: yarn test
+      services: 
+        - mongodb
