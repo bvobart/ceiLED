@@ -18,7 +18,7 @@ if [ $TRAVIS_BRANCH == "master" ] || [ $TRAVIS_BRANCH == "ci" ] ; then
     git add .
     git status # debug
     git commit -m "Deploy built files"
-    git push -f deploy HEAD:refs/heads/master
+    git push -f deploy HEAD:master
 
 else
 
