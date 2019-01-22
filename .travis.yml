@@ -39,4 +39,4 @@ jobs:
         provider: script
         script: cd .. && .travis/deploy.sh
         on:
-          all_branches: true
+          branch: master
