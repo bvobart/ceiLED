@@ -82,7 +82,7 @@ class GlobalControls extends Component {
 
   render() {
     const { classes } = this.props;
-    const { brightness, roomLight, flux, driverType } = this.state;
+    const { brightness, roomLight, flux } = this.state;
 
     return (
       <ControllerSocketContext.Consumer>
