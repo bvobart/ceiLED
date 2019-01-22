@@ -33,7 +33,6 @@ jobs:
       script: yarn build
       branches:
         only:
-          - ci
           - master
       deploy:
         skip_cleanup: true
