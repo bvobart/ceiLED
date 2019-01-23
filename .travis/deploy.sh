@@ -23,6 +23,7 @@ if [ $TRAVIS_BRANCH == "master" ] || [ $TRAVIS_BRANCH == "develop" ] ; then
         git push -f deploy HEAD:master
     else
         git push -f deploy HEAD:develop
+    fi
 
 else
 
