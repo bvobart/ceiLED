@@ -9,10 +9,10 @@ import withWidth from '@material-ui/core/withWidth';
 import { Paper, Slide } from '@material-ui/core';
 
 import ControllerSocketProvider from './context/ControllerSocketProvider';
-import Header from './common/Header';
-import LEDControls from './common/LEDControls';
+import Header from './common/header/Header';
 import Footer from './common/footer/Footer';
 import AboutPage from './about/AboutPage';
+import LEDControls from './controls/LEDControls';
 
 const styles = theme => ({
   root: {
@@ -30,7 +30,7 @@ class App extends Component {
       displayAbout: false
     }
   }
-  
+
   render() {
     const { classes, cookies } = this.props;
     const { displayAbout } = this.state;
@@ -49,13 +49,18 @@ class App extends Component {
       <Paper className={classes.root} style={{ width: isMobile }}>
         <ControllerSocketProvider>
           <Header />
+
           <Slide direction='right' in={!displayAbout}>
             <LEDControls hidden={displayAbout}/>
           </Slide>
           <Slide direction='left' in={displayAbout}>
             <AboutPage hidden={!displayAbout}/>
           </Slide>
-          <Footer toggleAboutPage={() => this.setState({ displayAbout: !displayAbout }) }/>
+          
+          <Footer 
+            displayAbout={displayAbout}
+            toggleAboutPage={() => this.setState({ displayAbout: !displayAbout }) }
+          />
         </ControllerSocketProvider>
       </Paper>
     )

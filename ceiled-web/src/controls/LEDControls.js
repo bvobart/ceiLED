@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { Card, CardHeader, Collapse, IconButton } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import GlobalControls from './GlobalControls';
-import FadeControls from '../fade/FadeControls';
-import SolidControls from '../solid/SolidControls';
-import JumpControls from '../jump/JumpControls';
-import FunControls from '../fun/FunControls';
+import FadeControls from './fade/FadeControls';
+import SolidControls from './solid/SolidControls';
+import JumpControls from './jump/JumpControls';
+import FunControls from './fun/FunControls';
 
 class Control extends Component {
   constructor(props) {

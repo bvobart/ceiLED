@@ -12,6 +12,7 @@ const styles = theme => ({
   },
   addressBox: {
     display: 'flex',
+    alignItems: 'center',
     justifyContent: 'space-between'
   },
   actionBox: {
@@ -27,8 +28,6 @@ const styles = theme => ({
     justifyContent: 'space-between'
   }
 });
-
-
 
 class Footer extends Component {
   constructor(props) {
@@ -66,7 +65,7 @@ class Footer extends Component {
   }
   
   render() {
-    const { classes, toggleAboutPage } = this.props;
+    const { classes, displayAbout, toggleAboutPage } = this.props;
     const { addressDisabled, address, hasError } = this.state;
 
     return (
@@ -83,7 +82,7 @@ class Footer extends Component {
                   variant='text'
                   onClick={toggleAboutPage}
                 >
-                  ABOUT
+                  { displayAbout ? 'CONTROLS' : 'ABOUT' }
                 </Button>
                 <Button
                   className={classes.actionButton}
@@ -94,10 +93,7 @@ class Footer extends Component {
                 </Button>
               </div>
               <div className={classes.addressBox}>
-                <Typography 
-                  variant='caption' 
-                  style={{ padding: 10 }}
-                >
+                <Typography variant='caption'>
                   Address:
                 </Typography>
                 <TextField 
@@ -105,8 +101,8 @@ class Footer extends Component {
                   onChange={(event) => this.setState({ address: event.target.value })}
                   onKeyDown={(event) => event.key === 'Enter' ? this.handleConnect() : undefined }
                   onDoubleClick={(event) => this.setState({ addressDisabled: !addressDisabled })}
-                  style={{ paddingRight: 10 }}
                   value={address}
+                  style={{ paddingLeft: 8 }}
                 ></TextField>
               </div>
             </CardContent>

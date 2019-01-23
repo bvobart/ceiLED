@@ -5,8 +5,8 @@ import red from '@material-ui/core/colors/red';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNewRounded';
 
-import { ControllerSocketContext } from '../context/ControllerSocketProvider';
-import { getApiUrl } from './utils';
+import { ControllerSocketContext } from '../../context/ControllerSocketProvider';
+import { getApiUrl } from '../utils';
 
 const styles = theme => ({
   powerIcon: {
