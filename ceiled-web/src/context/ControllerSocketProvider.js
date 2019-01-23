@@ -11,6 +11,7 @@ class ControllerSocketProvider extends Component {
       address: null,
       socket: null,
       connected: false,
+      status: WebSocket.CLOSED,
 
       open: this.open.bind(this),
       close: this.close.bind(this),
@@ -27,7 +28,7 @@ class ControllerSocketProvider extends Component {
   close() {
     if (this.state.socket) {
       this.state.socket.close();
-      this.setState({ connected: false });
+      this.setState({ connected: false, status: WebSocket.CLOSED });
     }
   }
 
@@ -63,7 +64,7 @@ class ControllerSocketProvider extends Component {
     return new Promise((resolve, reject) => {
       const newSocket = new WebSocket(address);
       newSocket.addEventListener('open', () => {
-        this.setState({ connected: true });
+        this.setState({ connected: true, status: WebSocket.OPEN });
         return resolve();
       });
       // TODO: add event listener for unauthorised messages, so we can show a pop up or header stating this
@@ -73,7 +74,8 @@ class ControllerSocketProvider extends Component {
       this.close();
       this.setState({
         socket: newSocket,
-        address: address
+        address: address,
+        status: WebSocket.CONNECTING,
       });
     })
   }

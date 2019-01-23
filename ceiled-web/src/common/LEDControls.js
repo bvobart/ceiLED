@@ -22,14 +22,18 @@ class Control extends Component {
   }
 
   render() {
+    const { hidden } = this.props;
+
     return (
       <div>
-        <CardHeader 
-          title={this.props.title}
-          action={<IconButton onClick={this.handleClick}><ExpandMoreIcon /></IconButton>}
-          onClick={this.handleClick}
-        />
-        <Collapse in={this.state.expanded}>
+        { !hidden && 
+          <CardHeader 
+            title={this.props.title}
+            action={<IconButton onClick={this.handleClick}><ExpandMoreIcon /></IconButton>}
+            onClick={this.handleClick}
+          />
+        }
+        <Collapse in={!hidden && this.state.expanded}>
           {this.props.children}
         </Collapse>
       </div>
@@ -39,19 +43,20 @@ class Control extends Component {
 
 class LEDControls extends Component {
   render() {
+    const { hidden } = this.props;
     return (
       <Card>
-        <GlobalControls />
-        <Control title="Solid">
+        <GlobalControls hidden={hidden}/>
+        <Control title="Solid" hidden={hidden}>
           <SolidControls />
         </Control>
-        <Control title="Fade">
+        <Control title="Fade" hidden={hidden}>
           <FadeControls />
         </Control>
-        <Control title="Jump">
+        <Control title="Jump" hidden={hidden}>
           <JumpControls />
         </Control>
-        <Control title="Fun">
+        <Control title="Fun" hidden={hidden}>
           <FunControls />
         </Control>
       </Card>

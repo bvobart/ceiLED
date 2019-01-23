@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { CardContent, Typography, TextField, withStyles, Button } from '@material-ui/core';
-import { ControllerSocketContext } from '../context/ControllerSocketProvider';
-import { getApiUrl } from './utils';
+import { ControllerSocketContext } from '../../context/ControllerSocketProvider';
+import { getApiUrl } from '../utils';
+import StatusBox from './StatusBox';
 
 const styles = theme => ({
   root: {
@@ -9,9 +10,16 @@ const styles = theme => ({
     flexFlow: 'row wrap',
     justifyContent: 'space-between'
   },
-  connectBox: {
+  addressBox: {
     display: 'flex',
     justifyContent: 'space-between'
+  },
+  actionBox: {
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  actionButton: {
+    width: '90px',
   },
   statusBox: {
     display: 'flex',
@@ -20,14 +28,7 @@ const styles = theme => ({
   }
 });
 
-const Status = {
-  closed: 'Closed',
-  closing: 'Closing',
-  connected: 'Connected',
-  connecting: 'Connecting',
-  error: 'Error, see console',
-  unknown: 'Unknown'
-};
+
 
 class Footer extends Component {
   constructor(props) {
@@ -35,7 +36,7 @@ class Footer extends Component {
     this.state = {
       addressDisabled: false,
       address: process.env.NODE_ENV === 'development' ? 'localhost:3000' : 'bart.vanoort.is',
-      status: Status.closed,
+      hasError: false,
     }
   }
 
@@ -43,63 +44,56 @@ class Footer extends Component {
     this.close();
   }
 
-  getStatusText(status) {
-    switch (status) {
-      case WebSocket.OPEN: return Status.connected;
-      case WebSocket.CLOSED: return Status.closed;
-      case WebSocket.CLOSING: return Status.closing;
-      case WebSocket.CONNECTING: return Status.connecting;
-      default: return Status.unknown; 
-    }
-  }
-
   handleConnect() {
     if (this.state.address) {
       const secure = process.env.NODE_ENV !== 'development';
       const address = getApiUrl(this.state.address, secure);
       this.open(address)
-      .then(() => {
-        console.log('Connected to', address);
-        this.setState({ addressDisabled: true, status: Status.connected });
-      })
-      .catch((event) => {
-        console.error('Error connecting to controller. Is the address correct?');
-        console.error(event);
-        this.setState({ status: Status.error });
-      });
-
-      this.setState({ status: Status.connecting });
+        .then(() => {
+          console.log('Connected to', address);
+          this.setState({ addressDisabled: true, hasError: false });
+        })
+        .catch((event) => {
+          console.error('Error connecting to controller. Is the address correct?');
+          console.error(event);
+          this.setState({ hasError: true });
+        });
     }
   }
   
-  handleRefreshStatus({ getStatus }) {
-    this.setState({ status: this.getStatusText(getStatus())})
+  handleRefreshStatus() {
+    this.setState({ hasError: false })
   }
   
   render() {
-    const { classes } = this.props;
-    const { addressDisabled, address, status} = this.state;
+    const { classes, toggleAboutPage } = this.props;
+    const { addressDisabled, address, hasError } = this.state;
 
     return (
       <ControllerSocketContext.Consumer>
-        {({ getStatus, open, close }) => {
+        {({ open, close, status }) => {
           this.open = open;
           this.close = close;
           return (
             <CardContent className={classes.root}>
-              <div className={classes.statusBox}>
-                <Typography 
-                  variant='caption' 
-                  style={{ padding: 10 }}
-                >
-                  Status: {status}
-                </Typography>
+              <StatusBox status={hasError ? WebSocket.CLOSED : status} error={hasError}/>
+              <div className={classes.actionBox}>
                 <Button 
-                  variant='outlined' 
-                  onClick={() => this.handleRefreshStatus({ getStatus })}
-                >Refresh</Button>
+                  className={classes.actionButton} 
+                  variant='text'
+                  onClick={toggleAboutPage}
+                >
+                  ABOUT
+                </Button>
+                <Button
+                  className={classes.actionButton}
+                  variant='text' 
+                  onClick={() => this.handleConnect()}
+                >
+                  Connect
+                </Button>
               </div>
-              <div className={classes.connectBox}>
+              <div className={classes.addressBox}>
                 <Typography 
                   variant='caption' 
                   style={{ padding: 10 }}
@@ -114,12 +108,6 @@ class Footer extends Component {
                   style={{ paddingRight: 10 }}
                   value={address}
                 ></TextField>
-                <Button
-                  variant='outlined' 
-                  onClick={() => this.handleConnect()}
-                >
-                  Connect
-                </Button>
               </div>
             </CardContent>
           );

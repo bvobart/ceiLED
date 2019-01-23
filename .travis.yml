@@ -25,15 +25,13 @@ jobs:
         - mongodb
     
     - stage: deploy
+      if: branch = master
       before_install:
         - openssl aes-256-cbc -K $encrypted_8913863055d3_key -iv $encrypted_8913863055d3_iv -in .travis/travis_key.enc -out ~/.ssh/travis_key -d
         - chmod 600 ~/.ssh/travis_key
         - echo "bart.vanoort.is ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDpIvXSvLobd5l7nlTVGPcH6kjDrQZga40RkHVdh1RQH7Z4btuNhjwfZyjtCM4aeTPHWx7Qi15FJaUdvknWR1CU=" >> ~/.ssh/known_hosts
       install: cd ceiled-web && yarn install
       script: yarn build
-      branches:
-        only:
-          - master
       deploy:
         skip_cleanup: true
         provider: script
