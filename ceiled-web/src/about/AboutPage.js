@@ -1,22 +1,25 @@
 import React, { Component } from 'react';
 import { withCookies } from 'react-cookie';
 import compose from 'recompose/compose';
-import { withStyles, Card, CardHeader, CardContent, Typography, TextField } from '@material-ui/core';
+import { withStyles, Card, CardHeader, CardContent, Link, Typography, TextField } from '@material-ui/core';
 
 import logo from './ceiled-logo.svg';
 
 const styles = theme => ({
   root: {},
   content: {
-    backgroundImage: logo,
     [theme.breakpoints.up('sm')]: {
       display: 'flex',
       justifyContent: 'space-between'
     }
   },
   logo: {
+    marginLeft: '16px',
     [theme.breakpoints.down('xs')]: {
-      justifySelf: 'center'
+      display: 'block',
+      width: '80%',
+      marginLeft: 'auto',
+      marginRight: 'auto',
     }
   },
   tokenField: {
@@ -33,7 +36,7 @@ class AboutPage extends Component {
         <CardHeader title='About' />
         <CardContent >
           <div className={classes.content}>
-            <Typography component='p' gutterBottom>
+            <Typography component='p' align='justify' gutterBottom>
               CeiLED is a suite of software that I created to control the LED strips that I have on
               my ceiling. It consists of this web interface as well as a controller in the form of
               a TypeScript NodeJS application that hosts the CeiLED API over a WebSocket connection.
@@ -41,14 +44,16 @@ class AboutPage extends Component {
               CeiLED's logo is designed after the way the LED strips are attached to my ceiling.
               The three prongs seen in the logo correspond with the three channels that colours can
               be applied to in this application.
+              <br /><br />
+              The source code of CeiLED is open source and can be found <Link href='https://github.com/bvobart/ceiLED'>on GitHub</Link>.
+              Want to use CeiLED in your own home? Let me know and I can help you set it up ;)
             </Typography>
-            <img src={logo} alt='CeiLED logo' />
+            <img className={classes.logo} src={logo} alt='CeiLED logo' />
           </div>
-          <br />
           <div>
-            <Typography variant='h5'>Security & Authorisation</Typography>
+            <Typography variant='h5'>Security & authorisation</Typography>
             <br />
-            <Typography component='p' gutterBottom>
+            <Typography component='p' align='justify' gutterBottom>
               Since CeiLED is literally controlling the lighting in my own home, security is very
               important. The way it is currently set up, you may only connect to the controller if
               you are connected to my personal WiFi network. Even then, to actually control the lights

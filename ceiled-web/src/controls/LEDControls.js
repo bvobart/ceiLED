@@ -6,6 +6,7 @@ import FadeControls from './fade/FadeControls';
 import SolidControls from './solid/SolidControls';
 import JumpControls from './jump/JumpControls';
 import FunControls from './fun/FunControls';
+import ComfortControls from './comfort/ComfortControls';
 
 class Control extends Component {
   constructor(props) {
@@ -47,13 +48,16 @@ class LEDControls extends Component {
     return (
       <Card>
         <GlobalControls hidden={hidden}/>
-        <Control title="Solid" hidden={hidden}>
+        <Control title="Comfort" hidden={true}>
+          <ComfortControls />
+        </Control>
+        <Control title="Solids" hidden={hidden}>
           <SolidControls />
         </Control>
-        <Control title="Fade" hidden={hidden}>
+        <Control title="Fades" hidden={hidden}>
           <FadeControls />
         </Control>
-        <Control title="Jump" hidden={hidden}>
+        <Control title="Jumps" hidden={hidden}>
           <JumpControls />
         </Control>
         <Control title="Fun" hidden={hidden}>

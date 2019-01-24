@@ -8,7 +8,7 @@ class Tile extends Component {
     const colorString = toRgbString(this.props.color);
     const tileStyle = {
       height: 50,
-      minWidth: 0,
+      minWidth: 32,
       backgroundColor: colorString,
       borderRadius: 0,
       flex: this.props.flex ? this.props.flex : '1 100%'
