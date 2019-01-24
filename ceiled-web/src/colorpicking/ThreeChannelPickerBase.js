@@ -102,8 +102,8 @@ class ThreeChannelPickerBase extends Component {
         <AppBar position='static'>
           <Tabs 
               className={classes.tabsBar} 
+              variant='fullWidth'
               centered 
-              fullWidth 
               value={tab}
               onChange={(e, tab) => this.handleChangeTab(tab)}>
             <Tab className={classes.tab1} label='Channel 1' style={{ backgroundColor: tabBgColors.channel1 }} />

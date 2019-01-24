@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { withCookies } from 'react-cookie';
-import ThreeChannelPicker from '../colorpicking/ThreeChannelPicker';
-import { ControllerSocketContext } from '../context/ControllerSocketProvider';
-import { CeiledRequestBuilder } from '../context/CeiledRequestBuilder';
+import ThreeChannelPicker from '../../colorpicking/ThreeChannelPicker';
+import { ControllerSocketContext } from '../../context/ControllerSocketProvider';
+import { CeiledRequestBuilder } from '../../context/CeiledRequestBuilder';
 
 class SolidControls extends Component {
   constructor(props) {

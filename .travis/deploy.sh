@@ -3,7 +3,7 @@
 # print outputs and exit on first failure
 set -xe
 
-if [ $TRAVIS_BRANCH == "master" ] ; then
+if [ $TRAVIS_BRANCH == "master" ] || [ $TRAVIS_BRANCH == "develop" ] ; then
 
     # setup ssh agent, git config and remote
     eval "$(ssh-agent -s)"
@@ -18,7 +18,12 @@ if [ $TRAVIS_BRANCH == "master" ] ; then
     git add .
     git status # debug
     git commit -m "Deploy built files"
-    git push -f deploy HEAD:master
+
+    if [ $TRAVIS_BRANCH == "master" ] ; then
+        git push -f deploy HEAD:master
+    else
+        git push -f deploy HEAD:develop
+    fi
 
 else
 

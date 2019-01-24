@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { withCookies } from 'react-cookie';
-import FadeOptionsControl from './FadeOptionsControl';
 import { Button, withStyles } from '@material-ui/core';
-import ThreeChannelMultiPicker from '../colorpicking/ThreeChannelMultiPicker';
-import { ControllerSocketContext } from '../context/ControllerSocketProvider';
-import { CeiledPatternOptionsBuilder } from '../context/CeiledPatternOptionsBuilder';
-import { CeiledRequestBuilder } from '../context/CeiledRequestBuilder';
+
+import FadeOptionsControl from './FadeOptionsControl';
+import ThreeChannelMultiPicker from '../../colorpicking/ThreeChannelMultiPicker';
+import { ControllerSocketContext } from '../../context/ControllerSocketProvider';
+import { CeiledPatternOptionsBuilder } from '../../context/CeiledPatternOptionsBuilder';
+import { CeiledRequestBuilder } from '../../context/CeiledRequestBuilder';
 
 const styles = theme => ({
   confirmButton: {

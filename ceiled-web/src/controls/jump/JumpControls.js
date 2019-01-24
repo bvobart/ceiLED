@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import JumpOptionsControl from './JumpOptionsControl';
 import { withStyles } from '@material-ui/core';
-import ThreeChannelMultiPicker from '../colorpicking/ThreeChannelMultiPicker';
+import JumpOptionsControl from './JumpOptionsControl';
+import ThreeChannelMultiPicker from '../../colorpicking/ThreeChannelMultiPicker';
 
 const styles = theme => ({
   

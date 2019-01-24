@@ -81,9 +81,10 @@ class GlobalControls extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, hidden } = this.props;
     const { brightness, roomLight, flux } = this.state;
 
+    if (hidden) return (<div />)
     return (
       <ControllerSocketContext.Consumer>
         {({ send }) => {

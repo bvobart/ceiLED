@@ -1,8 +1,13 @@
-# ceiLED
+# CeiLED
 
 Repository for the software written in order to control the LED strips on my room's ceiling. The software consists of a TypeScript NodeJS `controller` that hosts the JSON WebSocket API, and a ReactJS web interface `ceiled-web` that serves as a remote control for displaying cool RGB colour patterns on the LED strips.
 
 You can use `yarn install` in this folder to install the dependencies of both the controller and the web interface at the same time.
+
+Branch  | Build status
+--------|--------
+master  | [![Build Status](https://travis-ci.com/bvobart/ceiLED.svg?branch=master)](https://travis-ci.com/bvobart/ceiLED)
+develop | [![Build Status](https://travis-ci.com/bvobart/ceiLED.svg?branch=develop)](https://travis-ci.com/bvobart/ceiLED)
 
 ## SSL Certificates
 
