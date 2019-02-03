@@ -1,33 +1,30 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '@material-ui/core';
-import { toRgbString } from './utils';
+import { toRgbString } from '../utils';
+import Tile from './Tile';
 
-class Tile extends Component {
+class ColorTile extends Component {
   render() {
-    const colorString = toRgbString(this.props.color);
+    const { className, color, flex, onClick } = this.props;
+    const colorString = toRgbString(color);
     const tileStyle = {
-      height: 50,
-      minWidth: 32,
       backgroundColor: colorString,
-      borderRadius: 0,
-      flex: this.props.flex ? this.props.flex : '1 100%'
+      flex: flex ? flex : '1 100%'
     };
 
     return (
-      <Button
-        className={this.props.className}
+      <Tile
+        className={className}
         style={tileStyle} 
-        onClick={() => this.props.onClick && this.props.onClick(this.props.color)}
-        variant='text'
+        onClick={() => onClick && onClick(this.props.color)}
       >
         <div>{this.props.label}</div>
-      </Button>
+      </Tile>
     );
   }
 }
 
-Tile.propTypes = {
+ColorTile.propTypes = {
   // color of the tile.
   color: PropTypes.shape({
     red: PropTypes.number.isRequired,
@@ -42,8 +39,8 @@ Tile.propTypes = {
   onClick: PropTypes.func
 };
 
-Tile.defaultProps = {
+ColorTile.defaultProps = {
   color: { red: 0, green: 0, blue: 0 }
 };
 
-export default Tile;
+export default ColorTile;

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Paper, Typography, withStyles } from '@material-ui/core';
-import EditableTile from '../common/EditableTile';
+import EditableColorTile from '../common/tiles/EditableColorTile';
 
 const styles = theme => ({
   root: {},
@@ -37,7 +37,7 @@ class MultiSelectedBox extends Component {
         <Paper className={classes.root}>
         {label && <Typography variant='caption'>{label}</Typography> }
           {this.props.colors.map((color, index) => (
-            <EditableTile 
+            <EditableColorTile 
               key={index} 
               color={color}
               onChange={(newColor) => this.handleChangeColor(newColor, index)}

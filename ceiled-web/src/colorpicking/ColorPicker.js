@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core';
-import Tile from '../common/Tile';
+import ColorTile from '../common/tiles/ColorTile';
 import CustomColorPanel from './CustomColorPanel';
 
 const styles = theme => ({
@@ -48,25 +48,25 @@ class ColorPicker extends Component {
         <div className={classes.root}>
           <div className={classes.colorRows}>
             <div className={classes.row}> 
-              <Tile color={red} onClick={onConfirm} />
-              <Tile color={redOrange} onClick={onConfirm} />
-              <Tile color={orange} onClick={onConfirm} />
-              <Tile color={orangeYellow} onClick={onConfirm} />
-              <Tile color={yellow} onClick={onConfirm} />
+              <ColorTile color={red} onClick={onConfirm} />
+              <ColorTile color={redOrange} onClick={onConfirm} />
+              <ColorTile color={orange} onClick={onConfirm} />
+              <ColorTile color={orangeYellow} onClick={onConfirm} />
+              <ColorTile color={yellow} onClick={onConfirm} />
             </div>
             <div className={classes.row}>
-              <Tile color={turquoise} onClick={onConfirm} />
-              <Tile color={greenBlue} onClick={onConfirm} />
-              <Tile color={green} onClick={onConfirm} />
-              <Tile color={yellowGreen} onClick={onConfirm} />
-              <Tile color={yellowerGreen} onClick={onConfirm} />
+              <ColorTile color={turquoise} onClick={onConfirm} />
+              <ColorTile color={greenBlue} onClick={onConfirm} />
+              <ColorTile color={green} onClick={onConfirm} />
+              <ColorTile color={yellowGreen} onClick={onConfirm} />
+              <ColorTile color={yellowerGreen} onClick={onConfirm} />
             </div>
             <div className={classes.row}> 
-              <Tile color={blueGreen} onClick={onConfirm} />
-              <Tile color={blue} onClick={onConfirm} />
-              <Tile color={bluePurple} onClick={onConfirm} />
-              <Tile color={purpleBlue} onClick={onConfirm} />
-              <Tile color={purple} onClick={onConfirm} />
+              <ColorTile color={blueGreen} onClick={onConfirm} />
+              <ColorTile color={blue} onClick={onConfirm} />
+              <ColorTile color={bluePurple} onClick={onConfirm} />
+              <ColorTile color={purpleBlue} onClick={onConfirm} />
+              <ColorTile color={purple} onClick={onConfirm} />
             </div>
           </div>
           <div className={classes.customColorPanel}>
