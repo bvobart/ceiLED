@@ -20,7 +20,7 @@ class FadeControls extends Component {
     this.state = {
       options: {
         fadeMode: 3,
-        speed: 60
+        speed: 30
       },
       channel1: [{
         red: Math.round(Math.random() * 255),

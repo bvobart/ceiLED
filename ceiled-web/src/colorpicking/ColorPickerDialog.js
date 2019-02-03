@@ -60,8 +60,7 @@ class ColorPickerDialog extends Component {
           color={color}
           onChange={(color) => this.setState({ color })} 
           onConfirm={(color) => {
-            this.setState({ color });
-            this.handleConfirm();
+            this.setState({ color }, this.handleConfirm);
           }} 
         />
         <DialogActions className={classes.actions}>

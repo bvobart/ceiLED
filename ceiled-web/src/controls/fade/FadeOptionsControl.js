@@ -62,9 +62,9 @@ class FadeOptionsControl extends Component {
         <div className={classes.optionBox}>
           <Typography variant='caption'>Fade Mode</Typography>
           <div className={classes.inputBox}>
-            <Button className={fadeMode === 1 ? classes.selectedButton : undefined} fullWidth onClick={() => this.handleModeChange(1)}>Single Channel</Button>
-            <Button className={fadeMode === 2 ? classes.selectedButton : undefined} fullWidth onClick={() => this.handleModeChange(2)}>Double Channel</Button>
-            <Button className={fadeMode === 3 ? classes.selectedButton : undefined} fullWidth onClick={() => this.handleModeChange(3)}>Triple Channel</Button>
+            <Button variant='outlined' className={fadeMode === 1 ? classes.selectedButton : undefined} fullWidth onClick={() => this.handleModeChange(1)}>Single Channel</Button>
+            <Button variant='outlined' className={fadeMode === 2 ? classes.selectedButton : undefined} fullWidth onClick={() => this.handleModeChange(2)}>Double Channel</Button>
+            <Button variant='outlined' className={fadeMode === 3 ? classes.selectedButton : undefined} fullWidth onClick={() => this.handleModeChange(3)}>Triple Channel</Button>
           </div>
         </div>
         <div className={classes.optionBox}>
