@@ -29,8 +29,8 @@ class RippleRgbFadeTile extends Component {
 
     const patternOptions = new CeiledPatternOptionsBuilder()
       .for('fade')
-      .setSecondaryColors([ green, blue, red ])
-      .setTernaryColors([ blue, red, green ])
+      .setSecondaryColors([ blue, red, green ])
+      .setTernaryColors([ green, blue, red ])
       .setChannels(3)
       .setSpeed(10)
       .build();

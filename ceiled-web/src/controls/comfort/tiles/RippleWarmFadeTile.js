@@ -29,14 +29,14 @@ class RippleWarmFadeTile extends Component {
 
     const patternOptions = new CeiledPatternOptionsBuilder()
       .for('fade')
-      .setSecondaryColors([ chocolate, orangeYellow, red ])
-      .setTernaryColors([ red, chocolate, orangeYellow ])
+      .setSecondaryColors([ chocolate, red, orangeYellow ])
+      .setTernaryColors([ orangeYellow, chocolate, red ])
       .setChannels(3)
       .setSpeed(10)
       .build();
     const message = new CeiledRequestBuilder()
       .setType('fade')
-      .setColors([ red, chocolate, orangeYellow ])
+      .setColors([ red, orangeYellow, chocolate ])
       .setPatternOptions(patternOptions)
       .setAuthToken(cookies.get('authToken'))
       .build();

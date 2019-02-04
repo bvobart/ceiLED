@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { withCookies } from 'react-cookie';
 import CeiledRequestBuilder from './CeiledRequestBuilder';
+import UnauthorisedDialog from './UnauthorisedDialog';
+import ErrorDialog from './ErrorDialog';
 
 export const ControllerSocketContext = React.createContext();
 
@@ -12,6 +14,8 @@ class ControllerSocketProvider extends Component {
       socket: null,
       connected: false,
       status: WebSocket.CLOSED,
+      unauthorised: false,
+      gotError: true,
 
       open: this.open.bind(this),
       close: this.close.bind(this),
@@ -67,8 +71,7 @@ class ControllerSocketProvider extends Component {
         this.setState({ connected: true, status: WebSocket.OPEN });
         return resolve();
       });
-      // TODO: add event listener for unauthorised messages, so we can show a pop up or header stating this
-      newSocket.addEventListener('message', (event) => console.log(JSON.parse(event.data)));
+      newSocket.addEventListener('message', (event) => this.handleReply(event.data));
       newSocket.addEventListener('error', (event) => reject(event));
       
       this.close();
@@ -100,11 +103,25 @@ class ControllerSocketProvider extends Component {
     }
   }
 
+  handleReply(data) {
+    const message = JSON.parse(data);
+    console.log('Received reply from server: ', message);
+
+    if (message.status === 'unauthorised') {
+      this.setState({ unauthorised: true });
+    }
+    if (message.status === 'error') {
+      this.errors = message.errors;
+      this.setState({ gotError: true });
+    }
+  }
 
   render() {
     return (
       <ControllerSocketContext.Provider value={this.state}>
         {this.props.children}
+        <UnauthorisedDialog open={this.state.unauthorised} onClose={() => this.setState({ unauthorised: false })} />
+        <ErrorDialog errors={this.errors} open={this.state.gotError} onClose={() => this.setState({ gotError: false })} />
       </ControllerSocketContext.Provider>
     )
   }
