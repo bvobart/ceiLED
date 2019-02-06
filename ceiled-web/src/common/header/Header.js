@@ -52,8 +52,8 @@ class Header extends Component {
     const status = this.getStatus();
     if (status === WebSocket.CLOSED) {
       const defaultAddress = process.env.NODE_ENV === 'development' 
-        ? getApiUrl('localhost:3000') 
-        : getApiUrl('bart.vanoort.is');
+        ? getApiUrl('localhost:3000', false) 
+        : getApiUrl('bart.vanoort.is', true);
       this.open(this.address ? this.address : defaultAddress)
         .catch((reason) => {}) // error is generally printed out to the console already anyways.
         .then(() => this.setState({ status: this.getStatus() }));

@@ -15,7 +15,7 @@ class ControllerSocketProvider extends Component {
       connected: false,
       status: WebSocket.CLOSED,
       unauthorised: false,
-      gotError: true,
+      gotError: false,
 
       open: this.open.bind(this),
       close: this.close.bind(this),
