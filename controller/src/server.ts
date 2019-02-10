@@ -1,3 +1,6 @@
+import * as Bluebird from 'bluebird';
+Bluebird.config({ cancellation: true });
+
 import { readFileSync } from 'fs';
 import { IncomingMessage } from 'http';
 import { createServer } from 'https';

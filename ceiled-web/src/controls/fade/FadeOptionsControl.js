@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Button, Typography, withStyles } from '@material-ui/core';
 import { Slider } from '@material-ui/lab';
 import debounce from 'debounce';
+import { FadeInterpolationSetting, FadeInterpolations } from './FadeInterpolationSetting';
 
 const styles = theme => ({
   root: {
@@ -38,7 +39,8 @@ class FadeOptionsControl extends Component {
     super(props);
     this.state = {
       fadeMode: props.options.fadeMode || 3,
-      speed: props.options.speed || 60
+      speed: props.options.speed || 60,
+      interpolation: props.options.interpolation || FadeInterpolations.LINEAR,
     };
 
     this.debouncedOnChange = debounce(props.onChange, 65);
@@ -54,9 +56,14 @@ class FadeOptionsControl extends Component {
     this.setState({ speed });
   }
 
+  handleInterpolationChange(interpolation) {
+    if (this.props.onChange) this.props.onChange({ ...this.state, interpolation });
+    this.setState({ interpolation });
+  }
+
   render() {
     const { classes } = this.props;
-    const { fadeMode, speed } = this.state;
+    const { fadeMode, interpolation, speed } = this.state;
     return (
       <div className={classes.root}>
         <div className={classes.optionBox}>
@@ -67,6 +74,11 @@ class FadeOptionsControl extends Component {
             <Button variant='outlined' className={fadeMode === 3 ? classes.selectedButton : undefined} fullWidth onClick={() => this.handleModeChange(3)}>Triple Channel</Button>
           </div>
         </div>
+        <FadeInterpolationSetting 
+          classes={{ root: classes.optionBox, selected: classes.selectedButton, buttonBox: classes.inputBox }} 
+          onChange={this.handleInterpolationChange.bind(this)}
+          value={interpolation}
+        />
         <div className={classes.optionBox}>
           <Typography variant='caption'>Speed</Typography>
           <div className={classes.inputBox}>

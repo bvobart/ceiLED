@@ -237,15 +237,16 @@ There are also several fade types, that determine how the fades occur. See below
 
 ##### patternOptions
 
-| Parameter  | Type       | Value description                                                                      |
-| ---------- | ---------- | -------------------------------------------------------------------------------------- |
-| `speed`    | `number`   | Amount of BPM that determines how fast the fades happen.                               |
-| `channels` | `number`   | Amount of channels to use.                                                             |
-| `colors2`  | `Color[]`  | Secondary array of colours that needs to be filled when two or more channels are used. |
-| `colors3`  | `Color[]`  | Ternary array of colours that needs to be filled in when three channels are used.      |
-| `fadeType` | `FadeType` | Type of fade. See the values in the FadeType enum, described below.                    |
+| Parameter       | Type                      | Value description                                                                                                                                                                                                                                               |
+| --------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `speed`         | `number`                  | Amount of BPM that determines how fast the fades happen.                                                                                                                                                                                                        |
+| `channels`      | `number`                  | Amount of channels to use.                                                                                                                                                                                                                                      |
+| `colors2`       | `Color[]`                 | Secondary array of colours that needs to be filled when two or more channels are used.                                                                                                                                                                          |
+| `colors3`       | `Color[]`                 | Ternary array of colours that needs to be filled in when three channels are used.                                                                                                                                                                               |
+| `interpolation` | `"linear"` \| `"sigmoid"` | Type of interpolation function that the controller should use. When fading from one colour to another, this function determines how the two colours are mixed together over time. A sigmoid function may seem more natural, as it eases each colour in and out. |
+| `fadeType`      | `FadeType`                | Type of fade. See the values in the FadeType enum, described below.                                                                                                                                                                                             |
 
-The FadeType enum has the following values, with the following descriptions.
+The FadeType enum has the following values, with the following descriptions. _**Note that FadeType has not yet been implemented in the controller application.**_
 
 | FadeType       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

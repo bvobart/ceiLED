@@ -1,6 +1,7 @@
+import * as Bluebird from 'bluebird';
 import Color from '../common/Color';
 import { settings } from '../server';
-import { FadePatternOptions, FadeType } from './options/FadePatternOptions';
+import { FadePatternOptions, FadeType, InterpolationType } from './options/FadePatternOptions';
 import Pattern from './Pattern';
 
 class FadePattern implements Pattern {
@@ -10,13 +11,17 @@ class FadePattern implements Pattern {
   private colors3: Color[];
   private speed: number;
   private type: FadeType;
+  private interpolation: InterpolationType;
+
   private shouldShow: boolean;
+  private awaiting: Bluebird<[void, void, void]>;
 
   constructor(colors: Color[], options: FadePatternOptions) {
     this.channels = options.channels;
     this.colors1 = colors;
     this.speed = options.speed ? options.speed : 0.1;
     this.type = options.fadeType;
+    this.interpolation = options.interpolation;
 
     if (this.type === FadeType.NORMAL || this.type === FadeType.INVERTED) {
       this.colors2 = options.colors2;
@@ -56,22 +61,21 @@ class FadePattern implements Pattern {
 
   public async stop(): Promise<void> {
     this.shouldShow = false;
+    if (this.awaiting) this.awaiting.cancel();
   }
 
   /**
    * Will fade 'normally' across all colours. This method blocks.
    */
   public async fadeNormalOnce(): Promise<void> {
-    let prevColor1: Color = settings.channelStore.channel1.getColor();
-    let prevColor2: Color = settings.channelStore.channel2.getColor();
-    let prevColor3: Color = settings.channelStore.channel3.getColor();
     let ch1Color: Color;
     let ch2Color: Color;
     let ch3Color: Color;
 
     for (let index = 0; index < this.colors1.length; index++) {
-      ch1Color = this.colors1[index];
+      if (!this.shouldShow) break;
 
+      ch1Color = this.colors1[index];
       if (this.channels === 2) {
         // on 2 channels: channel 1 and 3 have the same colour, channel 2 has its own colour.
         ch2Color = this.colors2[index] ? this.colors2[index] : ch1Color;
@@ -88,15 +92,12 @@ class FadePattern implements Pattern {
 
       const duration: number = 60 / this.speed;
 
-      await Promise.all([
-        settings.channelStore.channel1.setFade(prevColor1, ch1Color, duration),
-        settings.channelStore.channel2.setFade(prevColor2, ch2Color, duration),
-        settings.channelStore.channel3.setFade(prevColor3, ch3Color, duration),
+      this.awaiting = Bluebird.all([
+        settings.channelStore.channel1.setFade(ch1Color, duration, this.interpolation),
+        settings.channelStore.channel2.setFade(ch2Color, duration, this.interpolation),
+        settings.channelStore.channel3.setFade(ch3Color, duration, this.interpolation),
       ]);
-
-      prevColor1 = ch1Color;
-      prevColor2 = ch2Color;
-      prevColor3 = ch3Color;
+      await this.awaiting;
     }
 
     return Promise.resolve();

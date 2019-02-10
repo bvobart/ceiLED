@@ -17,7 +17,8 @@
     "start": "INSECURE=true nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts",
     "build": "tsc",
     "serve": "nodemon build/server.js",
-    "test": "TEST=true jest --coverage --detectOpenHandles --forceExit"
+    "test": "TEST=true jest --coverage --detectOpenHandles --forceExit",
+    "addUser": "node ./src/auth/scripts/addToken.js"
   },
   "dependencies": {
     "bluebird": "3.5.3",

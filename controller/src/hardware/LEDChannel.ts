@@ -1,4 +1,7 @@
+import * as Bluebird from 'bluebird';
 import Color from '../common/Color';
+import { InterpolationType } from '../patterns/options/FadePatternOptions';
+import { Interpolate } from './interpolate';
 import Pin from './Pin';
 
 const FPS: number = 60;
@@ -17,7 +20,7 @@ interface ChannelMapping {
  * Map to contain the mappings for the different channels.
  */
 interface ChannelMap {
-  [key: number]: ChannelMapping
+  [key: number]: ChannelMapping;
 }
 
 /**
@@ -27,10 +30,10 @@ interface ChannelMap {
  */
 class LEDChannel {
   private static channelMap: ChannelMap = {
-    1: { red: 0, green: 1, blue: 2},
-    2: { red: 3, green: 4, blue: 5},
-    3: { red: 6, green: 7, blue: 8},
-  }
+    1: { red: 0, green: 1, blue: 2 },
+    2: { red: 3, green: 4, blue: 5 },
+    3: { red: 6, green: 7, blue: 8 },
+  };
 
   /** Channel number */
   public number: number;
@@ -77,21 +80,28 @@ class LEDChannel {
   }
 
   /**
-   * Makes this LED channel fade from one colour to another over the
+   * Makes this LED channel fade from the current colour to another over the
    * specified duration (in seconds)
-   * @param from The colour to start fading from
    * @param to The colour to fade to
    * @param duration How long the fade should take, in seconds.
    */
-  public setFade(from: Color, to: Color, duration: number): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
-      const difference = {
-        red: to.red - from.red, 
-        green: to.green - from.green, 
-        blue: to.blue - from.blue
+  public setFade(
+    to: Color,
+    duration: number,
+    interpolation: InterpolationType = InterpolationType.LINEAR,
+  ): Bluebird<void> {
+    return new Bluebird<void>(async (resolve, reject, onCancel) => {
+      const interpFunc = Interpolate.for(interpolation);
+      const from = {
+        red: this.red.value,
+        green: this.green.value,
+        blue: this.blue.value,
       };
-  
-      this.setColor(from);
+      const difference = {
+        red: to.red - from.red,
+        green: to.green - from.green,
+        blue: to.blue - from.blue,
+      };
 
       let loops: number = 0;
       const numFrames: number = duration * FPS;
@@ -102,13 +112,15 @@ class LEDChannel {
           return resolve();
         }
 
-        this.red.value += difference.red / numFrames;
-        this.green.value += difference.green / numFrames;
-        this.blue.value += difference.blue / numFrames;
-        
+        this.red.value = from.red + interpFunc(difference.red, loops, numFrames);
+        this.green.value = from.green + interpFunc(difference.green, loops, numFrames);
+        this.blue.value = from.blue + interpFunc(difference.blue, loops, numFrames);
+
         loops++;
       }, interval - interval * getIntervalFixFactor(duration * 1000));
-    })
+
+      onCancel(() => clearInterval(timer));
+    });
   }
 }
 
@@ -121,13 +133,13 @@ const intervalFixFactors = {
   400: 0.072,
   500: 0.061,
   600: 0.047,
-  700: 0.040,
-  800: 0.040,
-  900: 0.040,
-  1000: 0.040,
-  1500: 0.040,
-  2000: 0.040,
-  3000: 0.040
+  700: 0.04,
+  800: 0.04,
+  900: 0.04,
+  1000: 0.04,
+  1500: 0.04,
+  2000: 0.04,
+  3000: 0.04,
 };
 
 /**
@@ -149,6 +161,6 @@ const getIntervalFixFactor = (duration: number): number => {
   if (duration < 1250) return intervalFixFactors[1000];
   if (duration < 1750) return intervalFixFactors[2000];
   return intervalFixFactors[3000];
-}
+};
 
 export default LEDChannel;

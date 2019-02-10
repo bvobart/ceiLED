@@ -5,6 +5,7 @@ export class CeiledPatternOptionsBuilder {
   colors3;
   jumpType;
   fadeType;
+  interpolation;
 
   optionsType;
 
@@ -47,6 +48,11 @@ export class CeiledPatternOptionsBuilder {
     return this;
   }
 
+  setInterpolation(interpolation) {
+    this.interpolation = interpolation;
+    return this;
+  }
+
   build() {
     let channelsUsed = this.colors2 ? 2 : 1;
     channelsUsed = this.colors3 ? 3 : channelsUsed;
@@ -57,7 +63,8 @@ export class CeiledPatternOptionsBuilder {
         channels: this.channels ? this.channels : channelsUsed,
         colors2: this.colors2,
         colors3: this.colors3,
-        fadeType: this.fadeType ? this.fadeType : 'normal'
+        fadeType: this.fadeType ? this.fadeType : 'normal',
+        interpolation: this.interpolation,
       };
       case 'jump': return {
         speed: this.speed,
