@@ -31,6 +31,7 @@ export enum StatusType {
   FAIL = 'fail',
   ERROR = 'error',
   UNAUTHORISED = 'unauthorised',
+  CLOSING = 'closing',
 }
 
 /**

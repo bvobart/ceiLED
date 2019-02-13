@@ -105,11 +105,10 @@ class ControllerSocketProvider extends Component {
 
   handleReply(data) {
     const message = JSON.parse(data);
-    console.log('Received reply from server: ', message);
+    console.log('Received message from server: ', message);
 
-    if (message.status === 'unauthorised') {
-      this.setState({ unauthorised: true });
-    }
+    if (message.status === 'unauthorised') this.setState({ unauthorised: true });
+    if (message.status === 'closing') this.close();
     if (message.status === 'error') {
       this.errors = message.errors;
       this.setState({ gotError: true });
