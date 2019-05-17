@@ -1,6 +1,7 @@
 import * as Bluebird from 'bluebird';
 import Color from '../common/Color';
 import { InterpolationType } from '../patterns/options/FadePatternOptions';
+import { settings } from '../server';
 import { Interpolate } from './interpolate';
 import Pin from './Pin';
 
@@ -45,6 +46,9 @@ class LEDChannel {
   /** Blue pin */
   public blue: Pin;
 
+  /** The currently displayed colour, but without brightness etc applied to it */
+  private currentBaseColor: Color;
+
   /**
    * Creates and initialises an LED channel, i.e. LED strip.
    * @param channelNr Channel number
@@ -74,6 +78,7 @@ class LEDChannel {
    * @param color Color to set
    */
   public setColor(color: Color): void {
+    this.currentBaseColor = color;
     if (this.red.value !== color.red) this.red.value = color.red;
     if (this.green.value !== color.green) this.green.value = color.green;
     if (this.blue.value !== color.blue) this.blue.value = color.blue;
@@ -92,11 +97,7 @@ class LEDChannel {
   ): Bluebird<void> {
     return new Bluebird<void>(async (resolve, reject, onCancel) => {
       const interpFunc = Interpolate.for(interpolation);
-      const from = {
-        red: this.red.value,
-        green: this.green.value,
-        blue: this.blue.value,
-      };
+      const from = this.currentBaseColor;
       const difference = {
         red: to.red - from.red,
         green: to.green - from.green,
@@ -112,9 +113,19 @@ class LEDChannel {
           return resolve();
         }
 
-        this.red.value = from.red + interpFunc(difference.red, loops, numFrames);
-        this.green.value = from.green + interpFunc(difference.green, loops, numFrames);
-        this.blue.value = from.blue + interpFunc(difference.blue, loops, numFrames);
+        const baseColor = new Color({
+          red: from.red + interpFunc(difference.red, loops, numFrames),
+          green: from.green + interpFunc(difference.green, loops, numFrames),
+          blue: from.blue + interpFunc(difference.blue, loops, numFrames),
+        });
+        let adjustedColor = baseColor.withRoomLight(settings.roomLight);
+        adjustedColor = adjustedColor.withFlux(settings.flux);
+        adjustedColor = adjustedColor.withBrightness(settings.brightness);
+
+        this.currentBaseColor = baseColor;
+        this.red.value = adjustedColor.red;
+        this.green.value = adjustedColor.green;
+        this.blue.value = adjustedColor.blue;
 
         loops++;
       }, interval - interval * getIntervalFixFactor(duration * 1000));

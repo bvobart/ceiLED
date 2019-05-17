@@ -1,3 +1,4 @@
+import throttle from 'lodash.throttle';
 import React, { Component } from 'react';
 import { withCookies } from 'react-cookie';
 import CeiledRequestBuilder from './CeiledRequestBuilder';
@@ -16,6 +17,7 @@ class ControllerSocketProvider extends Component {
       status: WebSocket.CLOSED,
       unauthorised: false,
       gotError: false,
+      lastAlive: null,
 
       open: this.open.bind(this),
       close: this.close.bind(this),
@@ -68,11 +70,15 @@ class ControllerSocketProvider extends Component {
     return new Promise((resolve, reject) => {
       const newSocket = new WebSocket(address);
       newSocket.addEventListener('open', () => {
-        this.setState({ connected: true, status: WebSocket.OPEN });
+        this.setState({ connected: true, lastAlive: Date.now(), status: WebSocket.OPEN });
         return resolve();
       });
       newSocket.addEventListener('message', (event) => this.handleReply(event.data));
       newSocket.addEventListener('error', (event) => reject(event));
+      newSocket.addEventListener('close', () => {
+        this.setState({ connected: false, status: WebSocket.CLOSED })
+        console.log('Connection to server closed');
+      });
       
       this.close();
       this.setState({
@@ -96,8 +102,19 @@ class ControllerSocketProvider extends Component {
    * @param {String} message The message to be sent 
    */
   send(message) {
-    if (this.state.socket && this.state.socket.readyState === WebSocket.OPEN) {
-      this.state.socket.send(typeof message === 'string' ? message : JSON.stringify(message));
+    const { address, connected, lastAlive, socket } = this.state;
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      // after 60 seconds of no activity, reconnect to the server before sending message
+      if (lastAlive && !connected && Date.now() - lastAlive > 60000) {
+        this.open(address)
+          .then(() => {
+            this.setState({ lastAlive: Date.now() });
+            socket.send(typeof message === 'string' ? message : JSON.stringify(message));
+          })
+          .catch(err => console.error('Failed to send message even after reopening socket: ', err))
+      } else {
+        socket.send(typeof message === 'string' ? message : JSON.stringify(message));
+      }
     } else {
       console.error('Socket not connected!');
     }
@@ -106,6 +123,7 @@ class ControllerSocketProvider extends Component {
   handleReply(data) {
     const message = JSON.parse(data);
     console.log('Received message from server: ', message);
+    throttle(() => this.setState({ lastAlive: Date.now() }), 1000);
 
     if (message.status === 'unauthorised') this.setState({ unauthorised: true });
     if (message.status === 'closing') this.close();

@@ -102,6 +102,7 @@ const launch = async (): Promise<void> => {
 
   // When an error occurs in the WebSocket
   const onError = (error: Error) => console.error('Error occurred in WebSocket: \n', error, '\n');
+
   // When a WebSocket connection is opened
   const onConnection = (ws: WebSocket, req: IncomingMessage) => {
     const handlers: MessageHandler[] = [];
@@ -135,6 +136,7 @@ const launch = async (): Promise<void> => {
   // register connection, error and exit handlers.
   server.on('connection', onConnection);
   server.on('error', onError);
+
   process.on('SIGUSR1', onExit);
   process.on('SIGUSR2', onExit);
   process.on('SIGINT', onExit);

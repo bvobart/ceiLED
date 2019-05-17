@@ -6,7 +6,7 @@ class Tile extends Component {
   render() {
     const { className, children, onClick } = this.props;
     const style = {
-      height: 50,
+      minHeight: 50,
       minWidth: 32,
       borderRadius: 0,
       ...this.props.style
