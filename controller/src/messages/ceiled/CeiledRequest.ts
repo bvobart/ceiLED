@@ -11,6 +11,7 @@ import { JumpPatternOptions } from '../../patterns/options/JumpPatternOptions';
  * documentation as the pattern types.
  */
 export enum CeiledRequestType {
+  OFF = 'off',
   SOLID = 'solid',
   JUMP = 'jump',
   FADE = 'fade',
@@ -33,7 +34,7 @@ export class CeiledRequest {
     }
 
     if (!Object.values(CeiledRequestType).includes(x.type)) return false;
-    if (x.colors.length === 0 || x.colors.find((value: any) => !Color.isColor(value))) return false;
+    if (x.colors.find((value: any) => !Color.isColor(value))) return false;
 
     return true;
   }
@@ -71,6 +72,8 @@ export class CeiledRequest {
    */
   public toPattern(): Pattern {
     switch (this.type) {
+      case CeiledRequestType.OFF:
+        return new SolidPattern([]);
       case CeiledRequestType.SOLID:
         return new SolidPattern(this.colors);
       case CeiledRequestType.FADE:

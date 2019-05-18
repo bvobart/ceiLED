@@ -43,11 +43,11 @@ class ControllerSocketProvider extends Component {
    */
   turnOff() {
     if (this.state.socket) {
-      this.send(new CeiledRequestBuilder()
-        .setType('solid')
-        .setColors([{ red: 0, green: 0, blue: 0 }])
+      const offRequest = new CeiledRequestBuilder()
+        .setType('off')
         .setAuthToken(this.props.cookies.get('authToken'))
-      );
+        .build();
+      this.send(offRequest);
       this.close();
     }
   }
