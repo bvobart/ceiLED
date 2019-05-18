@@ -28,9 +28,9 @@ export class SettingsMessageHandler implements MessageHandler {
               (await getNameFromToken(message.authToken)) + '\n',
             );
 
-          settings.brightness = inRange(req.brightness, 0, 100);
-          settings.roomLight = inRange(req.roomLight, 0, 100);
-          settings.flux = inRange(req.flux, -1, 5);
+          settings.setBrightness(inRange(req.brightness, 0, 100));
+          settings.setRoomLight(inRange(req.roomLight, 0, 100));
+          settings.setFlux(inRange(req.flux, -1, 5));
           if (req.driver) settings.setDriver(req.driver);
 
           // TODO: call show() again on currently active pattern.

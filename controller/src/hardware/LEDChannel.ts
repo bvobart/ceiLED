@@ -79,9 +79,9 @@ class LEDChannel {
    */
   public setColor(color: Color): void {
     this.currentBaseColor = color;
-    let adjustedColor = color.withRoomLight(settings ? settings.roomLight : 0);
-    adjustedColor = adjustedColor.withFlux(settings ? settings.flux : 0);
-    adjustedColor = adjustedColor.withBrightness(settings ? settings.brightness : 100);
+    let adjustedColor = color.withRoomLight(settings ? settings.getBrightness() : 0);
+    adjustedColor = adjustedColor.withFlux(settings ? settings.getFlux() : 0);
+    adjustedColor = adjustedColor.withBrightness(settings ? settings.getBrightness() : 100);
 
     if (this.red.value !== adjustedColor.red) this.red.value = adjustedColor.red;
     if (this.green.value !== adjustedColor.green) this.green.value = adjustedColor.green;
@@ -132,9 +132,9 @@ class LEDChannel {
           green: from.green + interpFunc(difference.green, loops, numFrames),
           blue: from.blue + interpFunc(difference.blue, loops, numFrames),
         });
-        let adjustedColor = baseColor.withRoomLight(settings.roomLight);
-        adjustedColor = adjustedColor.withFlux(settings.flux);
-        adjustedColor = adjustedColor.withBrightness(settings.brightness);
+        let adjustedColor = baseColor.withRoomLight(settings.getRoomLight());
+        adjustedColor = adjustedColor.withFlux(settings.getFlux());
+        adjustedColor = adjustedColor.withBrightness(settings.getBrightness());
 
         this.currentBaseColor = baseColor;
         this.red.value = adjustedColor.red;

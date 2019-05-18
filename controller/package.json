@@ -1,6 +1,6 @@
 {
   "name": "controller",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "description": "TypeScript NodeJS controller and WebSocket server for the LEDs connected to the GPIO pins.",
   "main": "src/server.js",
   "author": "Bart van Oort",
