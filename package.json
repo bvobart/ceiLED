@@ -1,6 +1,6 @@
 {
     "name": "ceiled",
-    "version": "1.0.0-rc.2",
+    "version": "1.0.0",
     "description": "Server and web interface for LEDs on ceiling",
     "author": "Bart van Oort",
     "license": "ISC",
