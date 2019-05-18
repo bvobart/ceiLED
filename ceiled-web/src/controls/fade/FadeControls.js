@@ -7,6 +7,7 @@ import ThreeChannelMultiPicker from '../../colorpicking/ThreeChannelMultiPicker'
 import { ControllerSocketContext } from '../../context/ControllerSocketProvider';
 import { CeiledPatternOptionsBuilder } from '../../context/CeiledPatternOptionsBuilder';
 import { CeiledRequestBuilder } from '../../context/CeiledRequestBuilder';
+import { FadeInterpolations } from './FadeInterpolationSetting';
 
 const styles = theme => ({
   confirmButton: {
@@ -20,7 +21,8 @@ class FadeControls extends Component {
     this.state = {
       options: {
         fadeMode: 3,
-        speed: 60
+        speed: 30,
+        interpolation: FadeInterpolations.LINEAR,
       },
       channel1: [{
         red: Math.round(Math.random() * 255),
@@ -85,6 +87,7 @@ class FadeControls extends Component {
         .setTernaryColors(options.fadeMode >= 3 ? channel3 : undefined)
         .setChannels(options.fadeMode)
         .setSpeed(options.speed)
+        .setInterpolation(options.interpolation)
         .build();
       const request = new CeiledRequestBuilder()
         .setType('fade')

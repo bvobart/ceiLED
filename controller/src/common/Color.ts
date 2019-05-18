@@ -111,12 +111,11 @@ class Color implements IColor {
     if (roomLight === 0) return this;
     if (roomLight === 100) return Color.ROOMLIGHT;
 
-    // TODO: fix roomlight application
-    const factor: number = roomLight / 100;
+    const factor = roomLight / 100;
     return new Color({
-      red: this.red * factor,
-      green: this.green * factor,
-      blue: this.blue * factor,
+      red: Math.max(this.red, factor * Color.ROOMLIGHT.red),
+      green: Math.max(this.green, factor * Color.ROOMLIGHT.green),
+      blue: Math.max(this.blue, factor * Color.ROOMLIGHT.blue),
     });
   }
 

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Paper, withStyles } from '@material-ui/core';
 import { Slider } from '@material-ui/lab';
-import Tile from '../common/Tile';
+import ColorTile from '../common/tiles/ColorTile';
 
 const styles = theme => ({
   root: {
@@ -88,7 +88,7 @@ class CustomColorPanel extends Component {
           <ColorSlider className={classes.slider} value={this.state.green} onChange={this.handleChangeGreen} />
           <ColorSlider className={classes.slider} value={this.state.blue} onChange={this.handleChangeBlue} />
         </div>
-        <Tile label={label} className={classes.tile} color={this.state} onClick={this.handleClick} />
+        <ColorTile label={label} className={classes.tile} color={this.state} onClick={this.handleClick} />
       </Paper>
     );
   }

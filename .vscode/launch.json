@@ -56,9 +56,10 @@
       "outFiles": [
         "${workspaceFolder}/controller/build/**/*.js"
       ],
-      "args": [
-        "--debug"
-      ]
+      "env": {
+        "DEBUG": "true",
+        "INSECURE": "true"
+      }
     }
   ]
 }

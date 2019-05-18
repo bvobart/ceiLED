@@ -1,10 +1,16 @@
 import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core';
+import { withCookies } from 'react-cookie';
+import { withStyles, Button } from '@material-ui/core';
 import JumpOptionsControl from './JumpOptionsControl';
 import ThreeChannelMultiPicker from '../../colorpicking/ThreeChannelMultiPicker';
+import CeiledPatternOptionsBuilder from '../../context/CeiledPatternOptionsBuilder';
+import CeiledRequestBuilder from '../../context/CeiledRequestBuilder';
+import { ControllerSocketContext } from '../../context/ControllerSocketProvider';
 
 const styles = theme => ({
-  
+  confirmButton: {
+    width: '100%'
+  }
 })
 
 class JumpControls extends Component {
@@ -13,7 +19,7 @@ class JumpControls extends Component {
     this.state = {
       options: {
         jumpMode: 3,
-        speed: 60
+        speed: 30
       },
       channel1: [{
         red: Math.round(Math.random() * 255),
@@ -34,10 +40,10 @@ class JumpControls extends Component {
 
     this.handleChangeColors = this.handleChangeColors.bind(this);
     this.handleChangeOptions = this.handleChangeOptions.bind(this);
+    this.handleConfirm = this.handleConfirm.bind(this);
   }
 
   handleChangeColors(channelNr, colors) {
-    // TODO: send colors to controller here
     this.setState({ ['channel' + channelNr]: colors });
   }
 
@@ -68,23 +74,56 @@ class JumpControls extends Component {
     this.setState({ options });
   }
 
+  handleConfirm({ getStatus, send }) {
+    const { cookies } = this.props;
+    const { channel1, channel2, channel3, options } = this.state;
+    if (getStatus() === WebSocket.OPEN) {
+      const patternOptions = new CeiledPatternOptionsBuilder()
+        .for('jump')
+        .setSecondaryColors(options.jumpMode >= 2 ? channel2 : undefined)
+        .setTernaryColors(options.jumpMode >= 3 ? channel3 : undefined)
+        .setChannels(options.jumpMode)
+        .setSpeed(options.speed)
+        .build();
+      const request = new CeiledRequestBuilder()
+        .setType('jump')
+        .setColors(channel1)
+        .setPatternOptions(patternOptions)
+        .setAuthToken(cookies.get('authToken'))
+        .build();
+      send(request);
+    }
+  }
+
   render() {
+    const { classes } = this.props;
     return (
-      <div>
-        <JumpOptionsControl 
-          options={this.state.options} 
-          onChange={this.handleChangeOptions} 
-        />
-        <ThreeChannelMultiPicker
-          key={this.state.options.jumpMode}
-          channel1={this.state.channel1}
-          channel2={this.state.channel2}
-          channel3={this.state.channel3}
-          onChange={this.handleChangeColors} 
-        />
-      </div>
+      <ControllerSocketContext.Consumer>
+        {({ getStatus, send }) => (
+          <div>
+            <JumpOptionsControl 
+              options={this.state.options} 
+              onChange={this.handleChangeOptions} 
+            />
+            <ThreeChannelMultiPicker
+              key={this.state.options.jumpMode}
+              channel1={this.state.channel1}
+              channel2={this.state.channel2}
+              channel3={this.state.channel3}
+              onChange={this.handleChangeColors} 
+            />
+            <Button 
+              className={classes.confirmButton} 
+              variant='outlined' 
+              onClick={() => this.handleConfirm({ getStatus, send })}
+            >
+              Confirm
+            </Button>
+          </div>
+        )}
+      </ControllerSocketContext.Consumer>
     );
   }
 }
 
-export default withStyles(styles)(JumpControls);
+export default withStyles(styles)(withCookies(JumpControls));

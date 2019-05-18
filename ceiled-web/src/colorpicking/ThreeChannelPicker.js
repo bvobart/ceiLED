@@ -8,9 +8,7 @@ const styles = theme => ({
     backgroundColor: theme.palette.background.paper,
     borderRadius: 0,
     width: '100%',
-    '&:hover': {
-      backgroundColor: theme.palette.background.default
-    }
+    
   }
 });
 
@@ -68,7 +66,7 @@ class ThreeChannelPicker extends Component {
         onChangeChannelColor={this.handleChangeChannelColor}
         onConfirmChannelColor={this.handleChangeChannelColor}
       >
-        <Button className={classes.allChannelsButton} onClick={this.handleSetForAllChannels}>
+        <Button variant='outlined' className={classes.allChannelsButton} onClick={this.handleSetForAllChannels}>
           Set for all channels
         </Button> 
       </ThreeChannelPickerBase>

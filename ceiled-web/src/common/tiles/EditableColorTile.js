@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import ColorPickerDialog from '../colorpicking/ColorPickerDialog';
-import Tile from './Tile';
+import ColorPickerDialog from '../../colorpicking/ColorPickerDialog';
+import ColorTile from './ColorTile';
 
-class EditableTile extends Component {
+class EditableColorTile extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -14,7 +14,7 @@ class EditableTile extends Component {
   render() {
     return (
       <div style={{ display: 'flex' }}>
-        <Tile {...this.props} onClick={() => this.setState({ open: true })} />
+        <ColorTile {...this.props} onClick={() => this.setState({ open: true })} />
         <ColorPickerDialog
           color={this.props.color}
           open={this.state.open} 
@@ -27,7 +27,7 @@ class EditableTile extends Component {
   }
 }
 
-EditableTile.propTypes = {
+EditableColorTile.propTypes = {
   color: PropTypes.shape({ 
     red: PropTypes.number.isRequired,
     green: PropTypes.number.isRequired,
@@ -37,4 +37,4 @@ EditableTile.propTypes = {
   onDelete: PropTypes.func
 }
 
-export default EditableTile;
+export default EditableColorTile;

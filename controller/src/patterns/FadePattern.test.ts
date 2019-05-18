@@ -1,6 +1,6 @@
 import Color from '../common/Color';
 import FadePattern from './FadePattern';
-import { FadePatternOptions, FadeType } from './options/FadePatternOptions';
+import { FadePatternOptions, FadeType, InterpolationType } from './options/FadePatternOptions';
 
 describe('FadePattern', () => {
   describe('normal fade', () => {
@@ -12,6 +12,7 @@ describe('FadePattern', () => {
           speed: 120,
           channels: 1,
           fadeType: FadeType.NORMAL,
+          interpolation: InterpolationType.LINEAR,
         }),
       );
 
@@ -30,6 +31,7 @@ describe('FadePattern', () => {
           speed: 120,
           channels: 1,
           fadeType: FadeType.NORMAL,
+          interpolation: InterpolationType.LINEAR,
         }),
       );
 

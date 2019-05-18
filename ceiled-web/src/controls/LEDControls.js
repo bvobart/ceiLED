@@ -12,7 +12,7 @@ class Control extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      expanded: false,
+      expanded: props.expanded || false,
     }
 
     this.handleClick = this.handleClick.bind(this);
@@ -48,7 +48,7 @@ class LEDControls extends Component {
     return (
       <Card>
         <GlobalControls hidden={hidden}/>
-        <Control title="Comfort" hidden={true}>
+        <Control title="Comfort" hidden={hidden} expanded={true}>
           <ComfortControls />
         </Control>
         <Control title="Solids" hidden={hidden}>

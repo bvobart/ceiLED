@@ -1,3 +1,6 @@
+import * as Bluebird from 'bluebird';
+Bluebird.config({ cancellation: true });
+
 import { readFileSync } from 'fs';
 import { IncomingMessage } from 'http';
 import { createServer } from 'https';
@@ -8,6 +11,7 @@ import Color from './common/Color';
 import { ControllerSettings, DriverType } from './ControllerSettings';
 import CeiledMessageHandler from './messages/ceiled/CeiledMessageHandler';
 import { CeiledResponse } from './messages/ceiled/CeiledResponse';
+import ShutdownMessage from './messages/common/ShutdownMessage';
 import { MessageHandler, OutgoingMessage, StatusType } from './messages/MessageHandler';
 import SettingsMessageHandler from './messages/settings/SettingsMessageHandler';
 import SolidPattern from './patterns/SolidPattern';
@@ -54,7 +58,52 @@ const launch = async (): Promise<void> => {
   const ceiledHandler: CeiledMessageHandler = new CeiledMessageHandler();
   const settingsHandler: SettingsMessageHandler = new SettingsMessageHandler();
 
+  /**
+   * When the main process exits, this function performs a graceful shutdown by sending
+   * any still connected clients a ShutdownMessage.
+   * @param code Exit code
+   */
+  const onExit = (code: any) => {
+    if (server) {
+      let message: string = 'No clients were connected to server.';
+
+      const numClients: number = server.clients.size;
+      const awaitingClients: Array<Promise<Error>> = [];
+      for (const ws of server.clients) {
+        awaitingClients.push(
+          new Promise<Error>(resolve => {
+            const onSent = (err?: Error) => resolve(err);
+            ws.send(JSON.stringify(new ShutdownMessage()), onSent);
+            ws.removeAllListeners();
+            ws.close();
+          }),
+        );
+      }
+
+      Promise.all(awaitingClients).then((notifiedClients: Error[]) => {
+        const errored = notifiedClients.filter(value => value !== undefined).length;
+        if (numClients > 0) {
+          message =
+            errored === 0
+              ? `Notified ${numClients} clients of shutdown`
+              : `Could not notify ${errored} out of the ${numClients} clients that were still connected`;
+        }
+        console.log(message);
+        if (errored > 0) console.log(errored);
+        server.removeAllListeners();
+        server.close();
+        return process.exit(code);
+      });
+      return;
+    }
+    console.log('No WebSocket server present anymore');
+    return process.exit(code);
+  };
+
+  // When an error occurs in the WebSocket
   const onError = (error: Error) => console.error('Error occurred in WebSocket: \n', error, '\n');
+
+  // When a WebSocket connection is opened
   const onConnection = (ws: WebSocket, req: IncomingMessage) => {
     const handlers: MessageHandler[] = [];
     handlers.push(ceiledHandler);
@@ -79,13 +128,19 @@ const launch = async (): Promise<void> => {
         console.error('- Internal error: ', error);
         console.error('-------------------------------\n');
         const response: CeiledResponse = new CeiledResponse(StatusType.ERROR, [error]);
-        ws.emit(JSON.stringify(response));
+        ws.send(JSON.stringify(response));
       }
     });
   };
 
+  // register connection, error and exit handlers.
   server.on('connection', onConnection);
   server.on('error', onError);
+
+  process.on('SIGUSR1', onExit);
+  process.on('SIGUSR2', onExit);
+  process.on('SIGINT', onExit);
+  process.on('SIGTERM', onExit);
 
   console.log('.----------------------------');
   console.log('| CeiLED Controller online ');
