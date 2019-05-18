@@ -16,9 +16,9 @@ export interface IControllerSettings {
 }
 
 export class ControllerSettings {
-  public brightness: number;
-  public roomLight: number;
-  public flux: number;
+  private brightness: number;
+  private roomLight: number;
+  private flux: number;
   public channelStore: ChannelStore;
 
   private driver: Pca9685Driver | DebugDriver;
@@ -64,6 +64,30 @@ export class ControllerSettings {
 
   public getDriver(): Pca9685Driver | DebugDriver {
     return this.driver;
+  }
+
+  public getBrightness(): number {
+    return this.brightness;
+  }
+
+  public setBrightness(b: number) {
+    this.brightness = b;
+  }
+
+  public getRoomLight(): number {
+    return this.roomLight;
+  }
+
+  public setRoomLight(rl: number) {
+    this.roomLight = rl;
+  }
+
+  public getFlux(): number {
+    return this.flux;
+  }
+
+  public setFlux(f: number) {
+    this.flux = f;
   }
 }
 

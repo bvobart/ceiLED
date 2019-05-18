@@ -5,10 +5,10 @@ export class SettingsMessage {
   public static buildGet(settings: ControllerSettings): SettingsMessage {
     return new SettingsMessage(
       'get',
-      settings.brightness,
-      settings.roomLight,
+      settings.getBrightness(),
+      settings.getRoomLight(),
       settings.getDriver() instanceof DebugDriver ? DriverType.DEBUG : DriverType.PCA9685,
-      settings.flux,
+      settings.getFlux(),
     );
   }
 

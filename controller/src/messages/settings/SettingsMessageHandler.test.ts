@@ -15,9 +15,9 @@ describe('SettingsMessageHandler', () => {
       expect(response).toBeInstanceOf(SettingsSuccessResponse);
       expect(response.status).toBe(StatusType.SUCCES);
       expect(response.settings.action).toBe('get');
-      expect(response.settings.brightness).toBe(settings.brightness);
-      expect(response.settings.roomLight).toBe(settings.roomLight);
-      expect(response.settings.flux).toBe(settings.flux);
+      expect(response.settings.brightness).toBe(settings.getBrightness());
+      expect(response.settings.roomLight).toBe(settings.getRoomLight());
+      expect(response.settings.flux).toBe(settings.getFlux());
       done();
     });
   });
@@ -31,9 +31,9 @@ describe('SettingsMessageHandler', () => {
       const response: OutgoingMessage = await handler.handle(msg);
       expect(response).toBeInstanceOf(SettingsSuccessResponse);
       expect(response.status).toBe(StatusType.SUCCES);
-      expect(settings.brightness).toBe(msg.settings.brightness);
-      expect(settings.roomLight).toBe(msg.settings.roomLight);
-      expect(settings.flux).toBe(msg.settings.flux);
+      expect(settings.getBrightness()).toBe(msg.settings.brightness);
+      expect(settings.getRoomLight()).toBe(msg.settings.roomLight);
+      expect(settings.getFlux()).toBe(msg.settings.flux);
       done();
     });
   });
