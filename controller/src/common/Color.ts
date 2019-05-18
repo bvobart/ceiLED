@@ -28,7 +28,7 @@ class Color implements IColor {
   public static WHITE: Color = new Color({ red: 255, green: 255, blue: 255 });
 
   /** The colour of standard room lighting */
-  public static ROOMLIGHT: Color = new Color({ red: 255, green: 241, blue: 224 });
+  public static ROOMLIGHT: Color = new Color({ red: 255, green: 132, blue: 24 });
   /** The colour used for flux setting 1, i.e. 6000K */
   public static FLUX1: Color = new Color({ red: 255, green: 246, blue: 237 });
   /** The colour used for flux setting 2, i.e. 5500K */
