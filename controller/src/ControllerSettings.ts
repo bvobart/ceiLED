@@ -2,6 +2,7 @@ import { openSync } from 'i2c-bus';
 import Pca9685Driver, { Pca9685Options } from 'pca9685';
 import ChannelStore from './hardware/ChannelStore';
 import DebugDriver from './hardware/DebugDriver';
+import Pattern from './patterns/Pattern';
 
 export enum DriverType {
   PCA9685 = 'PCA9685',
@@ -16,11 +17,12 @@ export interface IControllerSettings {
 }
 
 export class ControllerSettings {
+  public activePattern: Pattern;
+  public channelStore: ChannelStore;
+
   private brightness: number;
   private roomLight: number;
   private flux: number;
-  public channelStore: ChannelStore;
-
   private driver: Pca9685Driver | DebugDriver;
 
   constructor({ brightness, roomLight, flux, driverType }: IControllerSettings) {

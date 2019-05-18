@@ -5,7 +5,7 @@ import { settings } from '../server';
 import { Interpolate } from './interpolate';
 import Pin from './Pin';
 
-const FPS: number = 60;
+const FPS: number = 40;
 
 /**
  * Defines a mapping between a channels colours (red, green and blue) and their respective
@@ -79,7 +79,7 @@ class LEDChannel {
    */
   public setColor(color: Color): void {
     this.currentBaseColor = color;
-    let adjustedColor = color.withRoomLight(settings ? settings.getBrightness() : 0);
+    let adjustedColor = color.withRoomLight(settings ? settings.getRoomLight() : 0);
     adjustedColor = adjustedColor.withFlux(settings ? settings.getFlux() : 0);
     adjustedColor = adjustedColor.withBrightness(settings ? settings.getBrightness() : 100);
 

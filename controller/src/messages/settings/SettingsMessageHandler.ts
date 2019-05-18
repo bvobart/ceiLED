@@ -1,4 +1,5 @@
 import { getNameFromToken, isAuthorised } from '../../auth/auth';
+import SolidPattern from '../../patterns/SolidPattern';
 import { settings } from '../../server';
 import CeiledError from '../common/CeiledError';
 import UnauthorisedResponse from '../common/UnauthorisedResponse';
@@ -33,8 +34,9 @@ export class SettingsMessageHandler implements MessageHandler {
           settings.setFlux(inRange(req.flux, -1, 5));
           if (req.driver) settings.setDriver(req.driver);
 
-          // TODO: call show() again on currently active pattern.
-          // TODO: move activePattern from CeiledMessageHandler to ControllerSettings
+          if (settings.activePattern && settings.activePattern instanceof SolidPattern) {
+            settings.activePattern.show();
+          }
 
           return Promise.resolve(new SettingsSuccessResponse());
         default:
