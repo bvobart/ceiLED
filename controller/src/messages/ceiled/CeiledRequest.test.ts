@@ -19,12 +19,12 @@ describe('CeiledRequest', () => {
       expect(CeiledRequest.isRequest(request)).toBe(false);
     });
 
-    it('recognises a request without colours', () => {
+    it('recognises an off request', () => {
       const request: any = {
-        type: CeiledRequestType.SOLID,
+        type: CeiledRequestType.OFF,
         colors: [],
       };
-      expect(CeiledRequest.isRequest(request)).toBe(false);
+      expect(CeiledRequest.isRequest(request)).toBe(true);
     });
 
     it('recognises a request with a badly constructed colour', () => {

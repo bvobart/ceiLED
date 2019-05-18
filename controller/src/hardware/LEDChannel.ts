@@ -74,11 +74,25 @@ class LEDChannel {
   }
 
   /**
-   * Sets a color on the LED channel.
+   * Sets a color on the LED channel. Applies roomlight, flux and brightness colour correction.
    * @param color Color to set
    */
   public setColor(color: Color): void {
     this.currentBaseColor = color;
+    let adjustedColor = color.withRoomLight(settings ? settings.roomLight : 0);
+    adjustedColor = adjustedColor.withFlux(settings ? settings.flux : 0);
+    adjustedColor = adjustedColor.withBrightness(settings ? settings.brightness : 100);
+
+    if (this.red.value !== adjustedColor.red) this.red.value = adjustedColor.red;
+    if (this.green.value !== adjustedColor.green) this.green.value = adjustedColor.green;
+    if (this.blue.value !== adjustedColor.blue) this.blue.value = adjustedColor.blue;
+  }
+
+  /**
+   * Sets a color on the LED channel. DOES NOT apply roomlight, flux and brightness colour corrections.
+   * @param color Color to set
+   */
+  public setColorDirectly(color: Color): void {
     if (this.red.value !== color.red) this.red.value = color.red;
     if (this.green.value !== color.green) this.green.value = color.green;
     if (this.blue.value !== color.blue) this.blue.value = color.blue;

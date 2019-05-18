@@ -19,10 +19,18 @@ class SolidPattern implements Pattern {
   public show(): void {
     this.colors.splice(3);
 
-    const store: ChannelStore = settings.channelStore;
-    store.channel1.setColor(this.colors[0]);
-    store.channel2.setColor(this.colors[1] ? this.colors[1] : this.colors[0]);
-    store.channel3.setColor(this.colors[2] ? this.colors[2] : this.colors[0]);
+    const { channel1, channel2, channel3 } = settings.channelStore;
+    if (this.colors.length === 0) {
+      // no colours in a SolidPattern means turn off
+      channel1.setColorDirectly(Color.BLACK);
+      channel2.setColorDirectly(Color.BLACK);
+      channel3.setColorDirectly(Color.BLACK);
+      return;
+    }
+
+    channel1.setColor(this.colors[0]);
+    channel2.setColor(this.colors[1] ? this.colors[1] : this.colors[0]);
+    channel3.setColor(this.colors[2] ? this.colors[2] : this.colors[0]);
   }
 
   public stop(): void {
