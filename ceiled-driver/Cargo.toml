@@ -1,0 +1,18 @@
+[package]
+name = "ceiled-pca9685"
+description = "Low-level LED strip driver for CeiLED"
+version = "0.1.0"
+authors = ["Bart van Oort <bvanoort@chello.nl>"]
+edition = "2018"
+homepage = "https://ceiled.bart.vanoort.is"
+repository = "https://github.com/bvobart/ceiLED"
+include = ["src/**/*.rs"]
+
+[dependencies]
+linux-embedded-hal = "0.2.2"
+pwm-pca9685 = "0.1.0"
+termcolor = "1.0.4"
+ctrlc = "3.1.2"
+rand = "0.6.5"
+crossterm = "0.9.5"
+nix = "0.13.0"
