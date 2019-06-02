@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { withCookies } from 'react-cookie';
 import { Button, withStyles } from '@material-ui/core';
 
 import FadeOptionsControl from './FadeOptionsControl';
@@ -19,6 +18,7 @@ class FadeControls extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      authToken: localStorage.getItem('authToken'),
       options: {
         fadeMode: 3,
         speed: 30,
@@ -78,8 +78,7 @@ class FadeControls extends Component {
   }
 
   handleConfirm({ getStatus, send }) {
-    const { cookies } = this.props;
-    const { channel1, channel2, channel3, options } = this.state;
+    const { channel1, channel2, channel3, options, authToken } = this.state;
     if (getStatus() === WebSocket.OPEN) {
       const patternOptions = new CeiledPatternOptionsBuilder()
         .for('fade')
@@ -93,7 +92,7 @@ class FadeControls extends Component {
         .setType('fade')
         .setColors(channel1)
         .setPatternOptions(patternOptions)
-        .setAuthToken(cookies.get('authToken'))
+        .setAuthToken(authToken)
         .build();
       send(request);
     }
@@ -130,4 +129,4 @@ class FadeControls extends Component {
   }
 }
 
-export default withStyles(styles)(withCookies(FadeControls));
+export default withStyles(styles)(FadeControls);

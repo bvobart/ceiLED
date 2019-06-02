@@ -1,6 +1,5 @@
 import throttle from 'lodash.throttle';
 import React, { Component } from 'react';
-import { withCookies } from 'react-cookie';
 import CeiledRequestBuilder from './CeiledRequestBuilder';
 import UnauthorisedDialog from './UnauthorisedDialog';
 import ErrorDialog from './ErrorDialog';
@@ -12,6 +11,7 @@ class ControllerSocketProvider extends Component {
     super(props);
     this.state = {
       address: null,
+      authToken: localStorage.getItem('authToken'),
       socket: null,
       connected: false,
       status: WebSocket.CLOSED,
@@ -45,7 +45,7 @@ class ControllerSocketProvider extends Component {
     if (this.state.socket) {
       const offRequest = new CeiledRequestBuilder()
         .setType('off')
-        .setAuthToken(this.props.cookies.get('authToken'))
+        .setAuthToken(this.state.authToken)
         .build();
       this.send(offRequest);
       this.close();
@@ -144,4 +144,4 @@ class ControllerSocketProvider extends Component {
   }
 }
 
-export default withCookies(ControllerSocketProvider);
+export default ControllerSocketProvider;

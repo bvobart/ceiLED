@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { withCookies } from 'react-cookie';
 import { withStyles, Button } from '@material-ui/core';
 import JumpOptionsControl from './JumpOptionsControl';
 import ThreeChannelMultiPicker from '../../colorpicking/ThreeChannelMultiPicker';
@@ -17,6 +16,7 @@ class JumpControls extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      authToken: localStorage.getItem('authToken'),
       options: {
         jumpMode: 3,
         speed: 30
@@ -75,8 +75,7 @@ class JumpControls extends Component {
   }
 
   handleConfirm({ getStatus, send }) {
-    const { cookies } = this.props;
-    const { channel1, channel2, channel3, options } = this.state;
+    const { channel1, channel2, channel3, options, authToken } = this.state;
     if (getStatus() === WebSocket.OPEN) {
       const patternOptions = new CeiledPatternOptionsBuilder()
         .for('jump')
@@ -89,7 +88,7 @@ class JumpControls extends Component {
         .setType('jump')
         .setColors(channel1)
         .setPatternOptions(patternOptions)
-        .setAuthToken(cookies.get('authToken'))
+        .setAuthToken(authToken)
         .build();
       send(request);
     }
@@ -126,4 +125,4 @@ class JumpControls extends Component {
   }
 }
 
-export default withStyles(styles)(withCookies(JumpControls));
+export default withStyles(styles)(JumpControls);
