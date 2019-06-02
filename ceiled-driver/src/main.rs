@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#[macro_use] extern crate lazy_static;
 
 mod commands;
 mod debug;
@@ -7,57 +8,79 @@ use ceiled::{ CeiledDriver };
 use commands::{ Command };
 use debug::{ DebugDriver };
 
-use crossterm::{ Colored };
+use crossterm::{ Colored, Crossterm };
 use ctrlc;
 use nix::errno::Errno;
 use nix::sys::stat::{ Mode };
 use nix::unistd;
 use std::fs;
-use std::sync::Arc;
+use std::sync::{ Arc, Mutex };
 use std::sync::atomic::{ AtomicBool, Ordering };
+use std::thread;
 use std::thread::sleep;
 use std::time::{ Duration };
 
 static PIPE_PATH: &'static str = "ceiled.pipe";
 
+/**
+ * Initialize the drivers.
+ */
+lazy_static! {
+  static ref RUNNING: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
+  static ref CTERM: Crossterm = Crossterm::new();
+  static ref DEV_DEBUG: Arc<Mutex<DebugDriver>> = Arc::new(Mutex::new(DebugDriver::new(&CTERM, 3)));
+}
+
 fn main() -> Result<(), &'static str> {
-  println!("CeiLED driver starting...");
+  println!("{}-> CeiLED driver starting...", Colored::Bg(crossterm::Color::Reset));
   checkPipe().expect("failed to open pipe");
 
-  let running = Arc::new(AtomicBool::new(true));
-  let r = running.clone();
+  // make list of enabled drivers.
+  let drivers = vec![&DEV_DEBUG];
+  for driver in drivers.clone() {
+    driver.lock().unwrap().init();
+  }
+
+  // set up main loop with ctrl-c handler.
+  let r = RUNNING.clone();
   ctrlc::set_handler(move || {
     r.store(false, Ordering::SeqCst);
     fs::write(PIPE_PATH, "").expect("failed to write EOF to pipe"); 
   }).expect("Error setting Ctrl-C handler");
-  
-  println!("Listening for commands...");
-  println!("");
-  let mut dbgDriver = DebugDriver::new(3);
 
-  while running.load(Ordering::SeqCst) {
-    let command = fs::read_to_string(PIPE_PATH).expect("failed to read from pipe");
-    if command == "" { continue }
-    print!("Command: {}", command);
+  println!("{}-> Listening for commands...", Colored::Bg(crossterm::Color::Reset));
 
-    let cmd = Command::parse(&command);
+  // main loop
+  while RUNNING.load(Ordering::SeqCst) {
+    // parse incoming commands
+    let cmdStr = fs::read_to_string(PIPE_PATH).expect("failed to read from pipe");
+    if cmdStr == "" { continue }
+    let cmd = Command::parse(&cmdStr);
     if cmd.is_err() { 
-      print!("invalid command given: {}, command: {}", cmd.unwrap_err(), command);
+      print!("{}invalid command given: {}, command: {}", Colored::Bg(crossterm::Color::Reset), cmd.unwrap_err(), cmdStr);
       continue;
     }
 
-    println!("parsed: {:?}", cmd.unwrap());
+    let command = cmd.unwrap();
+    println!("{}Command: {:?}", Colored::Bg(crossterm::Color::Reset), &command);
 
-    // dbgDriver.setColors(vec![]);
-
-    sleep(Duration::from_millis(500));
+    // spawn one thread for each driver in order to execute the command
+    for driver in drivers.clone() {
+      let c = command.clone();
+      let d = driver.clone();
+      thread::spawn(move || {
+        let res = c.apply(&mut *d.lock().unwrap());
+        if res.is_err() { 
+          println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), res.unwrap_err());
+        }
+      });
+    }
   }
 
   // TODO: initialize CeiledPca9685 driver, if that fails launch debug driver
   // TODO: implement setFade method
   // TODO: implement blend, withRoomlight etc methods on Color.
   // TODO: implement CeiledPca9685
-  // TODO: make sure that driver is set to black initially
 
 
   println!("{}", Colored::Bg(crossterm::Color::Reset));
@@ -67,13 +90,17 @@ fn main() -> Result<(), &'static str> {
   Ok(())
 }
 
+/**
+ * Checks whether the ceiled.pipe named pipe can be created and opens it.
+ * If the file already exists, try to delete it and then try to open again.
+ */
 fn checkPipe() -> Result<(), &'static str> {
   let mut tries = 0;
   while tries < 2 {
     // create named pipe for input
     match unistd::mkfifo(PIPE_PATH, Mode::S_IRWXU) {
       Ok(_)    => { 
-        println!("Opened pipe at {}", PIPE_PATH); 
+        println!("{}-> Opened pipe at {}", Colored::Bg(crossterm::Color::Reset), PIPE_PATH); 
         return Ok(()); 
       },
 
@@ -97,6 +124,9 @@ pub mod ceiled {
   use super::Colors::{ Color };
   
   pub trait CeiledDriver {
+    fn channels(&self) -> usize;
+    fn init(&mut self);
+    fn off(&mut self);
     fn setColor(&mut self, channel: usize, color: Color);
     fn setColors(&mut self, colors: Vec<Color>);
     fn setFade(&mut self, channel: usize, to: Color, millis: u32);
