@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withCookies } from 'react-cookie';
 import { withStyles } from '@material-ui/core';
 
 import Tile from '../../../common/tiles/Tile';
@@ -11,7 +10,7 @@ import { toRgbStringsList } from '../../../common/utils';
 
 const styles = theme => ({
   tile: {
-    animation: 'ripple-warm-fade 12s linear infinite',
+    animation: '$ripple-warm-fade 12s linear infinite',
     background: `linear-gradient(to right, ${toRgbStringsList([ red, chocolate, orangeYellow, red, chocolate, orangeYellow ])})`,
     backgroundSize: '400% 400%',
     width: '100%',
@@ -24,7 +23,7 @@ const styles = theme => ({
 
 class RippleWarmFadeTile extends Component {
   handleClick() {
-    const { onClick, cookies } = this.props;
+    const { onClick } = this.props;
     if (!onClick) return;
 
     const patternOptions = new CeiledPatternOptionsBuilder()
@@ -38,7 +37,7 @@ class RippleWarmFadeTile extends Component {
       .setType('fade')
       .setColors([ red, orangeYellow, chocolate ])
       .setPatternOptions(patternOptions)
-      .setAuthToken(cookies.get('authToken'))
+      .setAuthToken(localStorage.getItem('authToken'))
       .build();
 
     onClick(message);
@@ -59,4 +58,4 @@ RippleWarmFadeTile.propTypes = {
   onClick: PropTypes.func
 }
 
-export default withStyles(styles)(withCookies(RippleWarmFadeTile));
+export default withStyles(styles)(RippleWarmFadeTile);

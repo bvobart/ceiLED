@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { CookiesProvider, withCookies } from 'react-cookie';
 import compose from 'recompose/compose';
 import { theme } from './theme';
 
@@ -29,21 +28,22 @@ class App extends Component {
     this.state = {
       displayAbout: false
     }
-  }
-
-  render() {
-    const { classes, cookies } = this.props;
-    const { displayAbout } = this.state;
-    const isMobile = this.props.width === 'sm' || this.props.width === 'xs' ? window.innerWidth : 960;
 
     // generate new authorisation token in case it does not exist yet.
     // authToken is a cryptographically secure string of 8 32-bit random integers.
-    if (!cookies.get('authToken')) {
+    const token = localStorage.getItem('authToken');
+    if (token == null) {
       const tokens = new Uint32Array(8);
       crypto.getRandomValues(tokens);
       const authToken = tokens.reduce((token, current) => token += current, "");
-      cookies.set('authToken', authToken);
+      localStorage.setItem('authToken', authToken);    
     }
+  }
+
+  render() {
+    const { classes } = this.props;
+    const { displayAbout } = this.state;
+    const isMobile = this.props.width === 'sm' || this.props.width === 'xs' ? window.innerWidth : 960;
     
     return (
       <Paper className={classes.root} style={{ width: isMobile }}>
@@ -67,14 +67,12 @@ class App extends Component {
   }
 }
 
-const StyledApp = compose(withStyles(styles), withWidth(), withCookies)(App);
+const StyledApp = compose(withStyles(styles), withWidth())(App);
 const CompleteStyledApp = () => 
-  <CookiesProvider>
-    <MuiThemeProvider theme={theme}>
-      <CssBaseline />
-      <StyledApp />
-    </MuiThemeProvider>
-  </CookiesProvider>
+  <MuiThemeProvider theme={theme}>
+    <CssBaseline />
+    <StyledApp />
+  </MuiThemeProvider>
 ;
 
 export default CompleteStyledApp;

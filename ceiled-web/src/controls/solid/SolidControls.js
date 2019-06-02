@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { withCookies } from 'react-cookie';
 import ThreeChannelPicker from '../../colorpicking/ThreeChannelPicker';
 import { ControllerSocketContext } from '../../context/ControllerSocketProvider';
 import { CeiledRequestBuilder } from '../../context/CeiledRequestBuilder';
@@ -8,6 +7,7 @@ class SolidControls extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      authToken: localStorage.getItem('authToken'),
       channel1: {
         red: Math.round(Math.random() * 255),
         green: Math.round(Math.random() * 255),
@@ -32,7 +32,7 @@ class SolidControls extends Component {
       const request = new CeiledRequestBuilder()
         .setType('solid')
         .setColors(colors)
-        .setAuthToken(this.props.cookies.get('authToken'))
+        .setAuthToken(this.state.authToken)
         .build();
       send(request);
     }
@@ -59,4 +59,4 @@ class SolidControls extends Component {
   }
 }
 
-export default withCookies(SolidControls);
+export default SolidControls;

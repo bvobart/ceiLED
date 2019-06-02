@@ -1,6 +1,5 @@
 import throttle from 'lodash.throttle';
 import React, { Component } from 'react';
-import { withCookies } from 'react-cookie';
 import { Paper, withStyles, Typography } from '@material-ui/core';
 import { Slider } from '@material-ui/lab';
 import { ControllerSocketContext } from '../context/ControllerSocketProvider';
@@ -46,6 +45,7 @@ class GlobalControls extends Component {
     this.handleFluxChange = this.handleFluxChange.bind(this);
     this.handleDriverChange = this.handleDriverChange.bind(this);
     
+    this.authToken = localStorage.getItem('authToken');
     this.setSettings = throttle(this.setSettings, 200);
   }
 
@@ -76,7 +76,7 @@ class GlobalControls extends Component {
         ...this.state, 
         ...newSettings
       },
-      authToken: this.props.cookies.get('authToken')
+      authToken: this.authToken
     })
   }
 
@@ -138,4 +138,4 @@ class GlobalControls extends Component {
   }
 }
 
-export default withStyles(styles)(withCookies(GlobalControls));
+export default withStyles(styles)(GlobalControls);

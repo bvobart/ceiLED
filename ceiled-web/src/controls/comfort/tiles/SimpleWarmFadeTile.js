@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withCookies } from 'react-cookie';
 import { withStyles } from '@material-ui/core';
 
 import Tile from '../../../common/tiles/Tile';
@@ -11,7 +10,7 @@ import CeiledPatternOptionsBuilder from '../../../context/CeiledPatternOptionsBu
 
 const styles = theme => ({
   tile: {
-    animation: 'simple-warm-fade 12s linear infinite',
+    animation: '$simple-warm-fade 12s linear infinite',
     width: '100%',
   },
   '@keyframes simple-warm-fade': {
@@ -24,7 +23,7 @@ const styles = theme => ({
 
 class SimpleWarmFadeTile extends Component {
   handleClick() {
-    const { onClick, cookies } = this.props;
+    const { onClick } = this.props;
     if (!onClick) return;
 
     const patternOptions = new CeiledPatternOptionsBuilder()
@@ -36,7 +35,7 @@ class SimpleWarmFadeTile extends Component {
       .setType('fade')
       .setColors([ red, chocolate, orangeYellow ])
       .setPatternOptions(patternOptions)
-      .setAuthToken(cookies.get('authToken'))
+      .setAuthToken(localStorage.getItem('authToken'))
       .build();
 
     onClick(message);
@@ -57,4 +56,4 @@ SimpleWarmFadeTile.propTypes = {
   onClick: PropTypes.func
 }
 
-export default withStyles(styles)(withCookies(SimpleWarmFadeTile));
+export default withStyles(styles)(SimpleWarmFadeTile);

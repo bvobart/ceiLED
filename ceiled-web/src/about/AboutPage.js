@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import { withCookies } from 'react-cookie';
-import compose from 'recompose/compose';
 import { withStyles, Card, CardHeader, CardContent, Link, Typography, TextField } from '@material-ui/core';
 
 import logo from './ceiled-logo.svg';
@@ -29,7 +27,7 @@ const styles = theme => ({
 
 class AboutPage extends Component {
   render() {
-    const { classes, cookies, hidden } = this.props;
+    const { classes, hidden } = this.props;
     if (hidden) return (<div />)
     return (
       <Card className={classes.root}>
@@ -65,7 +63,7 @@ class AboutPage extends Component {
             <TextField 
               className={classes.tokenField} 
               variant='outlined' 
-              value={cookies.get('authToken')} 
+              value={localStorage.getItem('authToken')} 
             />
           </div>
         </CardContent>
@@ -74,4 +72,4 @@ class AboutPage extends Component {
   }
 }
 
-export default compose(withStyles(styles), withCookies)(AboutPage);
+export default withStyles(styles)(AboutPage);
