@@ -41,7 +41,7 @@ fn main() -> Result<(), &'static str> {
   // make list of enabled drivers.
   let drivers = vec![&DEV_DEBUG];
   for driver in drivers.clone() {
-    driver.lock().unwrap().get().lock().unwrap().init();
+    driver.lock().unwrap().get().init().expect("driver failed to perform initialisation");
   }
 
   // set up main loop with ctrl-c handler.

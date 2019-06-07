@@ -105,10 +105,7 @@ impl CeiledDriver for DebugDriver {
 
     thread::spawn(move || {
       for i in 0..totalFrames {
-        if ct.is_canceled() { 
-          println!("cancelled");
-          break; 
-        }
+        if ct.is_canceled() { break; }
 
         let baseColor = Color::new(
           (from.red as f64 + interp.interpolate(redDiff, i + 1, totalFrames).round()) as u8,
