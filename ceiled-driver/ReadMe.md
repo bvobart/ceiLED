@@ -22,3 +22,5 @@ Examples:
 
 TODO:
 - getting colours
+- Use this for DEBUG driver: https://gist.github.com/AndrewJakubowicz/9972b5d46be474c186a2dc3a71326de4
+- Use Unix domain socket instead of named pipe: http://kmdouglass.github.io/posts/a-simple-unix-socket-listener-in-rust/

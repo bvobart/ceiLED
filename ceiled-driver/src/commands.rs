@@ -1,5 +1,6 @@
 use super::Colors;
-use super::ceiled;
+
+use std::f64::consts;
 
 #[derive(Clone,Debug)]
 pub enum Action {
@@ -20,16 +21,29 @@ pub enum Pattern {
 }
 
 #[derive(Clone,Debug)]
+pub struct Command { 
+  action: Action,
+  target: Target,
+  pattern: Pattern,
+}
+
+#[derive(Clone,Debug)]
 pub enum Interpolator {
   Linear,
   Sigmoid
 }
 
-#[derive(Clone,Debug)]
-pub struct Command { 
-  action: Action,
-  target: Target,
-  pattern: Pattern,
+impl Interpolator {
+  pub fn interpolate(&self, delta: f64, currentStep: u32, totalSteps: u32) -> f64 {
+    match self {
+      Interpolator::Linear => (delta * currentStep as f64) / totalSteps as f64,
+      Interpolator::Sigmoid => {
+        let stepRatio = currentStep as f64 / totalSteps as f64;
+        let t = 8.0 * stepRatio - 0.5;
+        delta as f64 * (1.0 / (1.0 + consts::E.powf(-t)))
+      }
+    }
+  }
 }
 
 /**
@@ -123,41 +137,15 @@ impl Command {
  * Instance methods. For applying the command to a driver.
  */
 impl Command {
-  pub fn apply(&self, driver: &mut ceiled::CeiledDriver) -> Result<(), &'static str> {
-    match &self.action {
-      Action::SET => self.applySet(driver),
-      _ => Err("that action is not implemented")
-    }
+  pub fn action(&self) -> &Action {
+    &self.action
   }
 
-  fn applySet(&self, driver: &mut ceiled::CeiledDriver) -> Result<(), &'static str> {
-    match &self.pattern {
-      Pattern::Solid { color } => match self.target {
-        Target::All => { 
-          let mut colors = Vec::new();
-          for _ in 0..driver.channels() { colors.push(color.clone()) }
-          driver.setColors(colors);
-          Ok(())
-        },
-        Target::One { channel } => {
-          driver.setColor(channel, color.clone());
-          Ok(())
-        }
-      },
+  pub fn target(&self) -> &Target {
+    &self.target
+  }
 
-      Pattern::Fade { to, millis, interpolator } => match self.target {
-        Target::All => {
-          let mut colors = Vec::new();
-          for _ in 0..driver.channels() { colors.push(to) }
-          // TODO: fade is not properly implemented yet, so fade on all channels is not yet possible
-          driver.setFade(0, to.clone(), *millis);
-          Ok(())
-        },
-        Target::One { channel } => {
-          driver.setFade(channel, to.clone(), *millis);
-          Ok(())
-        }
-      }
-    }
+  pub fn pattern(&self) -> &Pattern {
+    &self.pattern
   }
 }

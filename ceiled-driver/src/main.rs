@@ -1,12 +1,15 @@
 #![allow(non_snake_case)]
 #[macro_use] extern crate lazy_static;
+extern crate cancellation;
 
 mod commands;
 mod debug;
+mod manager;
 
 use ceiled::{ CeiledDriver };
 use commands::{ Command };
 use debug::{ DebugDriver };
+use manager::DriverManager;
 
 use crossterm::{ Colored, Crossterm };
 use ctrlc;
@@ -28,7 +31,7 @@ static PIPE_PATH: &'static str = "ceiled.pipe";
 lazy_static! {
   static ref RUNNING: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
   static ref CTERM: Crossterm = Crossterm::new();
-  static ref DEV_DEBUG: Arc<Mutex<DebugDriver>> = Arc::new(Mutex::new(DebugDriver::new(&CTERM, 3)));
+  static ref DEV_DEBUG: Arc<Mutex<DriverManager<DebugDriver>>> = Arc::new(Mutex::new(DriverManager::new(DebugDriver::new(&CTERM, 3))));
 }
 
 fn main() -> Result<(), &'static str> {
@@ -38,7 +41,7 @@ fn main() -> Result<(), &'static str> {
   // make list of enabled drivers.
   let drivers = vec![&DEV_DEBUG];
   for driver in drivers.clone() {
-    driver.lock().unwrap().init();
+    driver.lock().unwrap().get().lock().unwrap().init();
   }
 
   // set up main loop with ctrl-c handler.
@@ -69,7 +72,7 @@ fn main() -> Result<(), &'static str> {
       let c = command.clone();
       let d = driver.clone();
       thread::spawn(move || {
-        let res = c.apply(&mut *d.lock().unwrap());
+        let res = d.lock().unwrap().execute(&c);
         if res.is_err() { 
           println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), res.unwrap_err());
         }
@@ -78,7 +81,7 @@ fn main() -> Result<(), &'static str> {
   }
 
   // TODO: initialize CeiledPca9685 driver, if that fails launch debug driver
-  // TODO: implement setFade method
+  // TODO: implement setFades method
   // TODO: implement blend, withRoomlight etc methods on Color.
   // TODO: implement CeiledPca9685
 
@@ -122,14 +125,16 @@ fn checkPipe() -> Result<(), &'static str> {
 
 pub mod ceiled {
   use super::Colors::{ Color };
+  use super::commands::{ Interpolator };
+  use super::cancellation::{ CancellationTokenSource };
   
   pub trait CeiledDriver {
     fn channels(&self) -> usize;
-    fn init(&mut self);
-    fn off(&mut self);
-    fn setColor(&mut self, channel: usize, color: Color);
-    fn setColors(&mut self, colors: Vec<Color>);
-    fn setFade(&mut self, channel: usize, to: Color, millis: u32);
+    fn init(&mut self) -> Result<(), &'static str>;
+    fn off(&mut self) -> Result<(), &'static str>;
+    fn setColor(&mut self, channel: usize, color: Color) -> Result<(), &'static str>;
+    fn setColors(&mut self, colors: Vec<Color>) -> Result<(), &'static str>;
+    fn setFade(&mut self, channel: usize, to: Color, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, &'static str>;
     // fn setFades(&self, )
   }
 }
