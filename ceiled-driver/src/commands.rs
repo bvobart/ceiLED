@@ -1,4 +1,4 @@
-use super::Colors;
+use super::colors::{ Color };
 
 use std::f64::consts;
 
@@ -12,12 +12,13 @@ pub enum Action {
 pub enum Target {
   All,
   One { channel: usize },
+  Multiple { channels: Vec<usize> }
 }
 
 #[derive(Clone,Debug)]
 pub enum Pattern {
-  Solid { color: Colors::Color },
-  Fade { to: Colors::Color, millis: u32, interpolator: Interpolator }
+  Solid { color: Color },
+  Fade { to: Color, millis: u32, interpolator: Interpolator }
 }
 
 #[derive(Clone,Debug)]
@@ -84,21 +85,26 @@ impl Command {
   fn parseTarget(cmd: Option<&str>) -> Result<Target, &'static str> {
     match cmd {
       Some("all") => Ok(Target::All),
-      Some(num) => {
-        // TODO: allow support for comma separated values "1,2,3"
-        let channel = num.parse::<usize>();
-        if channel.is_err() { return Err("invalid channel specified") };
-        Ok(Target::One { channel: channel.unwrap() })
+      Some(channelStr) => {
+        let mut channels = vec![];
+        for chStr in channelStr.split(",") {
+          let channel = chStr.parse::<usize>();
+          if channel.is_err() { return Err("invalid channel specified") };
+          channels.push(channel.unwrap());
+        }
+        if channels.len() == 0 { return Err("No channel numbers specified") };
+        if channels.len() == 1 { return Ok(Target::One { channel: channels[0] }) };
+        Ok(Target::Multiple { channels })
       },
       None => Err("no target specified")
     }
   }
 
-  fn parseColor(r: Option<&str>, g: Option<&str>, b: Option<&str>) -> Result<Colors::Color, &'static str> {
+  fn parseColor(r: Option<&str>, g: Option<&str>, b: Option<&str>) -> Result<Color, &'static str> {
     let red = Command::parseByte(r)?;
     let green = Command::parseByte(g)?;
     let blue = Command::parseByte(b)?;
-    Ok(Colors::Color { red, green, blue })
+    Ok(Color { red, green, blue })
   }
 
   fn parseByte(cmd: Option<&str>) -> Result<u8, &'static str> {

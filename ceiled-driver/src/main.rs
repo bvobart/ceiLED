@@ -1,7 +1,10 @@
 #![allow(non_snake_case)]
 #[macro_use] extern crate lazy_static;
+#[macro_use] extern crate crossbeam_channel;
 extern crate cancellation;
 
+mod ceiled;
+mod colors;
 mod commands;
 mod debug;
 mod manager;
@@ -12,11 +15,15 @@ use debug::{ DebugDriver };
 use manager::DriverManager;
 
 use crossterm::{ Colored, Crossterm };
+use crossbeam_channel::{ bounded, Receiver };
 use ctrlc;
 use nix::errno::Errno;
 use nix::sys::stat::{ Mode };
 use nix::unistd;
 use std::fs;
+use std::io::prelude::*;
+use std::io::{ BufRead, BufReader };
+use std::os::unix::net::{ UnixStream,UnixListener };
 use std::sync::{ Arc, Mutex };
 use std::sync::atomic::{ AtomicBool, Ordering };
 use std::thread;
@@ -24,19 +31,18 @@ use std::thread::sleep;
 use std::time::{ Duration };
 
 static PIPE_PATH: &'static str = "ceiled.pipe";
+static SOCKET_PATH: &'static str = "ceiled.sock";
 
 /**
  * Initialize the drivers.
  */
 lazy_static! {
-  static ref RUNNING: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
   static ref CTERM: Crossterm = Crossterm::new();
   static ref DEV_DEBUG: Arc<Mutex<DriverManager<DebugDriver>>> = Arc::new(Mutex::new(DriverManager::new(DebugDriver::new(&CTERM, 3))));
 }
 
 fn main() -> Result<(), &'static str> {
   println!("{}-> CeiLED driver starting...", Colored::Bg(crossterm::Color::Reset));
-  checkPipe().expect("failed to open pipe");
 
   // make list of enabled drivers.
   let drivers = vec![&DEV_DEBUG];
@@ -44,39 +50,64 @@ fn main() -> Result<(), &'static str> {
     driver.lock().unwrap().get().init().expect("driver failed to perform initialisation");
   }
 
-  // set up main loop with ctrl-c handler.
-  let r = RUNNING.clone();
-  ctrlc::set_handler(move || {
-    r.store(false, Ordering::SeqCst);
-    fs::write(PIPE_PATH, "").expect("failed to write EOF to pipe"); 
-  }).expect("Error setting Ctrl-C handler");
+  // set up ctrl-c handler.
+  let (notifyExit, exit) = bounded(1);
+  ctrlc::set_handler(move || { notifyExit.send(()); });
+
+  // set up ceiled.sock listener
+  let sockListener = initSocketListener(SOCKET_PATH)?;
+  let (notifyStream, streams) = bounded(65);
+  thread::spawn(move || {
+    for s in sockListener.incoming() {
+      match s {
+        Ok(stream) => { let _ = notifyStream.send(stream); },
+        Err(err) => println!("{}", err)
+      }
+    }
+  });
 
   println!("{}-> Listening for commands...", Colored::Bg(crossterm::Color::Reset));
 
   // main loop
-  while RUNNING.load(Ordering::SeqCst) {
-    // parse incoming commands
-    let cmdStr = fs::read_to_string(PIPE_PATH).expect("failed to read from pipe");
-    if cmdStr == "" { continue }
-    let cmd = Command::parse(&cmdStr);
-    if cmd.is_err() { 
-      print!("{}invalid command given: {}, command: {}", Colored::Bg(crossterm::Color::Reset), cmd.unwrap_err(), cmdStr);
-      continue;
-    }
+  loop {
+    select! {
+      // on receiving new stream, spawn new thread to handle the stream
+      recv(streams) -> stream => {
+        println!("-> New connection opened");
+        let drivers = drivers.clone();
+        thread::spawn(move || {
+          let mut stream = &stream.unwrap();
+          let reader = BufReader::new(stream);
+          // on receiving new command from the socket
+          for l in reader.lines() {
+            // parse the command
+            let line = l.unwrap();
+            let cmd = Command::parse(&line);
+            if cmd.is_err() { 
+              println!("{}invalid command given: {}, command: {}", Colored::Bg(crossterm::Color::Reset), cmd.unwrap_err(), line);
+              let _ = stream.write_all(b"error: invalid command");
+              continue;
+            }
 
-    let command = cmd.unwrap();
-    println!("{}Command: {:?}", Colored::Bg(crossterm::Color::Reset), &command);
+            let command = cmd.unwrap();
+            println!("{}Command: {:?}", Colored::Bg(crossterm::Color::Reset), &command);
 
-    // spawn one thread for each driver in order to execute the command
-    for driver in drivers.clone() {
-      let c = command.clone();
-      let d = driver.clone();
-      thread::spawn(move || {
-        let res = d.lock().unwrap().execute(&c);
-        if res.is_err() { 
-          println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), res.unwrap_err());
-        }
-      });
+            // spawn a thread for each driver in order to execute the command
+            for driver in drivers.clone() {
+              let c = command.clone();
+              let d = driver.clone();
+              thread::spawn(move || {
+                let res = d.lock().unwrap().execute(&c);
+                if res.is_err() { 
+                  println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), res.unwrap_err());
+                }
+              });
+            }
+          }
+        });
+      },
+      // on ctrl-c, exit.
+      recv(exit) -> _ => break
     }
   }
 
@@ -88,7 +119,7 @@ fn main() -> Result<(), &'static str> {
 
   println!("{}", Colored::Bg(crossterm::Color::Reset));
   println!("CeiLED driver stopping.");
-  fs::remove_file(PIPE_PATH).expect("cannot remove ceiled.pipe");
+  fs::remove_file(SOCKET_PATH).expect("cannot remove ceiled.sock");
   println!("CeiLED driver stopped.");
   Ok(())
 }
@@ -123,34 +154,10 @@ fn checkPipe() -> Result<(), &'static str> {
   Err("cannot open pipe")
 }
 
-pub mod ceiled {
-  use super::Colors::{ Color };
-  use super::commands::{ Interpolator };
-  use super::cancellation::{ CancellationTokenSource };
-  
-  pub trait CeiledDriver {
-    fn channels(&self) -> usize;
-    fn init(&mut self) -> Result<(), &'static str>;
-    fn off(&mut self) -> Result<(), &'static str>;
-    fn setColor(&mut self, channel: usize, color: Color) -> Result<(), &'static str>;
-    fn setColors(&mut self, colors: Vec<Color>) -> Result<(), &'static str>;
-    fn setFade(&mut self, channel: usize, to: Color, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, &'static str>;
-    // fn setFades(&self, )
-  }
-}
-
-pub mod Colors {
-  pub const BLACK: Color = Color { red: 0, green: 0, blue: 0 };
-  pub const WHITE: Color = Color { red: 255, green: 255, blue: 255 };
-  pub const RED: Color = Color { red: 255, green: 0, blue: 0 };
-  pub const GREEN: Color = Color { red: 0, green: 255, blue: 0 };
-  pub const BLUE: Color = Color { red: 0, green: 0, blue: 255 };
-  
-  #[derive(Clone, Debug)]
-  pub struct Color { pub red: u8, pub green: u8, pub blue: u8 }
-  impl Color {
-    pub fn new(red: u8, green: u8, blue: u8) -> Self {
-      Color { red, green, blue }
-    }
+fn initSocketListener(address: &str) -> Result<UnixListener, &'static str> {
+  match UnixListener::bind(address) {
+    Ok(l) => Ok(l),
+    // TODO: try deleting file once before failing with an error
+    Err(err) => { println!("{}", err); Err("failed to initialise unix socket listener") }
   }
 }

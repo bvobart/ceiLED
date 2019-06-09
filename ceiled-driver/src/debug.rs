@@ -1,6 +1,6 @@
 use super::ceiled::{ CeiledDriver };
-use super::Colors;
-use super::Colors::{ Color };
+use super::colors;
+use super::colors::{ Color };
 use super::commands::Interpolator;
 
 use cancellation::{ CancellationTokenSource };
@@ -36,7 +36,7 @@ impl DebugDriver {
     let cursor = cterm.cursor();
     let (xmax, ymax) = cterm.terminal().terminal_size();
     let mut colors = Vec::new();
-    for _ in 0..channels { colors.push(Colors::BLACK) }
+    for _ in 0..channels { colors.push(colors::BLACK) }
     DebugDriver { 
       channels,
       colors: Arc::new(Mutex::new(colors)), 
@@ -60,7 +60,7 @@ impl CeiledDriver for DebugDriver {
   fn off(&mut self) -> Result<(), &'static str> {
     let mut off = Vec::with_capacity(self.channels);
     for _ in 0..self.channels {
-      off.push(Colors::BLACK);
+      off.push(colors::BLACK);
     }
     let mut colors = self.colors.lock().unwrap();
     *colors = off;

@@ -47,7 +47,8 @@ impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
   fn executeSet(&mut self, cmd: &Command) -> Result<(), &'static str> {
     match cmd.target() {
       Target::All => self.executeSetAll(cmd),
-      Target::One { channel } => self.executeSetOne(cmd, *channel)
+      Target::One { channel } => self.executeSetOne(cmd, *channel),
+      Target::Multiple { channels } => self.executeSetAll(cmd)
     }
   }
 
