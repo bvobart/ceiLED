@@ -2,6 +2,8 @@
 #[macro_use] extern crate lazy_static;
 #[macro_use] extern crate crossbeam_channel;
 extern crate cancellation;
+extern crate crossterm;
+extern crate ctrlc;
 
 mod ceiled;
 mod colors;
@@ -16,20 +18,16 @@ use manager::DriverManager;
 
 use crossterm::{ Colored, Crossterm };
 use crossbeam_channel::{ bounded };
-use ctrlc;
-use nix::errno::Errno;
-use nix::sys::stat::{ Mode };
-use nix::unistd;
+
 use std::fs;
 use std::io::prelude::*;
-use std::io::{ BufRead, BufReader };
+use std::io::{ ErrorKind, BufRead, BufReader };
 use std::os::unix::net::{ UnixListener };
 use std::sync::{ Arc, Mutex };
 use std::thread;
 use std::thread::sleep;
 use std::time::{ Duration };
 
-static PIPE_PATH: &'static str = "ceiled.pipe";
 static SOCKET_PATH: &'static str = "ceiled.sock";
 
 /**
@@ -51,7 +49,7 @@ fn main() -> Result<(), &'static str> {
 
   // set up ctrl-c handler.
   let (notifyExit, exit) = bounded(1);
-  ctrlc::set_handler(move || { notifyExit.send(()); });
+  ctrlc::set_handler(move || { notifyExit.send(()).unwrap(); }).expect("failed to set ctrl-c handler");
 
   // set up ceiled.sock listener
   let sockListener = initSocketListener(SOCKET_PATH)?;
@@ -111,7 +109,6 @@ fn main() -> Result<(), &'static str> {
   }
 
   // TODO: initialize CeiledPca9685 driver, if that fails launch debug driver
-  // TODO: implement setFades method
   // TODO: implement blend, withRoomlight etc methods on Color.
   // TODO: implement CeiledPca9685
 
@@ -124,39 +121,22 @@ fn main() -> Result<(), &'static str> {
 }
 
 /**
- * Checks whether the ceiled.pipe named pipe can be created and opens it.
- * If the file already exists, try to delete it and then try to open again.
+ * Initialises the connection to the Unix domain socket used to listen for commands.
+ * If ceiled.sock already exists in this folder, it will try to delete it and then retry to initialise.
  */
-fn checkPipe() -> Result<(), &'static str> {
-  let mut tries = 0;
-  while tries < 2 {
-    // create named pipe for input
-    match unistd::mkfifo(PIPE_PATH, Mode::S_IRWXU) {
-      Ok(_)    => { 
-        println!("{}-> Opened pipe at {}", Colored::Bg(crossterm::Color::Reset), PIPE_PATH); 
-        return Ok(()); 
-      },
-
-      Err(err) => match err.as_errno() {
-        Some(Errno::EEXIST) => { // pipe already exists, try removing pipe and try again.
-          tries = tries + 1;
-          fs::remove_file(PIPE_PATH).expect("failed to remove pipe");
-          sleep(Duration::from_millis(5));
-          continue;
-        },
-        _ => { // default case
-          println!("Error opening pipe: {}", err);
-        } 
-      }
-    }
-  }
-  Err("cannot open pipe")
-}
-
 fn initSocketListener(address: &str) -> Result<UnixListener, &'static str> {
   match UnixListener::bind(address) {
     Ok(l) => Ok(l),
-    // TODO: try deleting file once before failing with an error
-    Err(err) => { println!("{}", err); Err("failed to initialise unix socket listener") }
+    Err(err) => { 
+      if err.kind() == ErrorKind::AddrInUse {
+        fs::remove_file(SOCKET_PATH).expect("failed to remove socket");
+        sleep(Duration::from_millis(5));
+        match UnixListener::bind(address) {
+          Ok(l) => return Ok(l),
+          Err(err) => println!("{}", err)
+        }
+      }
+      Err("failed to initialise unix socket listener")
+    }
   }
 }
