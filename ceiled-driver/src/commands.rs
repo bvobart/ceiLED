@@ -17,6 +17,7 @@ pub enum Target {
 
 #[derive(Clone,Debug)]
 pub enum Pattern {
+  None,
   Solid(Color),
   Fade(FadePattern, u32)
 }
@@ -28,7 +29,7 @@ pub struct FadePattern {
 }
 
 #[derive(Clone,Debug)]
-pub struct Command { 
+pub struct Command {
   action: Action,
   target: Target,
   pattern: Pattern,
@@ -60,6 +61,11 @@ impl Command {
   pub fn parse(cmd: &str) -> Result<Self, &'static str> {
     let mut iter = cmd.split_whitespace();
     let action = Command::parseAction(iter.next())?;
+    match action {
+      Action::GET => { return Ok(Command { action, target: Target::All, pattern: Pattern::None }) },
+      Action::SET => {}
+    }
+
     let target = Command::parseTarget(iter.next())?;
     let pattern = match iter.next() {
       Some("solid") => {
@@ -146,7 +152,7 @@ impl Command {
 }
 
 /**
- * Instance methods. For applying the command to a driver.
+ * Instance methods.
  */
 impl Command {
   pub fn action(&self) -> &Action {
@@ -159,5 +165,38 @@ impl Command {
 
   pub fn pattern(&self) -> &Pattern {
     &self.pattern
+  }
+
+  /**
+   * Transforms this command into the shell command in the way it is to be received through the socket.
+   */
+  pub fn toCmd(&self) -> String {
+    let actionStr = match self.action {
+      Action::SET => "set",
+      Action::GET => "get"
+    };
+
+    let targetStr = match &self.target {
+      Target::All => "all".to_string(),
+      Target::One { channel } => channel.to_string(),
+      Target::Multiple { channels } => {
+        let chStrs: Vec<String> = channels.iter().map(|ch| ch.to_string()).collect();
+        chStrs.join(",")
+      }
+    };
+
+    let patternStr = match &self.pattern {
+      Pattern::None => "".to_string(),
+      Pattern::Solid(color) => format!("solid {} {} {}", color.red, color.green, color.blue),
+      Pattern::Fade(fp, millis) => { 
+        let interpStr = match fp.interpolator {
+          Interpolator::Linear => "linear",
+          Interpolator::Sigmoid => "sigmoid"
+        };
+        format!("fade {} {} {} {} {}", fp.to.red, fp.to.green, fp.to.blue, millis, interpStr)
+      }
+    };
+
+    format!("{} {} {}", actionStr, targetStr, patternStr)
   }
 }

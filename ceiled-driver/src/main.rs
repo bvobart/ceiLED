@@ -82,23 +82,27 @@ fn main() -> Result<(), &'static str> {
             let cmd = Command::parse(&line);
             if cmd.is_err() { 
               println!("{}invalid command given: {}, command: {}", Colored::Bg(crossterm::Color::Reset), cmd.unwrap_err(), line);
-              let _ = stream.write_all(b"error: invalid command");
+              let _ = stream.write_all(b"error: invalid command\n");
               continue;
             }
 
             let command = cmd.unwrap();
             println!("{}Command: {:?}", Colored::Bg(crossterm::Color::Reset), &command);
 
-            // spawn a thread for each driver in order to execute the command
+            // for each active driver
             for driver in drivers.clone() {
-              let c = command.clone();
-              let d = driver.clone();
-              thread::spawn(move || {
-                let res = d.lock().unwrap().execute(&c);
-                if res.is_err() { 
-                  println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), res.unwrap_err());
+              // execute the command
+              match driver.lock().unwrap().execute(&command) {
+                Err(err) => { println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err) },
+                Ok(None) => {},
+                Ok(Some(msg)) => {
+                  // send a response if a response ewas given
+                  match stream.write_all((msg + "\n").as_bytes()) {
+                    Ok(()) => {},
+                    Err(err) => { println!("{}{}Error sending response message: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err); }
+                  }
                 }
-              });
+              }
             }
           }
         });
