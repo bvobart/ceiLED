@@ -1,14 +1,14 @@
-stages:
-  - build
-  - test
-  - deploy
-
 matrix:
   include:
     - language: node_js
       node_js:
         - 10
       cache: yarn
+      stages:
+        - build
+        - test
+        - deploy
+      
       jobs:
         include:
           - stage: build
@@ -43,15 +43,15 @@ matrix:
     - language: rust
       rust: stable
       cache: cargo
+      stages:
+        - build
+        - deploy
+      
       jobs:
         include:
           - stage: build
             install: cd ceiled-driver
             script: cargo build --verbose
-          
-          - stage: test
-            install: cd ceiled-driver
-            script: cargo test --verbose
 
           - stage: deploy
             if: branch = master OR branch = develop
