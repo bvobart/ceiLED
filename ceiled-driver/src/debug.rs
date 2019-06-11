@@ -1,10 +1,11 @@
 use super::ceiled::{ CeiledDriver };
 use super::colors;
 use super::colors::{ Color };
-use super::commands::Interpolator;
+use super::commands::FadePattern;
 
 use cancellation::{ CancellationTokenSource };
 use crossterm::{ Colored, Crossterm, TerminalCursor };
+use std::collections::HashMap;
 use std::sync::{ Arc, Mutex };
 use std::thread;
 use std::thread::sleep;
@@ -76,25 +77,37 @@ impl CeiledDriver for DebugDriver {
     Ok(())
   }
 
-  fn setColors(&mut self, colors: Vec<Color>) -> Result<(), &'static str> {
+  fn setColors(&mut self, colors: HashMap<usize, Color>) -> Result<(), &'static str> {
     if colors.len() > self.channels { return Err("argument contains too much colors for the amount of channels"); }
-    if colors.len() < self.channels { return Err("argument contains too few colors for the amount of channels"); }
     let mut selfColors = self.colors.lock().unwrap();
-    *selfColors = colors;
+    for (channel, color) in colors {
+      if channel >= self.channels { return Err("channel does not exist"); }
+      std::mem::replace(&mut selfColors[channel], color);
+    }
     printColors(&selfColors, &self.cursor.lock().unwrap(), self.printX, self.printY);
     Ok(())
   }
 
-  fn setFade(&mut self, channel: usize, to: Color, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, &'static str> {
-    if channel >= self.channels { return Err("channel does not exist"); }
+  fn setFade(&mut self, channel: usize, fade: FadePattern, millis: u32) -> Result<CancellationTokenSource, &'static str> {
+    let mut map = HashMap::new();
+    map.insert(channel, fade);
+    self.setFades(map, millis)
+  }
 
-    let from = self.colors.lock().unwrap()[channel].clone();
-    let redDiff = to.red as f64 - from.red as f64;
-    let greenDiff = to.green as f64 - from.green as f64;
-    let blueDiff = to.blue as f64 - from.blue as f64;
+  fn setFades(&mut self, fadeMap: HashMap<usize, FadePattern>, millis: u32) -> Result<CancellationTokenSource, &'static str> {
+    // apply only the fades for the channels that we actually support.
+    let fadeMap: HashMap<usize, FadePattern> = fadeMap.iter().filter_map(|(channel, fade)| { 
+      if channel < &self.channels { Some((*channel, fade.clone())) }
+      else { None } 
+    }).collect();
 
     let totalFrames = millis / 1000 * FPS;
     let nanosPerFrame = (1_000_000_000.0 / FPS as f64).round() as u64;
+
+    let froms: HashMap<usize, Color> = fadeMap.keys().map(|channel| { (*channel, self.colors.lock().unwrap()[*channel].clone()) }).collect();
+    let redDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].to.red as f64 - froms[channel].red as f64) }).collect();
+    let greenDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].to.green as f64 - froms[channel].green as f64) }).collect();
+    let blueDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].to.blue as f64 - froms[channel].blue as f64) }).collect();
 
     let selfColors = self.colors.clone();
     let cursor = self.cursor.clone();
@@ -107,16 +120,20 @@ impl CeiledDriver for DebugDriver {
       for i in 0..totalFrames {
         if ct.is_canceled() { break; }
 
-        let baseColor = Color::new(
-          (from.red as f64 + interp.interpolate(redDiff, i + 1, totalFrames).round()) as u8,
-          (from.green as f64 + interp.interpolate(greenDiff, i + 1, totalFrames).round()) as u8,
-          (from.blue as f64 + interp.interpolate(blueDiff, i + 1, totalFrames).round()) as u8,
-        );
-
-        // TODO: adjust for roomlight, flux and brightness here?
-
         let mut colors = selfColors.lock().unwrap();
-        std::mem::replace(&mut colors[channel], baseColor);
+        for (channel, fade) in fadeMap.iter() {
+          let from = &froms[channel];
+          let baseColor = Color::new(
+            (from.red as f64 + fade.interpolator.interpolate(redDiffs[channel], i + 1, totalFrames).round()) as u8,
+            (from.green as f64 + fade.interpolator.interpolate(greenDiffs[channel], i + 1, totalFrames).round()) as u8,
+            (from.blue as f64 + fade.interpolator.interpolate(blueDiffs[channel], i + 1, totalFrames).round()) as u8,
+          );
+
+          // TODO: adjust for roomlight, flux and brightness here?
+          
+          std::mem::replace(&mut colors[*channel], baseColor);
+        }
+
         printColors(&colors, &cursor.lock().unwrap(), px, py);
         sleep(Duration::from_nanos(nanosPerFrame));
       }

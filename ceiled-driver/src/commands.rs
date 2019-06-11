@@ -17,8 +17,14 @@ pub enum Target {
 
 #[derive(Clone,Debug)]
 pub enum Pattern {
-  Solid { color: Color },
-  Fade { to: Color, millis: u32, interpolator: Interpolator }
+  Solid(Color),
+  Fade(FadePattern, u32)
+}
+
+#[derive(Clone,Debug)]
+pub struct FadePattern { 
+  pub to: Color,
+  pub interpolator: Interpolator 
 }
 
 #[derive(Clone,Debug)]
@@ -58,13 +64,13 @@ impl Command {
     let pattern = match iter.next() {
       Some("solid") => {
         let color = Command::parseColor(iter.next(), iter.next(), iter.next())?;
-        Ok(Pattern::Solid { color })
+        Ok(Pattern::Solid(color))
       },
       Some("fade") => {
         let to = Command::parseColor(iter.next(), iter.next(), iter.next())?;
         let millis = Command::parseDuration(iter.next())?;
         let interpolator = Command::parseInterpolation(iter.next())?;
-        Ok(Pattern::Fade { to, millis, interpolator })
+        Ok(Pattern::Fade(FadePattern { to, interpolator }, millis))
       },
       Some(_) => Err("unknown pattern type"),
       None => Err("no pattern specified")
