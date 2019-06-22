@@ -55,7 +55,7 @@ impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
 impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
   pub fn execute(&mut self, cmd: &Command) -> Result<Option<String>, &'static str> {
     match cmd.action() {
-      Action::SET => { self.executeSet(cmd)?; Ok(None) },
+      Action::SET => { self.executeSet(cmd) },
       Action::GET => { self.executeGet() },
       _ => Err("that action is not implemented")
     }
@@ -68,14 +68,14 @@ impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
     }
   }
 
-  fn executeSet(&mut self, cmd: &Command) -> Result<(), &'static str> {
+  fn executeSet(&mut self, cmd: &Command) -> Result<Option<String>, &'static str> {
     match cmd.target() {
       Target::All => self.executeSetAll(cmd)?,
       Target::One { channel } => self.executeSetOne(cmd, *channel)?,
       Target::Multiple { channels } => self.executeSetMultiple(cmd, channels.clone())?
     }
     self.lastCommand = Some(cmd.clone());
-    Ok(())
+    Ok(Some("ok".to_string()))
   }
 
   fn executeSetAll(&mut self, cmd: &Command) -> Result<(), &'static str> {

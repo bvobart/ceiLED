@@ -93,7 +93,10 @@ fn main() -> Result<(), &'static str> {
             for driver in drivers.clone() {
               // execute the command
               match driver.lock().unwrap().execute(&command) {
-                Err(err) => { println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err) },
+                Err(err) => { 
+                  println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err);
+                  let _ = stream.write_all(("error: ".to_owned() + err).as_bytes());
+                },
                 Ok(None) => {},
                 Ok(Some(msg)) => {
                   // send a response if a response ewas given
