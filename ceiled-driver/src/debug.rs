@@ -1,4 +1,4 @@
-use super::ceiled::{ CeiledDriver };
+use super::ceiled::{ CeiledDriver, Dimmable, RoomlightSupport, Fluxable };
 use super::colors;
 use super::colors::{ Color };
 use super::commands::FadePattern;
@@ -7,6 +7,7 @@ use cancellation::{ CancellationTokenSource };
 use crossterm::{ Colored, Crossterm, TerminalCursor };
 use std::collections::HashMap;
 use std::sync::{ Arc, Mutex };
+use std::sync::atomic::{ AtomicU8, Ordering };
 use std::thread;
 use std::thread::sleep;
 use std::time::{ Duration };
@@ -26,7 +27,11 @@ fn printColors(colors: &Vec<Color>, cursor: &TerminalCursor, printX: u16, printY
 
 pub struct DebugDriver {
   channels: usize,
+  brightness: Arc<AtomicU8>,
+  flux: Arc<AtomicU8>,
+  roomlight: Arc<AtomicU8>,
   colors: Arc<Mutex<Vec<Color>>>,
+
   cursor: Arc<Mutex<TerminalCursor>>,
   printX: u16,
   printY: u16,
@@ -40,6 +45,10 @@ impl DebugDriver {
     for _ in 0..channels { colors.push(colors::BLACK) }
     DebugDriver { 
       channels,
+      brightness: Arc::new(AtomicU8::new(255)),
+      flux: Arc::new(AtomicU8::new(0)),
+      roomlight: Arc::new(AtomicU8::new(0)),
+
       colors: Arc::new(Mutex::new(colors)), 
       cursor: Arc::new(Mutex::new(cursor)),
       printX: xmax - 24,
@@ -49,12 +58,43 @@ impl DebugDriver {
 
 }
 
+impl Dimmable for DebugDriver {
+  fn getBrightness(&self) -> u8 {
+    self.brightness.load(Ordering::SeqCst)
+  }
+
+  fn setBrightness(&mut self, brightness: u8) {
+    self.brightness.store(brightness, Ordering::SeqCst);
+  }
+}
+
+impl RoomlightSupport for DebugDriver {
+  fn getRoomlight(&self) -> u8 {
+    self.roomlight.load(Ordering::SeqCst)
+  }
+
+  fn setRoomlight(&mut self, roomlight: u8) {
+    self.roomlight.store(roomlight, Ordering::SeqCst);
+  }
+}
+
+impl Fluxable for DebugDriver {
+  fn getFlux(&self) -> u8 {
+    self.flux.load(Ordering::SeqCst)
+  }
+
+  fn setFlux(&mut self, flux: u8) {
+    self.flux.store(flux, Ordering::SeqCst);
+  }
+}
+
 impl CeiledDriver for DebugDriver {
   fn channels(&self) -> usize {
     self.channels
   }
 
   fn init(&mut self) -> Result<(), &'static str> {
+    // TODO: make cool startup routine :P
     self.off()
   }
   
@@ -71,8 +111,13 @@ impl CeiledDriver for DebugDriver {
 
   fn setColor(&mut self, channel: usize, color: Color) -> Result<(), &'static str> {
     if channel >= self.channels { return Err("channel does not exist"); }
+    let adjustedColor = color
+      .withRoomlight(self.getRoomlight())
+      .withFlux(self.getFlux())
+      .withBrightness(self.getBrightness());
+    
     let mut colors = self.colors.lock().unwrap();
-    std::mem::replace(&mut colors[channel], color);
+    std::mem::replace(&mut colors[channel], adjustedColor);
     printColors(&colors, &self.cursor.lock().unwrap(), self.printX, self.printY);
     Ok(())
   }
@@ -82,7 +127,11 @@ impl CeiledDriver for DebugDriver {
     let mut selfColors = self.colors.lock().unwrap();
     for (channel, color) in colors {
       if channel >= self.channels { return Err("channel does not exist"); }
-      std::mem::replace(&mut selfColors[channel], color);
+      let adjustedColor = color
+        .withRoomlight(self.getRoomlight())
+        .withFlux(self.getFlux())
+        .withBrightness(self.getBrightness());
+      std::mem::replace(&mut selfColors[channel], adjustedColor);
     }
     printColors(&selfColors, &self.cursor.lock().unwrap(), self.printX, self.printY);
     Ok(())
@@ -110,6 +159,9 @@ impl CeiledDriver for DebugDriver {
     let blueDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].to.blue as f64 - froms[channel].blue as f64) }).collect();
 
     let selfColors = self.colors.clone();
+    let brightness = self.brightness.clone();
+    let roomlight = self.roomlight.clone();
+    let flux = self.flux.clone();
     let cursor = self.cursor.clone();
     let px = self.printX.clone();
     let py = self.printY.clone();
@@ -121,6 +173,10 @@ impl CeiledDriver for DebugDriver {
         if ct.is_canceled() { break; }
 
         let mut colors = selfColors.lock().unwrap();
+        let b = brightness.load(Ordering::SeqCst);
+        let f = flux.load(Ordering::SeqCst);
+        let rl = roomlight.load(Ordering::SeqCst);
+        
         for (channel, fade) in fadeMap.iter() {
           let from = &froms[channel];
           let baseColor = Color::new(
@@ -128,10 +184,8 @@ impl CeiledDriver for DebugDriver {
             (from.green as f64 + fade.interpolator.interpolate(greenDiffs[channel], i + 1, totalFrames).round()) as u8,
             (from.blue as f64 + fade.interpolator.interpolate(blueDiffs[channel], i + 1, totalFrames).round()) as u8,
           );
-
-          // TODO: adjust for roomlight, flux and brightness here?
-          
-          std::mem::replace(&mut colors[*channel], baseColor);
+          let adjustedColor = baseColor.withRoomlight(rl).withFlux(f).withBrightness(b);
+          std::mem::replace(&mut colors[*channel], adjustedColor);
         }
 
         printColors(&colors, &cursor.lock().unwrap(), px, py);

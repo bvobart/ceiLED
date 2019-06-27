@@ -116,7 +116,6 @@ fn main() -> Result<(), &'static str> {
   }
 
   // TODO: initialize CeiledPca9685 driver, if that fails launch debug driver
-  // TODO: implement blend, withRoomlight etc methods on Color.
   // TODO: implement CeiledPca9685
 
 
