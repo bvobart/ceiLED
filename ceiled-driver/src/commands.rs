@@ -12,7 +12,10 @@ pub enum Action {
 pub enum Target {
   All,
   One { channel: usize },
-  Multiple { channels: Vec<usize> }
+  Multiple { channels: Vec<usize> },
+  Brightness,
+  Roomlight,
+  Flux,
 }
 
 #[derive(Clone,Debug)]
@@ -33,6 +36,7 @@ pub struct Command {
   action: Action,
   target: Target,
   pattern: Pattern,
+  number: u8
 }
 
 #[derive(Clone,Debug)]
@@ -54,19 +58,32 @@ impl Interpolator {
   }
 }
 
+// TODO: create commands to set brightness, roomlight, flux etc.
+
 /**
  * Static functions, parsing mainly.
  */
 impl Command {
-  pub fn parse(cmd: &str) -> Result<Self, &'static str> {
+  pub fn parse(cmd: &str) -> Result<Self, String> {
     let mut iter = cmd.split_whitespace();
     let action = Command::parseAction(iter.next())?;
-    match action {
-      Action::GET => { return Ok(Command { action, target: Target::All, pattern: Pattern::None }) },
-      Action::SET => {}
+    let target = Command::parseTarget(iter.next())?;
+    
+    match target {
+      Target::Brightness | Target::Roomlight | Target::Flux => {
+        match action {
+          Action::GET => { return Ok(Command { action, target, pattern: Pattern::None, number: 0 }) },
+          Action::SET => { return Ok(Command { action, target, pattern: Pattern::None, number: Command::parseByte(iter.next())? }) }
+        } 
+      },
+      _ => {}
     }
 
-    let target = Command::parseTarget(iter.next())?;
+    match action {
+      Action::GET => { return Ok(Command { action, target, pattern: Pattern::None, number: 0 })},
+      _ => {}
+    }
+
     let pattern = match iter.next() {
       Some("solid") => {
         let color = Command::parseColor(iter.next(), iter.next(), iter.next())?;
@@ -78,74 +95,77 @@ impl Command {
         let interpolator = Command::parseInterpolation(iter.next())?;
         Ok(Pattern::Fade(FadePattern { to, interpolator }, millis))
       },
-      Some(_) => Err("unknown pattern type"),
-      None => Err("no pattern specified")
+      Some(p) => Err("unknown pattern type".to_owned() + p),
+      None => Err("no pattern specified".to_string())
     }?;
 
-    Ok(Command { action, target, pattern })
+    Ok(Command { action, target, pattern, number: 0 })
   }
 
-  fn parseAction(cmd: Option<&str>) -> Result<Action, &'static str> {
+  fn parseAction(cmd: Option<&str>) -> Result<Action, String> {
     match cmd {
       Some("set") => Ok(Action::SET),
       Some("get") => Ok(Action::GET),
-      Some(_) => Err("invalid action"),
-      None => Err("no action specified")
+      Some(a) => Err("invalid action: ".to_owned() + a),
+      None => Err("no action specified".to_string())
     }
   }
 
-  fn parseTarget(cmd: Option<&str>) -> Result<Target, &'static str> {
+  fn parseTarget(cmd: Option<&str>) -> Result<Target, String> {
     match cmd {
       Some("all") => Ok(Target::All),
+      Some("brightness") => Ok(Target::Brightness),
+      Some("roomlight") => Ok(Target::Roomlight),
+      Some("flux") => Ok(Target::Flux),
       Some(channelStr) => {
         let mut channels = vec![];
         for chStr in channelStr.split(",") {
           let channel = chStr.parse::<usize>();
-          if channel.is_err() { return Err("invalid channel specified") };
+          if channel.is_err() { return Err("invalid channel specified: ".to_owned() + chStr) };
           channels.push(channel.unwrap());
         }
-        if channels.len() == 0 { return Err("No channel numbers specified") };
+        if channels.len() == 0 { return Err("No channel numbers specified".to_string()) };
         if channels.len() == 1 { return Ok(Target::One { channel: channels[0] }) };
         Ok(Target::Multiple { channels })
       },
-      None => Err("no target specified")
+      None => Err("no target specified".to_string())
     }
   }
 
-  fn parseColor(r: Option<&str>, g: Option<&str>, b: Option<&str>) -> Result<Color, &'static str> {
+  fn parseColor(r: Option<&str>, g: Option<&str>, b: Option<&str>) -> Result<Color, String> {
     let red = Command::parseByte(r)?;
     let green = Command::parseByte(g)?;
     let blue = Command::parseByte(b)?;
     Ok(Color { red, green, blue })
   }
 
-  fn parseByte(cmd: Option<&str>) -> Result<u8, &'static str> {
+  fn parseByte(cmd: Option<&str>) -> Result<u8, String> {
     match cmd {
       Some(num) => {
         let b = num.parse::<u8>();
-        if b.is_err() { return Err("value is not a number") }
+        if b.is_err() { return Err("value is not a number: ".to_owned() + num) }
         Ok(b.unwrap())
       }
-      None => Err("no value specified")
+      None => Err("no value specified".to_string())
     }
   }
 
-  fn parseDuration(cmd: Option<&str>) -> Result<u32, &'static str> {
+  fn parseDuration(cmd: Option<&str>) -> Result<u32, String> {
     match cmd {
       Some(num) => {
         let b = num.parse::<u32>();
-        if b.is_err() { return Err("value is not a number") }
+        if b.is_err() { return Err("value is not a number: ".to_owned() + num) }
         Ok(b.unwrap())
       }
-      None => Err("no value specified")
+      None => Err("no value specified".to_string())
     }
   }
 
-  fn parseInterpolation(cmd: Option<&str>) -> Result<Interpolator, &'static str> {
+  fn parseInterpolation(cmd: Option<&str>) -> Result<Interpolator, String> {
     match cmd {
       Some("linear") => Ok(Interpolator::Linear),
       Some("sigmoid") => Ok(Interpolator::Sigmoid),
-      Some(_) => Err("invalid interpolation type"),
+      Some(_) => Err("invalid interpolation type".to_string()),
       None => Ok(Interpolator::Linear)
     }
   }
@@ -167,6 +187,10 @@ impl Command {
     &self.pattern
   }
 
+  pub fn number(&self) -> &u8 {
+    &self.number
+  }
+
   /**
    * Transforms this command into the shell command in the way it is to be received through the socket.
    */
@@ -182,7 +206,10 @@ impl Command {
       Target::Multiple { channels } => {
         let chStrs: Vec<String> = channels.iter().map(|ch| ch.to_string()).collect();
         chStrs.join(",")
-      }
+      },
+      Target::Brightness => "brightness".to_string(),
+      Target::Roomlight => "roomlight".to_string(),
+      Target::Flux => "flux".to_string(),
     };
 
     let patternStr = match &self.pattern {
@@ -197,6 +224,9 @@ impl Command {
       }
     };
 
-    format!("{} {} {}", actionStr, targetStr, patternStr)
+    match &self.target {
+      Target::Brightness | Target::Roomlight | Target::Flux => format!("{} {} {}", actionStr, targetStr, self.number.to_string()),
+      _ => format!("{} {} {}", actionStr, targetStr, patternStr)
+    }
   }
 }

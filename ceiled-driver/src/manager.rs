@@ -1,4 +1,4 @@
-use super::ceiled;
+use super::ceiled::{ CeiledDriver, Dimmable, RoomlightSupport, Fluxable };
 use super::commands::{ Action, Command, Pattern, Target };
 use cancellation::{ CancellationTokenSource };
 use std::collections::HashMap;
@@ -7,7 +7,7 @@ use std::collections::HashMap;
  * DriverManager acts as a generic wrapper around a driver, keeping track of long running operations that may need to be cancelled,
  * and providing an implementation for applying a Command to the driver.
  */
-pub struct DriverManager<Driver: ceiled::CeiledDriver + 'static + Send> {
+pub struct DriverManager<Driver: CeiledDriver + 'static + Send> {
   driver: Driver,
   lastCommand: Option<Command>,
   toBeCancelled: Option<CancellationTokenSource>,
@@ -16,7 +16,7 @@ pub struct DriverManager<Driver: ceiled::CeiledDriver + 'static + Send> {
 /**
  * Static methods, i.e. DriverManager::new(driver)
  */
-impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
+impl <Driver: CeiledDriver + 'static + Send> DriverManager<Driver> {
   pub fn new(driver: Driver) -> Self {
     DriverManager {
       driver,
@@ -29,7 +29,7 @@ impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
 /**
  * Instance methods.
  */
-impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
+impl <Driver: CeiledDriver + 'static + Send> DriverManager<Driver> {
   pub fn get(&mut self) -> &mut Driver {
     &mut self.driver
   }
@@ -52,19 +52,24 @@ impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
 /**
  * Instance methods for executing a command.
  */
-impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
+impl <Driver: CeiledDriver + 'static + Send + Dimmable + RoomlightSupport + Fluxable> DriverManager<Driver> {
   pub fn execute(&mut self, cmd: &Command) -> Result<Option<String>, &'static str> {
     match cmd.action() {
       Action::SET => { self.executeSet(cmd) },
-      Action::GET => { self.executeGet() },
+      Action::GET => { self.executeGet(cmd.target()) },
       _ => Err("that action is not implemented")
     }
   }
 
-  fn executeGet(&self) -> Result<Option<String>, &'static str> {
-    match &self.lastCommand {
-      None => Ok(Some("none".to_string())),
-      Some(cmd) => Ok(Some(cmd.toCmd()))
+  fn executeGet(&self, target: &Target) -> Result<Option<String>, &'static str> {
+    match target {
+      Target::Brightness => Ok(Some(self.driver.getBrightness().to_string())),
+      Target::Roomlight => Ok(Some(self.driver.getRoomlight().to_string())),
+      Target::Flux => Ok(Some(self.driver.getFlux().to_string())),
+      _ => match &self.lastCommand {
+        None => Ok(Some("none".to_string())),
+        Some(cmd) => Ok(Some(cmd.toCmd()))
+      }
     }
   }
 
@@ -72,7 +77,10 @@ impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
     match cmd.target() {
       Target::All => self.executeSetAll(cmd)?,
       Target::One { channel } => self.executeSetOne(cmd, *channel)?,
-      Target::Multiple { channels } => self.executeSetMultiple(cmd, channels.clone())?
+      Target::Multiple { channels } => self.executeSetMultiple(cmd, channels.clone())?,
+      Target::Brightness => { self.executeSetBrightness(*cmd.number())?; return Ok(Some("ok".to_string())); },
+      Target::Roomlight => { self.executeSetRoomlight(*cmd.number())?; return Ok(Some("ok".to_string())); },
+      Target::Flux => { self.executeSetFlux(*cmd.number())?; return Ok(Some("ok".to_string())); },
     }
     self.lastCommand = Some(cmd.clone());
     Ok(Some("ok".to_string()))
@@ -139,5 +147,20 @@ impl <Driver: ceiled::CeiledDriver + 'static + Send> DriverManager<Driver> {
         Ok(())
       }
     }
+  }
+
+  fn executeSetBrightness(&mut self, value: u8) -> Result<(), &'static str> {
+    self.driver.setBrightness(value);
+    Ok(())
+  }
+
+  fn executeSetRoomlight(&mut self, value: u8) -> Result<(), &'static str> {
+    self.driver.setRoomlight(value);
+    Ok(())
+  }
+
+  fn executeSetFlux(&mut self, value: u8) -> Result<(), &'static str> {
+    self.driver.setFlux(value);
+    Ok(())
   }
 }
