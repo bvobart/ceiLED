@@ -120,9 +120,9 @@ fn main() -> Result<(), &'static str> {
 
 
   println!("{}", Colored::Bg(crossterm::Color::Reset));
-  println!("CeiLED driver stopping.");
+  println!("-> CeiLED driver stopping.");
   fs::remove_file(SOCKET_PATH).expect("cannot remove ceiled.sock");
-  println!("CeiLED driver stopped.");
+  println!("-> CeiLED driver stopped.");
   Ok(())
 }
 

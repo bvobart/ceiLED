@@ -1,6 +1,7 @@
 import { getNameFromToken, isAuthorised } from '../../auth/auth';
+import { settings } from '../../ControllerSettings';
+import { CeiledDriver } from '../../hardware/CeiledDriver';
 import SolidPattern from '../../patterns/SolidPattern';
-import { settings } from '../../server';
 import CeiledError from '../common/CeiledError';
 import UnauthorisedResponse from '../common/UnauthorisedResponse';
 import { IncomingMessage, MessageHandler, OutgoingMessage, StatusType } from '../MessageHandler';
@@ -12,6 +13,11 @@ import { SettingsSuccessResponse } from './SettingsSuccessResponse';
  * Handles any messages to set and retrieve settings on the controller.
  */
 export class SettingsMessageHandler implements MessageHandler {
+  private driver: CeiledDriver;
+  constructor(driver: CeiledDriver) {
+    this.driver = driver;
+  }
+
   public async handle(message: IncomingMessage): Promise<OutgoingMessage> {
     if (!message.settings) return Promise.resolve(null);
     if (SettingsMessage.isMessage(message.settings)) {
@@ -29,13 +35,12 @@ export class SettingsMessageHandler implements MessageHandler {
               (await getNameFromToken(message.authToken)) + '\n',
             );
 
-          settings.setBrightness(inRange(req.brightness, 0, 100));
-          settings.setRoomLight(inRange(req.roomLight, 0, 100));
-          settings.setFlux(inRange(req.flux, -1, 5));
-          if (req.driver) settings.setDriver(req.driver);
+          settings.brightness = inRange(req.brightness, 0, 100);
+          settings.roomLight = inRange(req.roomLight, 0, 100);
+          settings.flux = inRange(req.flux, -1, 5);
 
           if (settings.activePattern && settings.activePattern instanceof SolidPattern) {
-            settings.activePattern.show();
+            settings.activePattern.show(this.driver);
           }
 
           return Promise.resolve(new SettingsSuccessResponse());

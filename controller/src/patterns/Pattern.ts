@@ -1,8 +1,10 @@
+import { Driver } from '../hardware/Driver';
+
 interface Pattern {
   /**
-   * Displays the pattern on the actual LED strips. Should never block.
+   * Displays the pattern on the specified driver. Should never block.
    */
-  show(): void;
+  show(driver: Driver): Promise<void>;
 
   /**
    * Stops displaying the pattern. Should never block.

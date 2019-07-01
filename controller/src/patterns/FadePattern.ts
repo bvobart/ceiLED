@@ -1,6 +1,5 @@
-import * as Bluebird from 'bluebird';
 import Color from '../common/Color';
-import { settings } from '../server';
+import { Driver } from '../hardware/Driver';
 import { FadePatternOptions, FadeType, InterpolationType } from './options/FadePatternOptions';
 import Pattern from './Pattern';
 
@@ -14,7 +13,7 @@ class FadePattern implements Pattern {
   private interpolation: InterpolationType;
 
   private shouldShow: boolean;
-  private awaiting: Bluebird<[void, void, void]>;
+  private interval: NodeJS.Timeout;
 
   constructor(colors: Color[], options: FadePatternOptions) {
     this.channels = options.channels;
@@ -31,71 +30,47 @@ class FadePattern implements Pattern {
     }
   }
 
-  public async show(): Promise<void> {
-    this.shouldShow = true;
-    return new Promise<void>(async (resolve, reject) => {
-      while (this.shouldShow) {
-        switch (this.type) {
-          case FadeType.NORMAL:
-            await this.fadeNormalOnce();
-            break;
-          case FadeType.INVERTED:
-            await this.fadeInvertedOnce();
-            break;
-          default:
-            reject('Unknown FadeType: ' + this.type);
+  public async show(driver: Driver): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.shouldShow = true;
+      let index = 0;
+      const duration = (60 * 1000) / this.speed; // sec/min / beats/min * 1000 = sec/beat * 1000 = ms/beat
+      const fadeFunc = async () => {
+        if (!this.shouldShow) {
+          clearInterval(this.interval);
+          return;
         }
-      }
-      return resolve();
+
+        if (this.channels === 3) {
+          // on 3 channels: each channel has its own colour.
+          await Promise.all([
+            driver.setFade([0], this.colors1[index], duration, this.interpolation),
+            driver.setFade([1], this.colors2[index], duration, this.interpolation),
+            driver.setFade([2], this.colors3[index], duration, this.interpolation),
+          ]);
+        } else if (this.channels === 2) {
+          // on 2 channels: channel 1 and 3 have the same colour, channel 2 has its own colour.
+          await Promise.all([
+            driver.setFade([0, 2], this.colors1[index], duration, this.interpolation),
+            driver.setFade([1], this.colors2[index], duration, this.interpolation),
+          ]);
+        } else {
+          // on 1 channel: all channels have the same colour.
+          await driver.setFade([0, 1, 2], this.colors1[index], duration, this.interpolation);
+        }
+
+        index = index + 1;
+        if (index === this.colors1.length) index = 0;
+      };
+
+      fadeFunc();
+      this.interval = setInterval(fadeFunc, duration);
+      resolve();
     });
   }
 
   public async stop(): Promise<void> {
     this.shouldShow = false;
-    if (this.awaiting) this.awaiting.cancel();
-  }
-
-  /**
-   * Will fade 'normally' across all colours. This method blocks.
-   */
-  public async fadeNormalOnce(): Promise<void> {
-    let ch1Color: Color;
-    let ch2Color: Color;
-    let ch3Color: Color;
-
-    for (let index = 0; index < this.colors1.length; index++) {
-      if (!this.shouldShow) break;
-
-      ch1Color = this.colors1[index];
-      if (this.channels === 2) {
-        // on 2 channels: channel 1 and 3 have the same colour, channel 2 has its own colour.
-        ch2Color = this.colors2[index] ? this.colors2[index] : ch1Color;
-        ch3Color = ch1Color;
-      } else if (this.channels === 3) {
-        // on 3 channels: each channel has its own colour.
-        ch2Color = this.colors2[index] ? this.colors2[index] : ch1Color;
-        ch3Color = this.colors3[index] ? this.colors3[index] : ch1Color;
-      } else {
-        // on 1 channel: all channels have the same colour.
-        ch2Color = ch1Color;
-        ch3Color = ch1Color;
-      }
-
-      const duration: number = 60 / this.speed;
-
-      this.awaiting = Bluebird.all([
-        settings.channelStore.channel1.setFade(ch1Color, duration, this.interpolation),
-        settings.channelStore.channel2.setFade(ch2Color, duration, this.interpolation),
-        settings.channelStore.channel3.setFade(ch3Color, duration, this.interpolation),
-      ]);
-      await this.awaiting;
-    }
-
-    return Promise.resolve();
-  }
-
-  public fadeInvertedOnce(): void {
-    this.fadeNormalOnce();
   }
 }
 

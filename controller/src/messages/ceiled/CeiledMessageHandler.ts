@@ -1,6 +1,7 @@
 import { getNameFromToken, isAuthorised } from '../../auth/auth';
+import { settings } from '../../ControllerSettings';
+import { CeiledDriver } from '../../hardware/CeiledDriver';
 import Pattern from '../../patterns/Pattern';
-import { settings } from '../../server';
 import UnauthorisedResponse from '../common/UnauthorisedResponse';
 import { IncomingMessage, MessageHandler, OutgoingMessage, StatusType } from '../MessageHandler';
 import { CeiledRequest } from './CeiledRequest';
@@ -15,7 +16,10 @@ import { CeiledResponse } from './CeiledResponse';
  * CeiledRequest class.
  */
 class CeiledMessageHandler implements MessageHandler {
-  constructor() {
+  private driver: CeiledDriver;
+
+  constructor(driver: CeiledDriver) {
+    this.driver = driver;
     this.handle = this.handle.bind(this);
   }
 
@@ -47,7 +51,7 @@ class CeiledMessageHandler implements MessageHandler {
       if (settings && settings.activePattern) settings.activePattern.stop();
 
       settings.activePattern = pattern;
-      settings.activePattern.show();
+      settings.activePattern.show(this.driver);
       return Promise.resolve(new CeiledResponse(StatusType.SUCCES));
     } else {
       const error: Error = new Error('Message is invalid: ' + JSON.stringify(message));

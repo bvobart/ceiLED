@@ -1,6 +1,5 @@
 import Color from '../common/Color';
-import ChannelStore from '../hardware/ChannelStore';
-import { settings } from '../server';
+import { Driver } from '../hardware/Driver';
 import Pattern from './Pattern';
 
 /**
@@ -16,21 +15,30 @@ class SolidPattern implements Pattern {
   /**
    * Shows this pattern.
    */
-  public show(): void {
-    this.colors.splice(3);
+  public async show(driver: Driver): Promise<void> {
+    if (!driver) return;
 
-    const { channel1, channel2, channel3 } = settings.channelStore;
+    this.colors.splice(3);
     if (this.colors.length === 0) {
       // no colours in a SolidPattern means turn off
-      channel1.setColorDirectly(Color.BLACK);
-      channel2.setColorDirectly(Color.BLACK);
-      channel3.setColorDirectly(Color.BLACK);
+      driver.off();
       return;
     }
 
-    channel1.setColor(this.colors[0]);
-    channel2.setColor(this.colors[1] ? this.colors[1] : this.colors[0]);
-    channel3.setColor(this.colors[2] ? this.colors[2] : this.colors[0]);
+    if (this.colors.length === 1) {
+      await driver.setColor([0, 1, 2], this.colors[0]);
+    } else if (this.colors.length === 2) {
+      await Promise.all([
+        driver.setColor([0, 2], this.colors[0]),
+        driver.setColor([1], this.colors[1]),
+      ]);
+    } else {
+      await Promise.all([
+        driver.setColor([0], this.colors[0]),
+        driver.setColor([1], this.colors[1]),
+        driver.setColor([2], this.colors[2]),
+      ]);
+    }
   }
 
   public stop(): void {

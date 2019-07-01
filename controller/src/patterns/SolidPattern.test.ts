@@ -1,46 +1,31 @@
 import Color from '../common/Color';
-import { settings } from '../server';
+import { CeiledDriver } from '../hardware/CeiledDriver';
 import SolidPattern from './SolidPattern';
 
+jest.mock('../hardware/CeiledDriver');
+
 describe('SolidPattern', () => {
-  let storeMock: any;
-
-  beforeEach(() => {
-    storeMock = {
-      channel1: { setColor: jest.fn() },
-      channel2: { setColor: jest.fn() },
-      channel3: { setColor: jest.fn() },
-    };
-    settings.channelStore = storeMock;
-    settings.setBrightness(100);
-    settings.setRoomLight(0);
-    settings.setFlux(0);
-  });
-
   it('shows one solid colour', () => {
+    const driver = new CeiledDriver(null, 3);
     const pattern: SolidPattern = new SolidPattern([Color.RED]);
-    pattern.show();
-    expect(storeMock.channel1.setColor).toHaveBeenCalledWith(Color.RED);
-    expect(storeMock.channel2.setColor).toHaveBeenCalledWith(Color.RED);
-    expect(storeMock.channel3.setColor).toHaveBeenCalledWith(Color.RED);
-    pattern.stop();
+    pattern.show(driver);
+    expect(driver.setColor).toHaveBeenCalledWith([0, 1, 2], Color.RED);
   });
 
   it('shows two solid colours', () => {
+    const driver = new CeiledDriver(null, 3);
     const pattern: SolidPattern = new SolidPattern([Color.RED, Color.BLUE]);
-    pattern.show();
-    expect(storeMock.channel1.setColor).toHaveBeenCalledWith(Color.RED);
-    expect(storeMock.channel2.setColor).toHaveBeenCalledWith(Color.BLUE);
-    expect(storeMock.channel3.setColor).toHaveBeenCalledWith(Color.RED);
-    pattern.stop();
+    pattern.show(driver);
+    expect(driver.setColor).toHaveBeenCalledWith([0, 2], Color.RED);
+    expect(driver.setColor).toHaveBeenCalledWith([1], Color.BLUE);
   });
 
   it('shows three solid colours', () => {
+    const driver = new CeiledDriver(null, 3);
     const pattern: SolidPattern = new SolidPattern([Color.RED, Color.BLUE, Color.GREEN]);
-    pattern.show();
-    expect(storeMock.channel1.setColor).toHaveBeenCalledWith(Color.RED);
-    expect(storeMock.channel2.setColor).toHaveBeenCalledWith(Color.BLUE);
-    expect(storeMock.channel3.setColor).toHaveBeenCalledWith(Color.GREEN);
-    pattern.stop();
+    pattern.show(driver);
+    expect(driver.setColor).toHaveBeenCalledWith([0], Color.RED);
+    expect(driver.setColor).toHaveBeenCalledWith([1], Color.BLUE);
+    expect(driver.setColor).toHaveBeenCalledWith([2], Color.GREEN);
   });
 });

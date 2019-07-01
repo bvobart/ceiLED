@@ -1,4 +1,5 @@
 import Color from '../../common/Color';
+import { CeiledDriver } from '../../hardware/CeiledDriver';
 import CeiledError from '../common/CeiledError';
 import { OutgoingMessage, StatusType } from '../MessageHandler';
 import CeiledMessageHandler from './CeiledMessageHandler';
@@ -6,10 +7,11 @@ import { CeiledRequest, CeiledRequestType } from './CeiledRequest';
 import { CeiledResponse } from './CeiledResponse';
 
 jest.mock('../../auth/auth');
+jest.mock('../../hardware/CeiledDriver');
 
 describe('CeiledMessageHandler', () => {
   describe('handle', () => {
-    const handler: CeiledMessageHandler = new CeiledMessageHandler();
+    const handler: CeiledMessageHandler = new CeiledMessageHandler(new CeiledDriver('', 3));
 
     it('handles a correct message', async done => {
       const colors: Color[] = [Color.BLACK, Color.WHITE];

@@ -1,12 +1,14 @@
-import { settings } from '../../server';
+import { settings } from '../../ControllerSettings';
+import { CeiledDriver } from '../../hardware/CeiledDriver';
 import { IncomingMessage, OutgoingMessage, StatusType } from '../MessageHandler';
 import SettingsMessageHandler from './SettingsMessageHandler';
 import { SettingsSuccessResponse } from './SettingsSuccessResponse';
 
 jest.mock('../../auth/auth');
+jest.mock('../../hardware/CeiledDriver');
 
 describe('SettingsMessageHandler', () => {
-  const handler = new SettingsMessageHandler();
+  const handler = new SettingsMessageHandler(new CeiledDriver(null, 3));
 
   describe('get message', () => {
     it('gets the settings', async done => {
@@ -15,9 +17,9 @@ describe('SettingsMessageHandler', () => {
       expect(response).toBeInstanceOf(SettingsSuccessResponse);
       expect(response.status).toBe(StatusType.SUCCES);
       expect(response.settings.action).toBe('get');
-      expect(response.settings.brightness).toBe(settings.getBrightness());
-      expect(response.settings.roomLight).toBe(settings.getRoomLight());
-      expect(response.settings.flux).toBe(settings.getFlux());
+      expect(response.settings.brightness).toBe(settings.brightness);
+      expect(response.settings.roomLight).toBe(settings.roomLight);
+      expect(response.settings.flux).toBe(settings.flux);
       done();
     });
   });
@@ -31,9 +33,9 @@ describe('SettingsMessageHandler', () => {
       const response: OutgoingMessage = await handler.handle(msg);
       expect(response).toBeInstanceOf(SettingsSuccessResponse);
       expect(response.status).toBe(StatusType.SUCCES);
-      expect(settings.getBrightness()).toBe(msg.settings.brightness);
-      expect(settings.getRoomLight()).toBe(msg.settings.roomLight);
-      expect(settings.getFlux()).toBe(msg.settings.flux);
+      expect(settings.brightness).toBe(msg.settings.brightness);
+      expect(settings.roomLight).toBe(msg.settings.roomLight);
+      expect(settings.flux).toBe(msg.settings.flux);
       done();
     });
   });

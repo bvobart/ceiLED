@@ -2,6 +2,7 @@ import Color from '../../common/Color';
 
 export enum FadeType {
   NORMAL = 'normal',
+  // fade types below are not implemented
   INVERTED = 'inverted',
   LINE = 'line',
   REVERSE_LINE = 'reverse-line',
