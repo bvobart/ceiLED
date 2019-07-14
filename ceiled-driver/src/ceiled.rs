@@ -1,5 +1,5 @@
 use super::colors::{ Color };
-use super::commands::{ FadePattern };
+use super::commands::{ Interpolator };
 use super::cancellation::{ CancellationTokenSource };
 
 use std::collections::HashMap;
@@ -9,12 +9,12 @@ use std::collections::HashMap;
  */
 pub trait CeiledDriver {
   fn channels(&self) -> usize;
-  fn init(&mut self) -> Result<(), &'static str>;
-  fn off(&mut self) -> Result<(), &'static str>;
-  fn setColor(&mut self, channel: usize, color: Color) -> Result<(), &'static str>;
-  fn setColors(&mut self, colors: HashMap<usize, Color>) -> Result<(), &'static str>;
-  fn setFade(&mut self, channel: usize, fade: FadePattern, millis: u32) -> Result<CancellationTokenSource, &'static str>;
-  fn setFades(&mut self, fadeMap: HashMap<usize, FadePattern>, millis: u32) -> Result<CancellationTokenSource, &'static str>;
+  fn init(&mut self) -> Result<(), String>;
+  fn off(&mut self) -> Result<(), String>;
+  fn setColor(&mut self, channel: usize, color: Color) -> Result<(), String>;
+  fn setColors(&mut self, colors: HashMap<usize, Color>) -> Result<(), String>;
+  fn setFade(&mut self, channel: usize, to: Color, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, String>;
+  fn setFades(&mut self, fadeMap: HashMap<usize, Color>, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, String>;
 }
 
 /**

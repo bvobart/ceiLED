@@ -2,44 +2,48 @@ use super::colors::{ Color };
 
 use std::f64::consts;
 
-#[derive(Clone,Debug)]
+#[derive(Clone,Debug,PartialEq)]
 pub enum Action {
   GET,
   SET,
 }
 
-#[derive(Clone,Debug)]
+#[derive(Clone,Debug,PartialEq)]
+pub enum TargetSetting {
+  Target(Target),
+  Setting(Setting)
+}
+
+#[derive(Clone,Debug,PartialEq)]
 pub enum Target {
   All,
   One { channel: usize },
   Multiple { channels: Vec<usize> },
+}
+
+#[derive(Clone,Debug,PartialEq)]
+pub enum Setting {
   Brightness,
   Roomlight,
   Flux,
 }
 
-#[derive(Clone,Debug)]
+#[derive(Clone,Debug,PartialEq)]
 pub enum Pattern {
   None,
-  Solid(Color),
-  Fade(FadePattern, u32)
-}
-
-#[derive(Clone,Debug)]
-pub struct FadePattern { 
-  pub to: Color,
-  pub interpolator: Interpolator 
+  Solid(Vec<(Target, Color)>),
+  Fade(Vec<(Target, Color)>, u32, Interpolator)
 }
 
 #[derive(Clone,Debug)]
 pub struct Command {
   action: Action,
-  target: Target,
+  arg1: TargetSetting,
   pattern: Pattern,
   number: u8
 }
 
-#[derive(Clone,Debug)]
+#[derive(Clone,Debug,PartialEq)]
 pub enum Interpolator {
   Linear,
   Sigmoid
@@ -58,7 +62,9 @@ impl Interpolator {
   }
 }
 
-// TODO: create commands to set brightness, roomlight, flux etc.
+use TargetSetting::*;
+use self::Target::*;
+use self::Setting::*;
 
 /**
  * Static functions, parsing mainly.
@@ -67,39 +73,62 @@ impl Command {
   pub fn parse(cmd: &str) -> Result<Self, String> {
     let mut iter = cmd.split_whitespace();
     let action = Command::parseAction(iter.next())?;
-    let target = Command::parseTarget(iter.next())?;
+    let arg1 = Command::parseTargetSetting(iter.next())?;
     
-    match target {
-      Target::Brightness | Target::Roomlight | Target::Flux => {
+    let mut target = match arg1 {
+      Setting(_) => { // if setting, return immediately
         match action {
-          Action::GET => { return Ok(Command { action, target, pattern: Pattern::None, number: 0 }) },
-          Action::SET => { return Ok(Command { action, target, pattern: Pattern::None, number: Command::parseByte(iter.next())? }) }
+          Action::GET => { return Ok(Command { action, arg1, pattern: Pattern::None, number: 0 }) },
+          Action::SET => { return Ok(Command { action, arg1, pattern: Pattern::None, number: Command::parseByte(iter.next())? }) }
         } 
       },
-      _ => {}
-    }
-
-    match action {
-      Action::GET => { return Ok(Command { action, target, pattern: Pattern::None, number: 0 })},
-      _ => {}
-    }
+      Target(t) => {
+        match action { // also for get target, return immediately
+          Action::GET => { return Ok(Command { action, arg1: Target(t), pattern: Pattern::None, number: 0 }) },
+          Action::SET => t // else continue to parse pattern
+        }
+      }
+    };
 
     let pattern = match iter.next() {
       Some("solid") => {
-        let color = Command::parseColor(iter.next(), iter.next(), iter.next())?;
-        Ok(Pattern::Solid(color))
+        let mut colors = vec![];
+        loop {
+          let color = Command::parseColor(iter.next(), iter.next(), iter.next())?;
+          colors.push((target.clone(), color));
+
+          match iter.next() {
+            Some(",") => { target = Command::parseTarget(iter.next())?; },
+            Some(x) => { return Err("expected comma, but found: ".to_owned() + x); },
+            None => break,
+          };
+        }
+        Ok(Pattern::Solid(colors))
       },
       Some("fade") => {
-        let to = Command::parseColor(iter.next(), iter.next(), iter.next())?;
-        let millis = Command::parseDuration(iter.next())?;
+        let mut colors = vec![];
+        let millis: u32;
+        loop {
+          let to = Command::parseColor(iter.next(), iter.next(), iter.next())?;
+          colors.push((target.clone(), to));
+
+          match iter.next() {
+            Some(",") => { target = Command::parseTarget(iter.next())?; },
+            Some(x) => {
+              millis = Command::parseDuration(Some(x))?;
+              break;
+            },
+            None => { return Err("no duration specified".to_string()); },
+          };
+        }
         let interpolator = Command::parseInterpolation(iter.next())?;
-        Ok(Pattern::Fade(FadePattern { to, interpolator }, millis))
+        Ok(Pattern::Fade(colors, millis, interpolator))
       },
       Some(p) => Err("unknown pattern type".to_owned() + p),
       None => Err("no pattern specified".to_string())
     }?;
 
-    Ok(Command { action, target, pattern, number: 0 })
+    Ok(Command { action, arg1: Target(target), pattern, number: 0 })
   }
 
   fn parseAction(cmd: Option<&str>) -> Result<Action, String> {
@@ -111,12 +140,12 @@ impl Command {
     }
   }
 
-  fn parseTarget(cmd: Option<&str>) -> Result<Target, String> {
+  fn parseTargetSetting(cmd: Option<&str>) -> Result<TargetSetting, String> {
     match cmd {
-      Some("all") => Ok(Target::All),
-      Some("brightness") => Ok(Target::Brightness),
-      Some("roomlight") => Ok(Target::Roomlight),
-      Some("flux") => Ok(Target::Flux),
+      Some("all") => Ok(Target(All)),
+      Some("brightness") => Ok(Setting(Brightness)),
+      Some("roomlight") => Ok(Setting(Roomlight)),
+      Some("flux") => Ok(Setting(Flux)),
       Some(channelStr) => {
         let mut channels = vec![];
         for chStr in channelStr.split(",") {
@@ -125,10 +154,18 @@ impl Command {
           channels.push(channel.unwrap());
         }
         if channels.len() == 0 { return Err("No channel numbers specified".to_string()) };
-        if channels.len() == 1 { return Ok(Target::One { channel: channels[0] }) };
-        Ok(Target::Multiple { channels })
+        if channels.len() == 1 { return Ok(Target(One { channel: channels[0] })) };
+        Ok(Target(Multiple { channels }))
       },
       None => Err("no target specified".to_string())
+    }
+  }
+
+  fn parseTarget(cmd: Option<&str>) -> Result<Target, String> {
+    match Command::parseTargetSetting(cmd) {
+      Ok(Target(t)) => Ok(t),
+      Ok(Setting(s)) => Err(format!("not a target {:?}", s)),
+      Err(err) => Err(err)
     }
   }
 
@@ -157,7 +194,7 @@ impl Command {
         if b.is_err() { return Err("value is not a number: ".to_owned() + num) }
         Ok(b.unwrap())
       }
-      None => Err("no value specified".to_string())
+      None => Err("no duration specified".to_string())
     }
   }
 
@@ -179,8 +216,8 @@ impl Command {
     &self.action
   }
 
-  pub fn target(&self) -> &Target {
-    &self.target
+  pub fn arg1(&self) -> &TargetSetting {
+    &self.arg1
   }
 
   pub fn pattern(&self) -> &Pattern {
@@ -200,33 +237,189 @@ impl Command {
       Action::GET => "get"
     };
 
-    let targetStr = match &self.target {
-      Target::All => "all".to_string(),
-      Target::One { channel } => channel.to_string(),
-      Target::Multiple { channels } => {
-        let chStrs: Vec<String> = channels.iter().map(|ch| ch.to_string()).collect();
-        chStrs.join(",")
-      },
-      Target::Brightness => "brightness".to_string(),
-      Target::Roomlight => "roomlight".to_string(),
-      Target::Flux => "flux".to_string(),
-    };
+    let targetStr = self.arg1.toCmd();
 
     let patternStr = match &self.pattern {
       Pattern::None => "".to_string(),
-      Pattern::Solid(color) => format!("solid {} {} {}", color.red, color.green, color.blue),
-      Pattern::Fade(fp, millis) => { 
-        let interpStr = match fp.interpolator {
+      Pattern::Solid(colors) => {
+        let mut pstr = "".to_string();
+        for (i, (target, color)) in colors.iter().enumerate() {
+          pstr = match i {
+            0 => format!("solid {} {} {}", color.red, color.green, color.blue),
+            _ => format!("{}, {} solid {} {} {}", pstr, target.toCmd(), color.red, color.green, color.blue)
+          }
+        }
+        pstr
+      },
+      Pattern::Fade(colors, millis, interpolator) => { 
+        let mut pstr = "".to_string();
+        for (i, (target, color)) in colors.iter().enumerate() {
+          pstr = match i {
+            0 => format!("fade {} {} {}", color.red, color.green, color.blue),
+            _ => format!("{}, {} fade {} {} {}", pstr, target.toCmd(), color.red, color.green, color.blue)
+          }
+        }
+
+        let interpStr = match interpolator {
           Interpolator::Linear => "linear",
           Interpolator::Sigmoid => "sigmoid"
         };
-        format!("fade {} {} {} {} {}", fp.to.red, fp.to.green, fp.to.blue, millis, interpStr)
+        format!("{} {} {}", pstr, millis, interpStr)
       }
     };
 
-    match &self.target {
-      Target::Brightness | Target::Roomlight | Target::Flux => format!("{} {} {}", actionStr, targetStr, self.number.to_string()),
+    match &self.arg1 {
+      Setting(_) => format!("{} {} {}", actionStr, targetStr, self.number.to_string()),
       _ => format!("{} {} {}", actionStr, targetStr, patternStr)
     }
+  }
+}
+
+impl Target {
+  fn toCmd(&self) -> String {
+    match &self {
+      All => "all".to_string(),
+      One { channel } => channel.to_string(),
+      Multiple { channels } => {
+        let chStrs: Vec<String> = channels.iter().map(|ch| ch.to_string()).collect();
+        chStrs.join(",")
+      }
+    }
+  }
+}
+
+impl Setting {
+  fn toCmd(&self) -> String {
+    match &self {
+      Brightness => "brightness".to_string(),
+      Roomlight => "roomlight".to_string(),
+      Flux => "flux".to_string(),
+    }
+  }
+}
+
+impl TargetSetting {
+  fn toCmd(&self) -> String {
+    match &self {
+      Target(t) => t.toCmd(),
+      Setting(s) => s.toCmd(),
+    }
+  }
+}
+
+#[cfg(test)]
+mod testParseCommands {
+  use super::*;
+
+  #[test]
+  fn testParseGetBrightness() {
+    let cmd = Command::parse("get brightness").unwrap();
+    assert_eq!(*cmd.action(), Action::GET);
+    assert_eq!(*cmd.pattern(), Pattern::None);
+    assert_eq!(*cmd.arg1(), Setting(Brightness));
+  }
+
+  #[test]
+  fn testParseGetRoomlight() {
+    let cmd = Command::parse("get roomlight").unwrap();
+    assert_eq!(*cmd.action(), Action::GET);
+    assert_eq!(*cmd.pattern(), Pattern::None);
+    assert_eq!(*cmd.arg1(), Setting(Roomlight));
+  }
+
+  #[test]
+  fn testParseGetFlux() {
+    let cmd = Command::parse("get flux").unwrap();
+    assert_eq!(*cmd.action(), Action::GET);
+    assert_eq!(*cmd.pattern(), Pattern::None);
+    assert_eq!(*cmd.arg1(), Setting(Flux));
+  }
+
+  #[test]
+  fn testParseSetBrightness() {
+    let cmd = Command::parse("set brightness 65").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::None);
+    assert_eq!(*cmd.arg1(), Setting(Brightness));
+    assert_eq!(*cmd.number(), 65);
+  }
+
+  #[test]
+  fn testParseSetRoomlight() {
+    let cmd = Command::parse("set roomlight 65").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::None);
+    assert_eq!(*cmd.arg1(), Setting(Roomlight));
+  }
+
+  #[test]
+  fn testParseSetFlux() {
+    let cmd = Command::parse("set flux 65").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::None);
+    assert_eq!(*cmd.arg1(), Setting(Flux));
+    assert_eq!(*cmd.number(), 65);
+  }
+
+  #[test]
+  fn testParseSetAllSolid() {
+    let cmd = Command::parse("set all solid 255 0 65").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::Solid(vec![(All, Color { red: 255, green: 0, blue: 65 })]));
+  }
+
+  #[test]
+  fn testParseSetOneSolid() {
+    let cmd = Command::parse("set 1 solid 255 0 65").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::Solid(vec![(One { channel: 1 }, Color { red: 255, green: 0, blue: 65 })]));
+  }
+
+  #[test]
+  fn testParseSetMultipleSameSolid() {
+    let cmd = Command::parse("set 1,2 solid 255 0 65").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::Solid(vec![(Multiple { channels: vec![1,2] }, Color { red: 255, green: 0, blue: 65 })]));
+  }
+
+  #[test]
+  fn testParseSetMultipleDifferentSolid() {
+    let cmd = Command::parse("set 0 solid 255 0 65 , 1 20 40 60").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::Solid(vec![
+      (One { channel: 0 }, Color { red: 255, green: 0, blue: 65 }),
+      (One { channel: 1 }, Color { red: 20, green: 40, blue: 60 }),
+    ]));
+  }
+
+  #[test]
+  fn testParseSetAllFade() {
+    let cmd = Command::parse("set all fade 255 0 65 1965").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::Fade(vec![(All, Color { red: 255, green: 0, blue: 65 })], 1965, Interpolator::Linear));
+  }
+
+  #[test]
+  fn testParseSetOneFade() {
+    let cmd = Command::parse("set 1 fade 255 0 65 6565 sigmoid").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::Fade(vec![(One { channel: 1 }, Color { red: 255, green: 0, blue: 65 })], 6565, Interpolator::Sigmoid));
+  }
+
+  #[test]
+  fn testParseSetMultipleSameFade() {
+    let cmd = Command::parse("set 1,2 fade 255 0 65 1000").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::Fade(vec![(Multiple { channels: vec![1,2] }, Color { red: 255, green: 0, blue: 65 })], 1000, Interpolator::Linear));
+  }
+
+  #[test]
+  fn testParseSetMultipleDifferentFade() {
+    let cmd = Command::parse("set 0 fade 255 0 65 , 1 20 40 60 1000 sigmoid").unwrap();
+    assert_eq!(*cmd.action(), Action::SET);
+    assert_eq!(*cmd.pattern(), Pattern::Fade(vec![
+      (One { channel: 0 }, Color { red: 255, green: 0, blue: 65 }),
+      (One { channel: 1 }, Color { red: 20, green: 40, blue: 60 }),
+    ], 1000, Interpolator::Sigmoid));
   }
 }

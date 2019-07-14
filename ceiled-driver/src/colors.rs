@@ -13,7 +13,7 @@ pub const FLUX3: Color = Color { red: 255, green: 228, blue: 206 };
 pub const FLUX4: Color = Color { red: 255, green: 218, blue: 187 };
 pub const FLUX5: Color = Color { red: 255, green: 206, blue: 166 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug,PartialEq)]
 pub struct Color { pub red: u8, pub green: u8, pub blue: u8 }
 
 /**

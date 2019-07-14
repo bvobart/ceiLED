@@ -95,7 +95,7 @@ fn main() -> Result<(), &'static str> {
               match driver.lock().unwrap().execute(&command) {
                 Err(err) => { 
                   println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err);
-                  let _ = stream.write_all(("error: ".to_owned() + err).as_bytes());
+                  let _ = stream.write_all(("error: ".to_owned() + &err).as_bytes());
                 },
                 Ok(None) => {},
                 Ok(Some(msg)) => {

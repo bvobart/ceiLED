@@ -1,7 +1,7 @@
 use super::ceiled::{ CeiledDriver, Dimmable, RoomlightSupport, Fluxable };
 use super::colors;
 use super::colors::{ Color };
-use super::commands::FadePattern;
+use super::commands::Interpolator;
 
 use cancellation::{ CancellationTokenSource };
 use crossterm::{ Colored, Crossterm, TerminalCursor };
@@ -93,12 +93,12 @@ impl CeiledDriver for DebugDriver {
     self.channels
   }
 
-  fn init(&mut self) -> Result<(), &'static str> {
+  fn init(&mut self) -> Result<(), String> {
     // TODO: make cool startup routine :P
     self.off()
   }
   
-  fn off(&mut self) -> Result<(), &'static str> {
+  fn off(&mut self) -> Result<(), String> {
     let mut off = Vec::with_capacity(self.channels);
     for _ in 0..self.channels {
       off.push(colors::BLACK);
@@ -109,8 +109,8 @@ impl CeiledDriver for DebugDriver {
     Ok(())
   }
 
-  fn setColor(&mut self, channel: usize, color: Color) -> Result<(), &'static str> {
-    if channel >= self.channels { return Err("channel does not exist"); }
+  fn setColor(&mut self, channel: usize, color: Color) -> Result<(), String> {
+    if channel >= self.channels { return Err(format!("channel does not exist: {}, max: {}", channel, self.channels)); }
     let adjustedColor = color
       .withRoomlight(self.getRoomlight())
       .withFlux(self.getFlux())
@@ -122,11 +122,11 @@ impl CeiledDriver for DebugDriver {
     Ok(())
   }
 
-  fn setColors(&mut self, colors: HashMap<usize, Color>) -> Result<(), &'static str> {
-    if colors.len() > self.channels { return Err("argument contains too much colors for the amount of channels"); }
+  fn setColors(&mut self, colors: HashMap<usize, Color>) -> Result<(), String> {
+    if colors.len() > self.channels { return Err(format!("too many colors for the amount of channels: {}, max: {}", colors.len(), self.channels )); }
     let mut selfColors = self.colors.lock().unwrap();
     for (channel, color) in colors {
-      if channel >= self.channels { return Err("channel does not exist"); }
+      if channel >= self.channels { return Err(format!("channel does not exist: {}, max: {}", channel, self.channels)); }
       let adjustedColor = color
         .withRoomlight(self.getRoomlight())
         .withFlux(self.getFlux())
@@ -137,16 +137,16 @@ impl CeiledDriver for DebugDriver {
     Ok(())
   }
 
-  fn setFade(&mut self, channel: usize, fade: FadePattern, millis: u32) -> Result<CancellationTokenSource, &'static str> {
+  fn setFade(&mut self, channel: usize, to: Color, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, String> {
     let mut map = HashMap::new();
-    map.insert(channel, fade);
-    self.setFades(map, millis)
+    map.insert(channel, to);
+    self.setFades(map, millis, interp)
   }
 
-  fn setFades(&mut self, fadeMap: HashMap<usize, FadePattern>, millis: u32) -> Result<CancellationTokenSource, &'static str> {
+  fn setFades(&mut self, fadeMap: HashMap<usize, Color>, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, String> {
     // apply only the fades for the channels that we actually support.
-    let fadeMap: HashMap<usize, FadePattern> = fadeMap.iter().filter_map(|(channel, fade)| { 
-      if channel < &self.channels { Some((*channel, fade.clone())) }
+    let fadeMap: HashMap<usize, Color> = fadeMap.iter().filter_map(|(channel, color)| { 
+      if channel < &self.channels { Some((*channel, color.clone())) }
       else { None } 
     }).collect();
 
@@ -154,9 +154,9 @@ impl CeiledDriver for DebugDriver {
     let nanosPerFrame = (1_000_000_000.0 / FPS as f64).round() as u64;
 
     let froms: HashMap<usize, Color> = fadeMap.keys().map(|channel| { (*channel, self.colors.lock().unwrap()[*channel].clone()) }).collect();
-    let redDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].to.red as f64 - froms[channel].red as f64) }).collect();
-    let greenDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].to.green as f64 - froms[channel].green as f64) }).collect();
-    let blueDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].to.blue as f64 - froms[channel].blue as f64) }).collect();
+    let redDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].red as f64 - froms[channel].red as f64) }).collect();
+    let greenDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].green as f64 - froms[channel].green as f64) }).collect();
+    let blueDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].blue as f64 - froms[channel].blue as f64) }).collect();
 
     let selfColors = self.colors.clone();
     let brightness = self.brightness.clone();
@@ -180,9 +180,9 @@ impl CeiledDriver for DebugDriver {
         for (channel, fade) in fadeMap.iter() {
           let from = &froms[channel];
           let baseColor = Color::new(
-            (from.red as f64 + fade.interpolator.interpolate(redDiffs[channel], i + 1, totalFrames).round()) as u8,
-            (from.green as f64 + fade.interpolator.interpolate(greenDiffs[channel], i + 1, totalFrames).round()) as u8,
-            (from.blue as f64 + fade.interpolator.interpolate(blueDiffs[channel], i + 1, totalFrames).round()) as u8,
+            (from.red as f64 + interp.interpolate(redDiffs[channel], i + 1, totalFrames).round()) as u8,
+            (from.green as f64 + interp.interpolate(greenDiffs[channel], i + 1, totalFrames).round()) as u8,
+            (from.blue as f64 + interp.interpolate(blueDiffs[channel], i + 1, totalFrames).round()) as u8,
           );
           let adjustedColor = baseColor.withRoomlight(rl).withFlux(f).withBrightness(b);
           std::mem::replace(&mut colors[*channel], adjustedColor);

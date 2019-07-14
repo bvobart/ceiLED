@@ -21,7 +21,9 @@ Getting:
 
 Setting:
 - `set TARGET solid RED GREEN BLUE`: sets the target channel(s) to the colour specified by the RGB values.
+- `set TARGET solid RED GREEN BLUE, TARGET RED GREEN BLUE, TARGET RED GREEN BLUE`: sets multiple target channels to their respective colours. Comma-separated list of targets and colours.
 - `set TARGET fade RED GREEN BLUE MILLIS INTERPOLATION?`: sets the target channel(s) to fade from their current colour to the target colour specified by the RGB values. This fade will take MILLIS milliseconds to complete and use the specified interpolation type (linear or sigmoid, defaults to linear).
+- `set TARGET fade RED GREEN BLUE, TARGET RED GREEN BLUE, TARGET RED GREEN BLUE MILLIS INTERPOLATION?`: sets multiple target channels to fade from their current colour to the target colours specified by the RGB values. This fade will take MILLIS milliseconds to complete and use the specified interpolation type (linear or sigmoid, defaults to linear). Comma separated list of targets and respective target colours.
 
 Keywords:
 - `TARGET` = all | 0 | 1 | 2 | ... | n (where n is the amount of channels that are available on the device) | 0,2,3 (comma separated channel numbers up to n)
@@ -35,6 +37,7 @@ Examples:
 - `set 1 solid 255 255 255`
 - `set all fade 255 0 255 500`
 - `set all fade 255 0 255 500 sigmoid`
+- `set all fade 255 0 255, 1 0 255 0 sigmoid` Result: fade to magenta on 0 and 2, fade to green on 1.
 
 TODO:
 - Implement pca9685 driver
