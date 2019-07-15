@@ -46,6 +46,7 @@ export class CeiledDriver implements Driver {
     return new Promise((resolve, reject) => {
       if (!this.socket) reject('ceiled-driver not connected');
       // TODO: this technically only gets the last set color, without care for which channel it was set on
+      // TODO: needs better implementation in Rust ceiled-driver.
       this.socket.once('data', (data: Buffer) => {
         const res = data.toString();
         if (res.trim() === 'none') resolve(Color.BLACK);
@@ -57,7 +58,7 @@ export class CeiledDriver implements Driver {
             new Color({
               red: parseInt(rgb[0], 10),
               green: parseInt(rgb[1], 10),
-              blue: parseInt(rgb[0], 10),
+              blue: parseInt(rgb[2], 10),
             }),
           );
         } else {
@@ -72,12 +73,30 @@ export class CeiledDriver implements Driver {
     return new Promise((resolve, reject) => {
       if (!this.socket) reject('ceiled-driver not connected');
       const chStr = buildChannelString(channels);
-      this.socket.once('data', (data: Buffer) => {
-        const res = data.toString();
-        if (res.trim() === 'ok') resolve();
-        else reject(res.trim());
-      });
+      this.expectResponseOk(resolve, reject);
       this.socket.write(`set ${chStr} solid ${color.red} ${color.green} ${color.blue}\n`);
+    });
+  }
+
+  public setColors(colors: Map<number, Color>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket) reject('ceiled-driver not connected');
+      if (colors.size === 0) resolve();
+
+      const channels = colors.keys();
+      const firstChannel = channels.next().value;
+      const firstColor = colors.get(firstChannel);
+      let cmd = `set ${firstChannel} solid ${firstColor.red} ${firstColor.green} ${
+        firstColor.blue
+      }`;
+
+      for (const channel of channels) {
+        const color = colors.get(channel);
+        cmd = cmd + ` , ${channel} ${color.red} ${color.green} ${color.blue}`;
+      }
+
+      this.expectResponseOk(resolve, reject);
+      this.socket.write(`${cmd}\n`);
     });
   }
 
@@ -91,14 +110,40 @@ export class CeiledDriver implements Driver {
       if (!this.socket) reject('ceiled-driver not connected');
       const chStr = buildChannelString(channels);
       const interpStr = interpolation === InterpolationType.SIGMOID ? 'sigmoid' : 'linear';
-      this.socket.once('data', (data: Buffer) => {
-        const res = data.toString();
-        if (res.trim() === 'ok') resolve();
-        else reject(res.trim());
-      });
+      this.expectResponseOk(resolve, reject);
       this.socket.write(
         `set ${chStr} fade ${to.red} ${to.green} ${to.blue} ${millis} ${interpStr}\n`,
       );
+    });
+  }
+
+  public setFades(
+    colors: Map<number, Color>,
+    millis: number,
+    interpolation: InterpolationType = InterpolationType.LINEAR,
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket) reject('ceiled-driver not connected');
+      const channels = colors.keys();
+      const firstChannel = channels.next().value;
+      const firstColor = colors.get(firstChannel);
+      let cmd = `set ${firstChannel} fade ${firstColor.red} ${firstColor.green} ${firstColor.blue}`;
+
+      for (const channel of channels) {
+        const color = colors.get(channel);
+        cmd = cmd + ` , ${channel} ${color.red} ${color.green} ${color.blue}`;
+      }
+
+      this.expectResponseOk(resolve, reject);
+      this.socket.write(`${cmd} ${millis} ${interpolation}\n`);
+    });
+  }
+
+  private expectResponseOk(resolve: (result?: any) => void, reject: (error?: any) => void): void {
+    this.socket.once('data', (data: Buffer) => {
+      const res = data.toString();
+      if (res.trim() === 'ok') resolve();
+      else reject(res.trim());
     });
   }
 }
