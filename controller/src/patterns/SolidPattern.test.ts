@@ -16,16 +16,21 @@ describe('SolidPattern', () => {
     const driver = new CeiledDriver(null, 3);
     const pattern: SolidPattern = new SolidPattern([Color.RED, Color.BLUE]);
     pattern.show(driver);
-    expect(driver.setColor).toHaveBeenCalledWith([0, 2], Color.RED);
-    expect(driver.setColor).toHaveBeenCalledWith([1], Color.BLUE);
+    const colors = new Map<number, Color>();
+    colors.set(0, Color.RED);
+    colors.set(1, Color.BLUE);
+    colors.set(2, Color.RED);
+    expect(driver.setColors).toHaveBeenCalledWith(colors);
   });
 
   it('shows three solid colours', () => {
     const driver = new CeiledDriver(null, 3);
     const pattern: SolidPattern = new SolidPattern([Color.RED, Color.BLUE, Color.GREEN]);
     pattern.show(driver);
-    expect(driver.setColor).toHaveBeenCalledWith([0], Color.RED);
-    expect(driver.setColor).toHaveBeenCalledWith([1], Color.BLUE);
-    expect(driver.setColor).toHaveBeenCalledWith([2], Color.GREEN);
+    const colors = new Map<number, Color>();
+    colors.set(0, Color.RED);
+    colors.set(1, Color.BLUE);
+    colors.set(2, Color.GREEN);
+    expect(driver.setColors).toHaveBeenCalledWith(colors);
   });
 });
