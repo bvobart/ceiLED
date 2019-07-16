@@ -10,9 +10,9 @@ use std::sync::{ Arc, Mutex };
 use std::sync::atomic::{ AtomicU8, Ordering };
 use std::thread;
 use std::thread::sleep;
-use std::time::{ Duration };
+use std::time::{ Duration, SystemTime };
 
-static FPS: u32 = 60;
+static FPS: u32 = 30;
 
 fn printColors(colors: &Vec<Color>, cursor: &TerminalCursor, printX: u16, printY: u16) {
   let (x, y) = cursor.pos();
@@ -150,14 +150,15 @@ impl CeiledDriver for DebugDriver {
       else { None } 
     }).collect();
 
-    let totalFrames = millis / 1000 * FPS;
+    let totalFrames = (millis as f64 / 1000.0 * FPS as f64).round() as u32;
     let nanosPerFrame = (1_000_000_000.0 / FPS as f64).round() as u64;
-
-    let froms: HashMap<usize, Color> = fadeMap.keys().map(|channel| { (*channel, self.colors.lock().unwrap()[*channel].clone()) }).collect();
+    
+    let currentColors = self.colors.lock().unwrap();
+    let froms: HashMap<usize, Color> = fadeMap.keys().map(|channel| { (*channel, currentColors[*channel].clone()) }).collect();
     let redDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].red as f64 - froms[channel].red as f64) }).collect();
     let greenDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].green as f64 - froms[channel].green as f64) }).collect();
     let blueDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].blue as f64 - froms[channel].blue as f64) }).collect();
-
+    
     let selfColors = self.colors.clone();
     let brightness = self.brightness.clone();
     let roomlight = self.roomlight.clone();
@@ -169,15 +170,25 @@ impl CeiledDriver for DebugDriver {
     let ct = cts.token().clone();
 
     thread::spawn(move || {
+      let mut frameStartTime = SystemTime::now();
       for i in 0..totalFrames {
+        if i > 0 {
+          let elapsed = frameStartTime.elapsed().unwrap().as_nanos();
+          if elapsed < nanosPerFrame as u128 {
+            let nsToSleep = nanosPerFrame as u128 - elapsed;
+            sleep(Duration::from_nanos(nsToSleep as u64)); 
+          }
+        }
+        frameStartTime = SystemTime::now();
+
         if ct.is_canceled() { break; }
 
+        let b = brightness.load(Ordering::Relaxed);
+        let f = flux.load(Ordering::Relaxed);
+        let rl = roomlight.load(Ordering::Relaxed);
         let mut colors = selfColors.lock().unwrap();
-        let b = brightness.load(Ordering::SeqCst);
-        let f = flux.load(Ordering::SeqCst);
-        let rl = roomlight.load(Ordering::SeqCst);
         
-        for (channel, fade) in fadeMap.iter() {
+        for (channel, _) in fadeMap.iter() {
           let from = &froms[channel];
           let baseColor = Color::new(
             (from.red as f64 + interp.interpolate(redDiffs[channel], i + 1, totalFrames).round()) as u8,
@@ -189,7 +200,6 @@ impl CeiledDriver for DebugDriver {
         }
 
         printColors(&colors, &cursor.lock().unwrap(), px, py);
-        sleep(Duration::from_nanos(nanosPerFrame));
       }
     });
 
