@@ -34,7 +34,7 @@ class FadePattern implements Pattern {
     return new Promise<void>((resolve, reject) => {
       this.shouldShow = true;
       let index = 0;
-      const duration = (60 * 1000) / this.speed; // sec/min / beats/min * 1000 = sec/beat * 1000 = ms/beat
+      const duration = (60 * 1000) / this.speed; // (sec/min * 1000) / beats/min = sec/beat * 1000 = ms/beat
       const fadeFunc = async () => {
         if (!this.shouldShow) {
           clearInterval(this.interval);

@@ -56,6 +56,7 @@ const launch = async (): Promise<void> => {
    * @param code Exit code
    */
   const onExit = (code: any) => {
+    ceiledDriver.close();
     if (server) {
       let message: string = 'No clients were connected to server.';
 

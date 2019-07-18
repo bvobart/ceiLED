@@ -8,27 +8,52 @@ const CMD_GET = 'get\n';
 
 export class CeiledDriver implements Driver {
   public channels: number;
+  public isConnected: boolean;
+
   private socketFileName: string;
   private socket: Socket;
+  private shouldReconnect: boolean = true;
 
   constructor(file: string, channels: number) {
     this.channels = channels;
+    this.isConnected = false;
     this.socketFileName = file;
   }
 
   public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.socket = createConnection(this.socketFileName, () => {
-        console.log('ceiled-driver connected');
+        console.log('--> ceiled-driver connected');
+        this.isConnected = true;
+        this.shouldReconnect = true;
+
+        this.socket.on('close', async hadErr => {
+          this.isConnected = false;
+          console.error('--> ceiled-driver disconnected', hadErr ? 'with error' : '');
+          console.log('--> trying to reconnect to ceiled-driver...');
+
+          while (!this.isConnected && this.shouldReconnect) {
+            try {
+              await this.connect();
+            } catch (err) {
+              console.error(err);
+              console.log('--> trying to reconnect to ceiled-driver after 1 second...');
+              await sleep(1000);
+            }
+          }
+        });
+
         resolve();
       }).on('error', (err: Error) => {
-        reject('failed to connect to ceiled-driver: ' + err.message + '\n' + err.stack);
+        reject('--> failed to connect to ceiled-driver: ' + err.message + '\n' + err.stack);
       });
     });
   }
 
   public close(): void {
     if (this.socket) {
+      this.shouldReconnect = false;
+      this.isConnected = false;
       this.socket.end();
       this.socket = null;
     }
@@ -36,7 +61,7 @@ export class CeiledDriver implements Driver {
 
   public off(): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.socket) reject('ceiled-driver not connected');
+      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       this.socket.write(CMD_OFF);
       resolve();
     });
@@ -44,7 +69,7 @@ export class CeiledDriver implements Driver {
 
   public getColor(): Promise<Color> {
     return new Promise((resolve, reject) => {
-      if (!this.socket) reject('ceiled-driver not connected');
+      if (!this.socket) return reject('ceiled-driver not connected');
       // TODO: this technically only gets the last set color, without care for which channel it was set on
       // TODO: needs better implementation in Rust ceiled-driver.
       this.socket.once('data', (data: Buffer) => {
@@ -71,7 +96,7 @@ export class CeiledDriver implements Driver {
 
   public setColor(channels: number[], color: Color): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.socket) reject('ceiled-driver not connected');
+      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       const chStr = buildChannelString(channels);
       this.expectResponseOk(resolve, reject);
       this.socket.write(`set ${chStr} solid ${color.red} ${color.green} ${color.blue}\n`);
@@ -80,8 +105,8 @@ export class CeiledDriver implements Driver {
 
   public setColors(colors: Map<number, Color>): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.socket) reject('ceiled-driver not connected');
-      if (colors.size === 0) resolve();
+      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
+      if (colors.size === 0) return resolve();
 
       const channels = colors.keys();
       const firstChannel = channels.next().value;
@@ -107,7 +132,7 @@ export class CeiledDriver implements Driver {
     interpolation: InterpolationType = InterpolationType.LINEAR,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.socket) reject('ceiled-driver not connected');
+      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       const chStr = buildChannelString(channels);
       const interpStr = interpolation === InterpolationType.SIGMOID ? 'sigmoid' : 'linear';
       this.expectResponseOk(resolve, reject);
@@ -123,7 +148,7 @@ export class CeiledDriver implements Driver {
     interpolation: InterpolationType = InterpolationType.LINEAR,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.socket) reject('ceiled-driver not connected');
+      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       const channels = colors.keys();
       const firstChannel = channels.next().value;
       const firstColor = colors.get(firstChannel);
@@ -150,3 +175,5 @@ export class CeiledDriver implements Driver {
 
 const buildChannelString = (channels: number[]): string =>
   channels.reduce((acc, ch) => acc + ',' + ch, '').slice(1);
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
