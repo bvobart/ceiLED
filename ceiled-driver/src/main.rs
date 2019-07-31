@@ -10,10 +10,11 @@ mod colors;
 mod commands;
 mod debug;
 mod manager;
+mod pca9685;
 
-use ceiled::{ CeiledDriver };
 use commands::{ Command };
 use debug::{ DebugDriver };
+use pca9685::{ CeiledPca9685 };
 use manager::DriverManager;
 
 use crossterm::{ Colored, Crossterm };
@@ -30,19 +31,34 @@ use std::time::{ Duration };
 
 static SOCKET_PATH: &'static str = "ceiled.sock";
 
+lazy_static! {
+  static ref CTERM: Crossterm = Crossterm::new();
+}
+
 /**
  * Initialize the drivers.
  */
-lazy_static! {
-  static ref CTERM: Crossterm = Crossterm::new();
-  static ref DEV_DEBUG: Arc<Mutex<DriverManager<DebugDriver>>> = Arc::new(Mutex::new(DriverManager::new(DebugDriver::new(&CTERM, 3))));
+fn initDrivers() -> Vec<Arc<Mutex<DriverManager>>> {
+  let drvDebug = Arc::new(Mutex::new(DriverManager::new(Box::new(DebugDriver::new(&CTERM, 3)))));
+  let drvCeiled = CeiledPca9685::new(3);
+
+  if drvCeiled.is_err() {
+    let err = drvCeiled.err().unwrap();
+    println!("{}{}-> Error: Failed to initialise CeiledPca9685 driver! Reason: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err);
+    println!("{}{}-> Continuing with DebugDriver..", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Yellow));
+    return vec![drvDebug];
+  } else {
+    println!("{}{}-> CeiledPca9685 driver connected!", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Green));
+    let drvCeiled = Arc::new(Mutex::new(DriverManager::new(Box::new(drvCeiled.unwrap()))));
+    return vec![drvCeiled, drvDebug];
+  }
 }
 
 fn main() -> Result<(), &'static str> {
   println!("{}-> CeiLED driver starting...", Colored::Bg(crossterm::Color::Reset));
 
   // make list of enabled drivers.
-  let drivers = vec![&DEV_DEBUG];
+  let drivers = initDrivers();
   for driver in drivers.clone() {
     driver.lock().unwrap().get().init().expect("driver failed to perform initialisation");
   }
@@ -63,7 +79,7 @@ fn main() -> Result<(), &'static str> {
     }
   });
 
-  println!("{}-> Listening for commands...", Colored::Bg(crossterm::Color::Reset));
+  println!("{}{}-> Listening for commands...", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Reset));
 
   // main loop
   loop {
@@ -114,10 +130,6 @@ fn main() -> Result<(), &'static str> {
       recv(exit) -> _ => break
     }
   }
-
-  // TODO: initialize CeiledPca9685 driver, if that fails launch debug driver
-  // TODO: implement CeiledPca9685
-
 
   println!("{}", Colored::Bg(crossterm::Color::Reset));
   println!("-> CeiLED driver stopping.");

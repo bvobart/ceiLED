@@ -1,4 +1,4 @@
-use super::ceiled::{ CeiledDriver, Dimmable, RoomlightSupport, Fluxable };
+use super::ceiled::{ CeiledDriver };
 use super::colors;
 use super::colors::{ Color };
 use super::commands::Interpolator;
@@ -55,37 +55,6 @@ impl DebugDriver {
       printY: ymax, 
     }
   }
-
-}
-
-impl Dimmable for DebugDriver {
-  fn getBrightness(&self) -> u8 {
-    self.brightness.load(Ordering::SeqCst)
-  }
-
-  fn setBrightness(&mut self, brightness: u8) {
-    self.brightness.store(brightness, Ordering::SeqCst);
-  }
-}
-
-impl RoomlightSupport for DebugDriver {
-  fn getRoomlight(&self) -> u8 {
-    self.roomlight.load(Ordering::SeqCst)
-  }
-
-  fn setRoomlight(&mut self, roomlight: u8) {
-    self.roomlight.store(roomlight, Ordering::SeqCst);
-  }
-}
-
-impl Fluxable for DebugDriver {
-  fn getFlux(&self) -> u8 {
-    self.flux.load(Ordering::SeqCst)
-  }
-
-  fn setFlux(&mut self, flux: u8) {
-    self.flux.store(flux, Ordering::SeqCst);
-  }
 }
 
 impl CeiledDriver for DebugDriver {
@@ -96,6 +65,30 @@ impl CeiledDriver for DebugDriver {
   fn init(&mut self) -> Result<(), String> {
     // TODO: make cool startup routine :P
     self.off()
+  }
+
+  fn getBrightness(&self) -> u8 {
+    self.brightness.load(Ordering::Relaxed)
+  }
+
+  fn setBrightness(&mut self, brightness: u8) {
+    self.brightness.store(brightness, Ordering::Relaxed);
+  }
+
+  fn getRoomlight(&self) -> u8 {
+    self.roomlight.load(Ordering::Relaxed)
+  }
+
+  fn setRoomlight(&mut self, roomlight: u8) {
+    self.roomlight.store(roomlight, Ordering::Relaxed);
+  }
+  
+  fn getFlux(&self) -> u8 {
+    self.flux.load(Ordering::Relaxed)
+  }
+
+  fn setFlux(&mut self, flux: u8) {
+    self.flux.store(flux, Ordering::Relaxed);
   }
   
   fn off(&mut self) -> Result<(), String> {

@@ -1,4 +1,4 @@
-use super::ceiled::{ CeiledDriver, Dimmable, RoomlightSupport, Fluxable };
+use super::ceiled::{ CeiledDriver };
 use super::commands::{ Action, Command, Interpolator, Pattern, Target, TargetSetting, Setting };
 use super::colors::Color;
 use Target::*;
@@ -12,8 +12,8 @@ use std::collections::HashMap;
  * DriverManager acts as a generic wrapper around a driver, keeping track of long running operations that may need to be cancelled,
  * and providing an implementation for applying a Command to the driver.
  */
-pub struct DriverManager<Driver: CeiledDriver + 'static + Send> {
-  driver: Driver,
+pub struct DriverManager {
+  driver: Box<CeiledDriver + Send>,
   lastCommand: Option<Command>,
   toBeCancelled: Option<CancellationTokenSource>,
 }
@@ -21,8 +21,8 @@ pub struct DriverManager<Driver: CeiledDriver + 'static + Send> {
 /**
  * Static methods, i.e. DriverManager::new(driver)
  */
-impl <Driver: CeiledDriver + 'static + Send> DriverManager<Driver> {
-  pub fn new(driver: Driver) -> Self {
+impl DriverManager {
+  pub fn new(driver: Box<CeiledDriver + Send>) -> Self {
     DriverManager {
       driver,
       lastCommand: None,
@@ -34,8 +34,8 @@ impl <Driver: CeiledDriver + 'static + Send> DriverManager<Driver> {
 /**
  * Instance methods.
  */
-impl <Driver: CeiledDriver + 'static + Send> DriverManager<Driver> {
-  pub fn get(&mut self) -> &mut Driver {
+impl DriverManager {
+  pub fn get(&mut self) -> &mut Box<CeiledDriver + Send> {
     &mut self.driver
   }
 
@@ -57,7 +57,7 @@ impl <Driver: CeiledDriver + 'static + Send> DriverManager<Driver> {
 /**
  * Instance methods for executing a command.
  */
-impl <Driver: CeiledDriver + 'static + Send + Dimmable + RoomlightSupport + Fluxable> DriverManager<Driver> {
+impl DriverManager {
   pub fn execute(&mut self, cmd: &Command) -> Result<Option<String>, String> {
     match cmd.action() {
       Action::SET => { self.executeSet(cmd) },
