@@ -14,7 +14,11 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::sync::{ Arc, Mutex };
 use std::sync::atomic::{ AtomicU8, Ordering };
+use std::thread;
+use std::thread::sleep;
+use std::time::{ Duration, SystemTime };
 
+static FPS: u32 = 90;
 
 pub struct CeiledPca9685 { 
   channels: usize, // NOTE: colour channels. Number of pins used is thus channels * 3, see toPwmChannel
@@ -22,7 +26,8 @@ pub struct CeiledPca9685 {
   flux: Arc<AtomicU8>,
   roomlight: Arc<AtomicU8>,
 
-  pwm: Arc<Mutex<Pca9685<I2cdev>>>
+  pwm: Arc<Mutex<Pca9685<I2cdev>>>,
+  colors: Arc<Mutex<Vec<Color>>>,
 }
 
 enum ChannelPin {
@@ -59,6 +64,13 @@ fn checkErr(err: Result<(), PwmError<LinuxI2CError>>, message: String) -> Result
   }
 }
 
+fn printErr(err: Result<(), String>) {
+  match err {
+    Ok(()) => {},
+    Err(err) => println!("{}", err),
+  }
+}
+
 use ChannelPin::*;
 
 impl CeiledPca9685 {
@@ -73,12 +85,16 @@ impl CeiledPca9685 {
     checkErr(pwm.set_prescale(3), "failed to set pca9685 driver pwm frequency".to_string())?;
     checkErr(pwm.enable(), "failed to enable pca9685 driver:".to_string())?;
 
+    let mut colors = Vec::new();
+    for _ in 0..channels { colors.push(colors::BLACK) }
+
     Ok(CeiledPca9685 {
       channels,
       brightness: Arc::new(AtomicU8::new(255)),
       flux: Arc::new(AtomicU8::new(0)),
       roomlight: Arc::new(AtomicU8::new(0)),
-      pwm: Arc::new(Mutex::new(pwm))
+      pwm: Arc::new(Mutex::new(pwm)),
+      colors: Arc::new(Mutex::new(colors)),
     })
   }
 }
@@ -103,6 +119,11 @@ impl CeiledDriver for CeiledPca9685 {
   }
 
   fn setColor(&mut self, channel: usize, color: Color) -> Result<(), String> {
+    let color = color
+      .withRoomlight(self.getRoomlight())
+      .withFlux(self.getFlux())
+      .withBrightness(self.getBrightness());
+    
     let mut pwm = self.pwm.lock().unwrap();
     checkErr(pwm.set_channel_on(toPwmChannel(channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string())?;
     checkErr(pwm.set_channel_off(toPwmChannel(channel, RED), color.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string())?;    
@@ -110,6 +131,10 @@ impl CeiledDriver for CeiledPca9685 {
     checkErr(pwm.set_channel_off(toPwmChannel(channel, GREEN), color.green as u16 * 16), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string())?;    
     checkErr(pwm.set_channel_on(toPwmChannel(channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string())?;
     checkErr(pwm.set_channel_off(toPwmChannel(channel, BLUE), color.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string())?;    
+    
+    let mut colors = self.colors.lock().unwrap();
+    std::mem::replace(&mut colors[channel], color);
+
     Ok(())
   }
 
@@ -128,9 +153,70 @@ impl CeiledDriver for CeiledPca9685 {
   }
 
   fn setFades(&mut self, fadeMap: HashMap<usize, Color>, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, String> {
-    // TODO: implement setFades
+    // apply only the fades for the channels that we actually support.
+    let fadeMap: HashMap<usize, Color> = fadeMap.iter().filter_map(|(channel, color)| { 
+      if channel < &self.channels { Some((*channel, color.clone())) }
+      else { None } 
+    }).collect();
+
+    let totalFrames = (millis as f64 / 1000.0 * FPS as f64).round() as u32;
+    let nanosPerFrame = (1_000_000_000.0 / FPS as f64).round() as u64;
+    
+    let currentColors = self.colors.lock().unwrap();
+    let froms: HashMap<usize, Color> = fadeMap.keys().map(|channel| { (*channel, currentColors[*channel].clone()) }).collect();
+    let redDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].red as f64 - froms[channel].red as f64) }).collect();
+    let greenDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].green as f64 - froms[channel].green as f64) }).collect();
+    let blueDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].blue as f64 - froms[channel].blue as f64) }).collect();
+    
+    let selfPwm = self.pwm.clone();
+    let selfColors = self.colors.clone();
+    let brightness = self.brightness.clone();
+    let roomlight = self.roomlight.clone();
+    let flux = self.flux.clone();
     let cts = CancellationTokenSource::new();
-    // let ct = cts.token().clone();
+    let ct = cts.token().clone();
+
+    thread::spawn(move || {
+      let mut frameStartTime = SystemTime::now();
+      for i in 0..totalFrames {
+        if i > 0 {
+          let elapsed = frameStartTime.elapsed().unwrap().as_nanos();
+          if elapsed < nanosPerFrame as u128 {
+            let nsToSleep = nanosPerFrame as u128 - elapsed;
+            sleep(Duration::from_nanos(nsToSleep as u64)); 
+          }
+        }
+        frameStartTime = SystemTime::now();
+
+        if ct.is_canceled() { break; }
+
+        let b = brightness.load(Ordering::Relaxed);
+        let f = flux.load(Ordering::Relaxed);
+        let rl = roomlight.load(Ordering::Relaxed);
+        let mut colors = selfColors.lock().unwrap();
+        let mut pwm = selfPwm.lock().unwrap();
+        
+        for (channel, _) in fadeMap.iter() {
+          let from = &froms[channel];
+          let baseColor = Color::new(
+            (from.red as f64 + interp.interpolate(redDiffs[channel], i + 1, totalFrames).round()) as u8,
+            (from.green as f64 + interp.interpolate(greenDiffs[channel], i + 1, totalFrames).round()) as u8,
+            (from.blue as f64 + interp.interpolate(blueDiffs[channel], i + 1, totalFrames).round()) as u8,
+          );
+          let adjustedColor = baseColor.withRoomlight(rl).withFlux(f).withBrightness(b);
+
+          printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));
+          printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, RED), adjustedColor.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));    
+          printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, GREEN), 0), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));
+          printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, GREEN), adjustedColor.green as u16 * 16), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));    
+          printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
+          printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, BLUE), adjustedColor.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
+
+          std::mem::replace(&mut colors[*channel], adjustedColor);
+        }
+      }
+    });
+
     Ok(cts)
   }
   
