@@ -164,11 +164,73 @@ export class CeiledDriver implements Driver {
     });
   }
 
+  public setBrightness(brightness: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
+      const cmd = `set brightness ${Math.round(brightness)}\n`;
+      this.expectResponseOk(resolve, reject);
+      this.socket.write(cmd);
+    });
+  }
+
+  public getBrightness(): Promise<number> {
+    return this.getNumber('brightness');
+  }
+
+  public setRoomlight(roomlight: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
+      const cmd = `set roomlight ${Math.round(roomlight)}\n`;
+      this.expectResponseOk(resolve, reject);
+      this.socket.write(cmd);
+    });
+  }
+
+  public getRoomlight(): Promise<number> {
+    return this.getNumber('roomlight');
+  }
+
+  public setFlux(flux: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
+      const cmd = `set flux ${Math.round(flux)}\n`;
+      this.expectResponseOk(resolve, reject);
+      this.socket.write(cmd);
+    });
+  }
+
+  public getFlux(): Promise<number> {
+    return this.getNumber('flux');
+  }
+
+  private getNumber(name: string): Promise<number> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
+      const cmd = `get ${name}\n`;
+      const promise = this.expectReply();
+      this.socket.write(cmd);
+      const reply = await promise;
+
+      try {
+        const res = parseInt(reply, 10);
+        resolve(res);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
   private expectResponseOk(resolve: (result?: any) => void, reject: (error?: any) => void): void {
     this.socket.once('data', (data: Buffer) => {
       const res = data.toString();
       if (res.trim() === 'ok') resolve();
       else reject(res.trim());
+    });
+  }
+
+  private expectReply(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.socket.once('data', (data: Buffer) => resolve(data.toString()));
     });
   }
 }

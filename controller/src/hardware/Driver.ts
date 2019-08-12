@@ -6,7 +6,7 @@ import { InterpolationType } from '../patterns/options/FadePatternOptions';
  */
 export interface Driver {
   /**
-   * Ghe number of channels on which the device behind this driver can display colour.
+   * The number of channels on which the device behind this driver can display colour.
    */
   channels: number;
 
@@ -71,4 +71,36 @@ export interface Driver {
     millis: number,
     interpolation: InterpolationType,
   ): Promise<void>;
+
+  /**
+   * Sets the brightness level. Must be a number between 0 and 255
+   */
+  setBrightness(brightness: number): Promise<void>;
+
+  /**
+   * Gets the brightness level.
+   */
+  getBrightness(): Promise<number>;
+
+  /**
+   * Sets the level of roomlight adjustment. Must be a number between 0 and 255
+   * @param roomlight the roomlight level to be set. Between 0 and 255
+   */
+  setRoomlight(roomlight: number): Promise<void>;
+
+  /**
+   * Gets the roomlight level adjustment.
+   */
+  getRoomlight(): Promise<number>;
+
+  /**
+   * Sets the flux level (blue light reduction)
+   * @param flux flux level. Between 0 and 5 inclusive
+   */
+  setFlux(flux: number): Promise<void>;
+
+  /**
+   * Gets the flux level (blue light reduction)
+   */
+  getFlux(): Promise<number>;
 }
