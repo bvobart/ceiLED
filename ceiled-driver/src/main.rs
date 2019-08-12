@@ -23,7 +23,7 @@ use crossbeam_channel::{ bounded };
 use std::fs;
 use std::io::prelude::*;
 use std::io::{ ErrorKind, BufRead, BufReader };
-use std::os::unix::net::{ UnixListener };
+use std::os::unix::net::{ UnixListener, UnixStream };
 use std::sync::{ Arc, Mutex };
 use std::thread;
 use std::thread::sleep;
@@ -89,20 +89,24 @@ fn main() -> Result<(), &'static str> {
         println!("-> New connection opened");
         let drivers = drivers.clone();
         thread::spawn(move || {
-          let mut stream = &stream.unwrap();
+          let stream = &stream.unwrap();
           let reader = BufReader::new(stream);
           // on receiving new command from the socket
           for l in reader.lines() {
+            let mut responder = StreamResponder::new(stream);
+
             // parse the command
             let line = l.unwrap();
-            let cmd = Command::parse(&line);
-            if cmd.is_err() { 
-              println!("{}invalid command given: {}, command: {}", Colored::Bg(crossterm::Color::Reset), cmd.unwrap_err(), line);
-              let _ = stream.write_all(b"error: invalid command\n");
-              continue;
-            }
+            let command = match Command::parse(&line) {
+              Ok(c) => c,
+              Err(err) => {
+                println!("{}invalid command given: {}, command: {}", Colored::Bg(crossterm::Color::Reset), err, line);
+                responder.add(format!("error: invalid command: {}", err));
+                responder.send();
+                continue;
+              }
+            };
 
-            let command = cmd.unwrap();
             println!("{}Command: {:?}", Colored::Bg(crossterm::Color::Reset), &command);
 
             // for each active driver
@@ -111,18 +115,16 @@ fn main() -> Result<(), &'static str> {
               match driver.lock().unwrap().execute(&command) {
                 Err(err) => { 
                   println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err);
-                  let _ = stream.write_all(("error: ".to_owned() + &err).as_bytes());
+                  responder.add("error: ".to_owned() + &err);
                 },
                 Ok(None) => {},
                 Ok(Some(msg)) => {
-                  // send a response if a response ewas given
-                  match stream.write_all((msg + "\n").as_bytes()) {
-                    Ok(()) => {},
-                    Err(err) => { println!("{}{}Error sending response message: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err); }
-                  }
+                  responder.add(msg);
                 }
               }
             }
+
+            responder.send();
           }
         });
       },
@@ -155,6 +157,36 @@ fn initSocketListener(address: &str) -> Result<UnixListener, &'static str> {
         }
       }
       Err("failed to initialise unix socket listener")
+    }
+  }
+}
+
+struct StreamResponder<'a> {
+  stream: &'a UnixStream,
+  responses: Vec<String>,
+}
+
+impl<'a> StreamResponder<'a> {
+  fn new(stream: &'a UnixStream) -> Self {
+    let responses = Vec::new();
+    return StreamResponder { stream, responses }
+  }
+
+  fn add(&mut self, response: String) {
+    self.responses.push(response);
+  }
+
+  fn send(&mut self) {
+    let mut finalRes = "ok";
+    for res in &self.responses {
+      if res == "ok" { continue }
+      finalRes = res;
+    }
+
+    let finalRes = finalRes.to_owned() + "\n";
+    match self.stream.write_all(finalRes.as_bytes()) {
+      Ok(()) => {},
+      Err(err) => { println!("{}{}Error sending response message: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err); }
     }
   }
 }
