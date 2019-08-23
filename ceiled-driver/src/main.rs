@@ -2,6 +2,7 @@
 #[macro_use] extern crate lazy_static;
 #[macro_use] extern crate crossbeam_channel;
 extern crate cancellation;
+extern crate clap;
 extern crate crossterm;
 extern crate ctrlc;
 
@@ -17,6 +18,7 @@ use debug::{ DebugDriver };
 use pca9685::{ CeiledPca9685 };
 use manager::DriverManager;
 
+use clap::{ App, Arg, ArgMatches };
 use crossterm::{ Colored, Crossterm };
 use crossbeam_channel::{ bounded };
 
@@ -30,6 +32,7 @@ use std::thread::sleep;
 use std::time::{ Duration };
 
 static SOCKET_PATH: &'static str = "ceiled.sock";
+static VERSION: &'static str = "0.1.0";
 
 lazy_static! {
   static ref CTERM: Crossterm = Crossterm::new();
@@ -38,27 +41,53 @@ lazy_static! {
 /**
  * Initialize the drivers.
  */
-fn initDrivers() -> Vec<Arc<Mutex<DriverManager>>> {
-  let drvDebug = Arc::new(Mutex::new(DriverManager::new(Box::new(DebugDriver::new(&CTERM, 3)))));
-  let drvCeiled = CeiledPca9685::new(3);
+fn initDrivers(args: ArgMatches) -> Vec<Arc<Mutex<DriverManager>>> {
+  let mut drivers = Vec::new();
 
-  if drvCeiled.is_err() {
-    let err = drvCeiled.err().unwrap();
-    println!("{}{}-> Error: Failed to initialise CeiledPca9685 driver! Reason: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err);
-    println!("{}{}-> Continuing with DebugDriver..", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Yellow));
-    return vec![drvDebug];
-  } else {
-    println!("{}{}-> CeiledPca9685 driver connected!", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Green));
-    let drvCeiled = Arc::new(Mutex::new(DriverManager::new(Box::new(drvCeiled.unwrap()))));
-    return vec![drvCeiled, drvDebug];
+  if let Some(location) = args.value_of("pca9685") {
+    let drvCeiled = CeiledPca9685::new(location.to_owned(), 3);
+
+    if drvCeiled.is_err() {
+      let err = drvCeiled.err().unwrap();
+      println!("{}{}-> Error: Failed to initialise CeiledPca9685 driver: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err);
+    } else {
+      let drvCeiled = Arc::new(Mutex::new(DriverManager::new(Box::new(drvCeiled.unwrap()))));
+      println!("{}{}-> CeiledPca9685 driver connected!", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Green));
+      drivers.push(drvCeiled);
+    }
   }
+
+  if args.is_present("debug") {
+    let drvDebug = Arc::new(Mutex::new(DriverManager::new(Box::new(DebugDriver::new(&CTERM, 3)))));
+    println!("{}{}-> Debug driver enabled!", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Green));
+    drivers.push(drvDebug);
+  }
+
+  return drivers;
 }
 
 fn main() -> Result<(), &'static str> {
+  let args = App::new("ceiled-driver")
+    .version(VERSION)
+    .author("Bart van Oort")
+    .about("Rust driver for the CeiLED system")
+    .arg(Arg::with_name("debug")
+      .long("debug")
+      .help("Enables the debug driver"))
+    .arg(Arg::with_name("pca9685")
+      .long("pca9685")
+      .help("Enables the PCA9685 driver. Please specify the location of this device on the filesystem, e.g. /dev/i2c-5")
+      .takes_value(true))
+    .get_matches();
+
   println!("{}-> CeiLED driver starting...", Colored::Bg(crossterm::Color::Reset));
 
   // make list of enabled drivers.
-  let drivers = initDrivers();
+  let drivers = initDrivers(args);
+  if drivers.is_empty() {
+    return Err("No drivers were successfully initialised")
+  }
+
   for driver in drivers.clone() {
     driver.lock().unwrap().get().init().expect("driver failed to perform initialisation");
   }
@@ -135,7 +164,17 @@ fn main() -> Result<(), &'static str> {
 
   println!("{}", Colored::Bg(crossterm::Color::Reset));
   println!("-> CeiLED driver stopping.");
+
+  for driver in drivers {
+    match driver.lock().unwrap().get().off() {
+      Ok(()) => {},
+      Err(err) => {
+        println!("-> Failed to properly turn off a driver: {}", err)
+      }
+    }
+  }
   fs::remove_file(SOCKET_PATH).expect("cannot remove ceiled.sock");
+  
   println!("-> CeiLED driver stopped.");
   Ok(())
 }

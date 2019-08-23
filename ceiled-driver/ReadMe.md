@@ -1,5 +1,36 @@
 # ceiled-driver
 
+
+## Quick start
+
+Make sure you have [Rust](https://www.rust-lang.org) and Cargo installed. Then from the same directory as this file, run: `cargo run -- --debug`
+
+A Unix socket file `ceiled.sock` should appear in this folder. For quick commandline debugging, connect to it using `nc -U ceiled.sock`
+
+```
+USAGE:
+    ceiled-driver [FLAGS] [OPTIONS]
+
+FLAGS:
+        --debug      Enables the debug driver
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+        --pca9685 <pca9685>    Enables the PCA9685 driver. Please specify the location of this device on the filesystem,
+                               e.g. /dev/i2c-5
+```
+
+### Docker
+
+Building the image: `docker build -t ceiled-driver .`
+
+Running the image:
+- `docker run -e ARGS="--debug" ceiled-driver .`
+
+or if you want to use the pca9685 driver, mount it using the `--device` option:
+- `docker run --device /dev/i2c-5 -e ARGS="--pca9685 /dev/i2c-5" ceiled-driver .`
+
 ## API
 
 ### Getting / Setting brightness, roomlight and flux

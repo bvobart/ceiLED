@@ -1,8 +1,8 @@
 [package]
-name = "ceiled-pca9685"
+name = "ceiled-driver"
 description = "Low-level LED strip driver for CeiLED"
 version = "0.1.0"
-authors = ["Bart van Oort <bvanoort@chello.nl>"]
+authors = ["Bart van Oort <bvobart@gmail.com>"]
 edition = "2018"
 homepage = "https://ceiled.bart.vanoort.is"
 repository = "https://github.com/bvobart/ceiLED"
@@ -18,3 +18,4 @@ nix = "0.14.0"
 lazy_static = "1.3.0"
 cancellation = "0.1.0"
 crossbeam-channel = "0.3.8"
+clap = "2.33.0"

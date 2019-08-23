@@ -74,10 +74,14 @@ fn printErr(err: Result<(), String>) {
 use ChannelPin::*;
 
 impl CeiledPca9685 {
-  pub fn new(channels: usize) -> Result<Self, String> {
-    let i2c = match I2cdev::new("/dev/i2c-5") {
-      Ok(dev) => dev,
-      Err(err) => return Err(format!("failed to initialise pca9685 driver: {}", err.description()))
+  /**
+   * Opens a connection to a PCA9685 PWM controller at the location specified by `dev`.
+   * There are 15 PWM channels on the device, thus allowing for a maximum of 5 RGB led strips.
+   */
+  pub fn new(location: String, channels: usize) -> Result<Self, String> {
+    let i2c = match I2cdev::new(location.clone()) {
+      Ok(i2c) => i2c,
+      Err(err) => return Err(format!("failed to initialise i2c device at {}: {}", location, err.description()))
     };
 
     let address = SlaveAddr::default();
