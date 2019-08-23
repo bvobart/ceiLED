@@ -9,9 +9,9 @@ jobs:
       node_js:
         - 10
       cache: yarn
-      name: Build controller
+      name: Build ceiled-server
       stage: build
-      before_install: cd controller
+      before_install: cd ceiled-server
       install: yarn install
       script: yarn build
 
@@ -29,9 +29,9 @@ jobs:
       node_js:
         - 10
       cache: yarn
-      name: Test controller
+      name: Test ceiled-server
       stage: test
-      before_install: cd controller
+      before_install: cd ceiled-server
       install: yarn install
       script: yarn test
       services: 
@@ -41,7 +41,7 @@ jobs:
       node_js:
         - 10
       cache: yarn
-      name: Deploy ceiled-driver, controller and ceiled-web
+      name: Deploy ceiled-driver, ceiled-server and ceiled-web
       stage: deploy
       if: branch = master OR branch = develop
       before_install:
