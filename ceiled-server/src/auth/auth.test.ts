@@ -8,10 +8,7 @@ describe('auth', () => {
 
   describe('isAuthorised', () => {
     it('rejects a fake token', async done => {
-      const dbClient = await MongoClient.connect(
-        address,
-        { useNewUrlParser: true },
-      );
+      const dbClient = await MongoClient.connect(address, { useNewUrlParser: true });
       const db = dbClient.db('ceiled');
 
       const token = 'fakeNews';
@@ -20,10 +17,7 @@ describe('auth', () => {
     });
 
     it.skip('accepts a correct token', async done => {
-      const dbClient = await MongoClient.connect(
-        address,
-        { useNewUrlParser: true },
-      );
+      const dbClient = await MongoClient.connect(address, { useNewUrlParser: true });
       const db = dbClient.db('ceiled');
       const token = 'obscured';
 

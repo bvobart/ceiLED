@@ -3,7 +3,9 @@ build
 coverage
 
 # SSL Certificate files
+./https
 *.pem
+.env
 
 .vscode/ipch
 ceiled-driver/target

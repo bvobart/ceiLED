@@ -1,0 +1,41 @@
+version: "3.7"
+
+services:
+
+  ceiled-driver:
+    build: ./ceiled-driver
+    image: ceiled-driver:latest
+    restart: unless-stopped
+    devices:
+      - "/dev/i2c-5:/dev/i2c-5"
+    environment:
+      ARGS: --debug
+    volumes:
+      - ceiled-driver:/app
+
+  ceiled-server:
+    build: ./ceiled-server
+    image: ceiled-server:latest
+    restart: unless-stopped
+    depends_on:
+      - ceiled-driver
+    ports:
+      - "6565:6565"
+    environment:
+      PORT: 6565
+      CEILED_SOCKET: ceiled-driver/ceiled.sock
+      INSECURE: ${INSECURE}
+      KEY_FILE: https/localhost.key.pem
+      CERT_FILE: https/localhost.cert.pem
+      DB_HOST: ${DB_HOST}
+      DB_AUTH: ${DB_AUTH}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      
+    volumes:
+      - ceiled-driver:/app/ceiled-driver
+      - ./${HTTPS_FILES}:/app/https
+
+volumes:
+  ceiled-driver:

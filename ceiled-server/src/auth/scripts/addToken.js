@@ -10,10 +10,7 @@ const collectionName = 'authorisedTokens';
  * @param {String} name The name of the device that belongs to this authorisation token
  */
 const addUserToDB = async (token, name) => {
-  const client = await MongoClient.connect(
-    'mongodb://localhost:27017',
-    { useNewUrlParser: true },
-  );
+  const client = await MongoClient.connect('mongodb://localhost:27017', { useNewUrlParser: true });
   console.log('Connected to MongoDB');
 
   const collection = client.db(dbName).collection(collectionName);

@@ -1,6 +1,6 @@
 # Controller API
 
-The ceiLED controller listens to a JSON API over a WebSocket connection on port 6565. This document captures that JSON API.
+The `ceiled-server` listens to a JSON API over a WebSocket connection on port 6565. This document captures that JSON API.
 
 ---
 

@@ -17,7 +17,8 @@ RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-li
 
 # then copy the built file into run container
 FROM alpine:latest
+WORKDIR /app
 
-COPY --from=build /usr/src/ceiled-driver/target/x86_64-unknown-linux-musl/release/ceiled-driver .
+COPY --from=build /usr/src/ceiled-driver/target/x86_64-unknown-linux-musl/release/ceiled-driver ./ceiled-driver
 
 CMD ./ceiled-driver $ARGS

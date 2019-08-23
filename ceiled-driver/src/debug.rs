@@ -15,14 +15,14 @@ use std::time::{ Duration, SystemTime };
 static FPS: u32 = 30;
 
 fn printColors(colors: &Vec<Color>, cursor: &TerminalCursor, printX: u16, printY: u16) {
-  let (x, y) = cursor.pos();
+  cursor.save_position().expect("failed to save debug driver cursor location");
   cursor.goto(printX, printY).expect("failed to set debug driver print location");
 
   for c in colors.clone() {
     print!("{}        ", Colored::Bg(crossterm::Color::Rgb{ r: c.red, g: c.green, b: c.blue }));
   }
   
-  cursor.goto(x, y).expect("failed to move back to original cursor position");
+  cursor.reset_position().expect("failed to reset debug driver cursor position");
 }
 
 pub struct DebugDriver {

@@ -40,8 +40,11 @@ const launch = async (): Promise<void> => {
 
   // and some DB settings too, then initialise DB for authorisation requests.
   const dbHost: string = process.env.DB_HOST || 'localhost:27017';
-  const dbName: string = 'ceiled';
-  db = await initDB(dbHost, dbName);
+  const dbAuth: string = process.env.DB_AUTH || 'admin';
+  const dbName: string = process.env.DB_NAME || 'ceiled';
+  const dbUsername: string = process.env.DB_USERNAME || '';
+  const dbPassword: string = process.env.DB_PASSWORD || '';
+  db = await initDB(dbHost, dbAuth, dbName, dbUsername, dbPassword);
 
   // start API server and create message handlers
   const server: WebSocket.Server = insecure
@@ -145,8 +148,19 @@ const launch = async (): Promise<void> => {
 /**
  * Initialises the connection to the database.
  */
-const initDB = async (dbHost: string, dbName: string): Promise<Db> => {
-  const dbClient = await MongoClient.connect('mongodb://' + dbHost, { useNewUrlParser: true });
+const initDB = async (
+  dbHost: string,
+  dbAuth: string,
+  dbName: string,
+  dbUsername: string,
+  dbPassword: string,
+): Promise<Db> => {
+  const creds = dbUsername !== '' ? `${dbUsername}${dbPassword}@` : '';
+  const url = `mongodb://${creds}${dbHost}/${dbAuth}`;
+  const dbClient = await MongoClient.connect(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
   return dbClient.db(dbName);
 };
 

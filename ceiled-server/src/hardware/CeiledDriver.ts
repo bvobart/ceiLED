@@ -111,9 +111,7 @@ export class CeiledDriver implements Driver {
       const channels = colors.keys();
       const firstChannel = channels.next().value;
       const firstColor = colors.get(firstChannel);
-      let cmd = `set ${firstChannel} solid ${firstColor.red} ${firstColor.green} ${
-        firstColor.blue
-      }`;
+      let cmd = `set ${firstChannel} solid ${firstColor.red} ${firstColor.green} ${firstColor.blue}`;
 
       for (const channel of channels) {
         const color = colors.get(channel);
