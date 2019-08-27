@@ -134,16 +134,20 @@ impl CeiledDriver for CeiledPca9685 {
       .withFlux(self.getFlux())
       .withBrightness(self.getBrightness());
     
-    let mut pwm = self.pwm.lock();
-    checkErr(pwm.set_channel_on(toPwmChannel(channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string())?;
-    checkErr(pwm.set_channel_off(toPwmChannel(channel, RED), color.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string())?;    
-    checkErr(pwm.set_channel_on(toPwmChannel(channel, GREEN), 0), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string())?;
-    checkErr(pwm.set_channel_off(toPwmChannel(channel, GREEN), color.green as u16 * 16), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string())?;    
-    checkErr(pwm.set_channel_on(toPwmChannel(channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string())?;
-    checkErr(pwm.set_channel_off(toPwmChannel(channel, BLUE), color.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string())?;    
+    {
+      let mut pwm = self.pwm.lock();
+      checkErr(pwm.set_channel_on(toPwmChannel(channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string())?;
+      checkErr(pwm.set_channel_off(toPwmChannel(channel, RED), color.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string())?;    
+      checkErr(pwm.set_channel_on(toPwmChannel(channel, GREEN), 0), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string())?;
+      checkErr(pwm.set_channel_off(toPwmChannel(channel, GREEN), color.green as u16 * 16), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string())?;    
+      checkErr(pwm.set_channel_on(toPwmChannel(channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string())?;
+      checkErr(pwm.set_channel_off(toPwmChannel(channel, BLUE), color.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string())?;    
+    }
     
-    let mut colors = self.colors.lock();
-    std::mem::replace(&mut colors[channel], color);
+    {
+      let mut colors = self.colors.lock();
+      std::mem::replace(&mut colors[channel], color);
+    }
 
     Ok(())
   }
@@ -172,7 +176,10 @@ impl CeiledDriver for CeiledPca9685 {
     let totalFrames = (millis as f64 / 1000.0 * FPS as f64).round() as u32;
     let nanosPerFrame = (1_000_000_000.0 / FPS as f64).round() as u64;
     
-    let currentColors = self.colors.lock();
+    let currentColors: Vec<Color>;
+    {
+      currentColors = self.colors.lock().clone();
+    }
     let froms: HashMap<usize, Color> = fadeMap.keys().map(|channel| { (*channel, currentColors[*channel].clone()) }).collect();
     let redDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].red as f64 - froms[channel].red as f64) }).collect();
     let greenDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].green as f64 - froms[channel].green as f64) }).collect();
@@ -202,35 +209,38 @@ impl CeiledDriver for CeiledPca9685 {
 
         if ct.is_canceled() { break; }
 
-        let b = brightness.load(Ordering::Relaxed);
-        let f = flux.load(Ordering::Relaxed);
-        let rl = roomlight.load(Ordering::Relaxed);
-        let mut colors = selfColors.lock();
-        let mut pwm = match selfPwm.try_lock() {
-          Some(pwm) => pwm,
-          None => {
-            if ct.is_canceled() { break; }
-            selfPwm.lock()
+        {
+          let b = brightness.load(Ordering::Relaxed);
+          let f = flux.load(Ordering::Relaxed);
+          let rl = roomlight.load(Ordering::Relaxed);
+          let mut colors = selfColors.lock();
+          let mut pwm = selfPwm.lock();
+          // let mut pwm = match selfPwm.try_lock() {
+          //   Some(pwm) => pwm,
+          //   None => {
+          //     if ct.is_canceled() { break; }
+          //     selfPwm.lock()
+          //   }
+          // };
+          
+          for (channel, _) in fadeMap.iter() {
+            let from = &froms[channel];
+            let baseColor = Color::new(
+              (from.red as f64 + interp.interpolate(redDiffs[channel], i + 1, totalFrames).round()) as u8,
+              (from.green as f64 + interp.interpolate(greenDiffs[channel], i + 1, totalFrames).round()) as u8,
+              (from.blue as f64 + interp.interpolate(blueDiffs[channel], i + 1, totalFrames).round()) as u8,
+            );
+            let adjustedColor = baseColor.withRoomlight(rl).withFlux(f).withBrightness(b);
+
+            printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));
+            printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, RED), adjustedColor.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));    
+            printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, GREEN), 0), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));
+            printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, GREEN), adjustedColor.green as u16 * 16), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));    
+            printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
+            printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, BLUE), adjustedColor.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
+
+            std::mem::replace(&mut colors[*channel], adjustedColor);
           }
-        };
-        
-        for (channel, _) in fadeMap.iter() {
-          let from = &froms[channel];
-          let baseColor = Color::new(
-            (from.red as f64 + interp.interpolate(redDiffs[channel], i + 1, totalFrames).round()) as u8,
-            (from.green as f64 + interp.interpolate(greenDiffs[channel], i + 1, totalFrames).round()) as u8,
-            (from.blue as f64 + interp.interpolate(blueDiffs[channel], i + 1, totalFrames).round()) as u8,
-          );
-          let adjustedColor = baseColor.withRoomlight(rl).withFlux(f).withBrightness(b);
-
-          printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));
-          printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, RED), adjustedColor.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));    
-          printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, GREEN), 0), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));
-          printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, GREEN), adjustedColor.green as u16 * 16), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));    
-          printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
-          printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, BLUE), adjustedColor.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
-
-          std::mem::replace(&mut colors[*channel], adjustedColor);
         }
       }
     });
