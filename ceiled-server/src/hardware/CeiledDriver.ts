@@ -135,7 +135,7 @@ export class CeiledDriver implements Driver {
       const interpStr = interpolation === InterpolationType.SIGMOID ? 'sigmoid' : 'linear';
       this.expectResponseOk(resolve, reject);
       this.socket.write(
-        `set ${chStr} fade ${to.red} ${to.green} ${to.blue} ${millis} ${interpStr}\n`,
+        `set ${chStr} fade ${to.red} ${to.green} ${to.blue} ${Math.round(millis)} ${interpStr}\n`,
       );
     });
   }
@@ -158,7 +158,7 @@ export class CeiledDriver implements Driver {
       }
 
       this.expectResponseOk(resolve, reject);
-      this.socket.write(`${cmd} ${millis} ${interpolation}\n`);
+      this.socket.write(`${cmd} ${Math.round(millis)} ${interpolation}\n`);
     });
   }
 

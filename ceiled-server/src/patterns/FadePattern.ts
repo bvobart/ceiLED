@@ -41,23 +41,28 @@ class FadePattern implements Pattern {
           return;
         }
 
-        if (this.channels === 3) {
-          // on 3 channels: each channel has its own colour.
-          const colors = new Map<number, Color>();
-          colors.set(0, this.colors1[index]);
-          colors.set(1, this.colors2[index]);
-          colors.set(2, this.colors3[index]);
-          await driver.setFades(colors, duration, this.interpolation);
-        } else if (this.channels === 2) {
-          // on 2 channels: channel 1 and 3 have the same colour, channel 2 has its own colour.
-          const colors = new Map<number, Color>();
-          colors.set(0, this.colors1[index]);
-          colors.set(1, this.colors2[index]);
-          colors.set(2, this.colors1[index]);
-          await driver.setFades(colors, duration, this.interpolation);
-        } else {
-          // on 1 channel: all channels have the same colour.
-          await driver.setFade([0, 1, 2], this.colors1[index], duration, this.interpolation);
+        try {
+          if (this.channels === 3) {
+            // on 3 channels: each channel has its own colour.
+            const colors = new Map<number, Color>();
+            colors.set(0, this.colors1[index]);
+            colors.set(1, this.colors2[index]);
+            colors.set(2, this.colors3[index]);
+            await driver.setFades(colors, duration, this.interpolation);
+          } else if (this.channels === 2) {
+            // on 2 channels: channel 1 and 3 have the same colour, channel 2 has its own colour.
+            const colors = new Map<number, Color>();
+            colors.set(0, this.colors1[index]);
+            colors.set(1, this.colors2[index]);
+            colors.set(2, this.colors1[index]);
+            await driver.setFades(colors, duration, this.interpolation);
+          } else {
+            // on 1 channel: all channels have the same colour.
+            await driver.setFade([0, 1, 2], this.colors1[index], duration, this.interpolation);
+          }
+        } catch (err) {
+          console.error('--> Warning: an error has occurred while applying fade pattern:');
+          console.error('-->', err);
         }
 
         index = index + 1;
