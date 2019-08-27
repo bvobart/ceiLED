@@ -189,6 +189,8 @@ impl CeiledDriver for CeiledPca9685 {
     thread::spawn(move || {
       let mut frameStartTime = SystemTime::now();
       for i in 0..totalFrames {
+        if ct.is_canceled() { break; }
+        
         if i > 0 {
           let elapsed = frameStartTime.elapsed().unwrap().as_nanos();
           if elapsed < nanosPerFrame as u128 {
@@ -204,7 +206,13 @@ impl CeiledDriver for CeiledPca9685 {
         let f = flux.load(Ordering::Relaxed);
         let rl = roomlight.load(Ordering::Relaxed);
         let mut colors = selfColors.lock();
-        let mut pwm = selfPwm.lock();
+        let mut pwm = match selfPwm.try_lock() {
+          Some(pwm) => pwm,
+          None => {
+            if ct.is_canceled() { break; }
+            selfPwm.lock()
+          }
+        };
         
         for (channel, _) in fadeMap.iter() {
           let from = &froms[channel];
