@@ -19,3 +19,8 @@ lazy_static = "1.3.0"
 cancellation = "0.1.0"
 crossbeam-channel = "0.3.8"
 clap = "2.33.0"
+parking_lot = { version = "0.9.0", features = ["deadlock_detection"], optional = true}
+
+[features]
+deadlock_detection = ["parking_lot"]
+default = ["deadlock_detection"]

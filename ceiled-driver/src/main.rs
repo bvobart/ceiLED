@@ -5,6 +5,7 @@ extern crate cancellation;
 extern crate clap;
 extern crate crossterm;
 extern crate ctrlc;
+extern crate parking_lot;
 
 mod ceiled;
 mod colors;
@@ -81,6 +82,7 @@ fn main() -> Result<(), &'static str> {
     .get_matches();
 
   println!("{}-> CeiLED driver starting...", Colored::Bg(crossterm::Color::Reset));
+  enableDeadlockDetection();
 
   // make list of enabled drivers.
   let drivers = initDrivers(args);
@@ -174,7 +176,7 @@ fn main() -> Result<(), &'static str> {
     }
   }
   fs::remove_file(SOCKET_PATH).expect("cannot remove ceiled.sock");
-  
+
   println!("-> CeiLED driver stopped.");
   Ok(())
 }
@@ -227,5 +229,32 @@ impl<'a> StreamResponder<'a> {
       Ok(()) => {},
       Err(err) => { println!("{}{}Error sending response message: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err); }
     }
+  }
+}
+
+fn enableDeadlockDetection() {
+  #[cfg(feature="deadlock_detection")] {
+    use parking_lot::deadlock;
+
+    // Create a background thread which checks for deadlocks every 10s
+    thread::spawn(move || {
+        println!("-> Deadlock detection enabled!");
+        loop {
+            thread::sleep(Duration::from_secs(10));
+            let deadlocks = deadlock::check_deadlock();
+            if deadlocks.is_empty() {
+                continue;
+            }
+
+            println!("-> {} deadlocks detected", deadlocks.len());
+            for (i, threads) in deadlocks.iter().enumerate() {
+                println!("-> Deadlock #{}", i);
+                for t in threads {
+                    println!("-> Thread Id {:#?}", t.thread_id());
+                    println!("-> {:#?}", t.backtrace());
+                }
+            }
+        }
+    });
   }
 }
