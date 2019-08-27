@@ -61,6 +61,10 @@ impl CeiledDriver for DebugDriver {
   fn channels(&self) -> usize {
     self.channels
   }
+  
+  fn name(&self) -> String {
+    "debug".to_owned()
+  }
 
   fn init(&mut self) -> Result<(), String> {
     // TODO: make cool startup routine :P

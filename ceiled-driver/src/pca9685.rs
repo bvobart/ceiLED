@@ -107,6 +107,10 @@ impl CeiledDriver for CeiledPca9685 {
   fn channels(&self) -> usize {
     self.channels
   }
+
+  fn name(&self) -> String {
+    "pca9685".to_owned()
+  }
   
   fn init(&mut self) -> Result<(), String> {
     // TODO: make cool startup routine :P
@@ -119,6 +123,7 @@ impl CeiledDriver for CeiledPca9685 {
 
   fn off(&mut self) -> Result<(), String> {
     let mut pwm = self.pwm.lock().unwrap();
+    checkErr(pwm.set_channel_on(Channel::All, 0), "pca9685 failed to turn off".to_string())?;
     checkErr(pwm.set_channel_full_off(Channel::All), "pca9685 failed to turn off".to_string())
   }
 

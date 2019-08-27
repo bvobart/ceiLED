@@ -10,7 +10,7 @@ use std::collections::HashMap;
 pub trait CeiledDriver {
   // Gets the number of channels
   fn channels(&self) -> usize;
-
+  fn name(&self) -> String;
   fn init(&mut self) -> Result<(), String>;
   fn off(&mut self) -> Result<(), String>;
   fn setColor(&mut self, channel: usize, color: Color) -> Result<(), String>;

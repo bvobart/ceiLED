@@ -167,12 +167,11 @@ fn main() -> Result<(), &'static str> {
   println!("{}", Colored::Bg(crossterm::Color::Reset));
   println!("-> CeiLED driver stopping.");
 
-  for driver in drivers {
-    match driver.lock().unwrap().get().off() {
-      Ok(()) => {},
-      Err(err) => {
-        println!("-> Failed to properly turn off a driver: {}", err)
-      }
+  for driver in drivers.clone() {
+    let mut drv = driver.lock().unwrap();
+    match drv.get().off() {
+      Ok(())   => println!("-> Device stopped: {}", drv.get().name()),
+      Err(err) => println!("-> Failed to properly turn off a driver: {}", err)
     }
   }
   fs::remove_file(SOCKET_PATH).expect("cannot remove ceiled.sock");
