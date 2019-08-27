@@ -84,20 +84,20 @@ const launch = async (): Promise<void> => {
               ? `Notified ${numClients} clients of shutdown`
               : `Could not notify ${errored} out of the ${numClients} clients that were still connected`;
         }
-        console.log(message);
-        if (errored > 0) console.log(errored);
+        console.log('-->', message);
+        if (errored > 0) console.log('-->', errored);
         server.removeAllListeners();
         server.close();
         return process.exit(code);
       });
       return;
     }
-    console.log('No WebSocket server present anymore');
+    console.log('--> No WebSocket server present anymore');
     return process.exit(code);
   };
 
   // When an error occurs in the WebSocket
-  const onError = (error: Error) => console.error('Error occurred in WebSocket: \n', error, '\n');
+  const onError = (error: Error) => console.error('--> Error occurred in WebSocket: \n', error);
 
   // When a WebSocket connection is opened
   const onConnection = (ws: WebSocket, req: IncomingMessage) => {
@@ -106,9 +106,9 @@ const launch = async (): Promise<void> => {
     handlers.push(settingsHandler);
 
     const clientIP: string = req.connection.remoteAddress;
-    console.log('Client with IP', clientIP, 'connected.\n');
+    console.log('--> Client with IP', clientIP, 'connected.');
 
-    ws.on('close', () => console.log('Client with IP', clientIP, 'disconnected\n'));
+    ws.on('close', () => console.log('--> Client with IP', clientIP, 'disconnected'));
     ws.on('message', async (payload: string) => {
       try {
         const message = JSON.parse(payload);
@@ -191,11 +191,11 @@ const initSecureApiServer = (port: number, keyFile: string, certFile: string): W
 // if launched directly through node, then launch.
 if (require.main === module) {
   launch().catch((reason: any) => {
-    console.error('.----------------------------');
+    console.error('!---------------------------!');
     console.error('| FATAL ERROR OCCURRED       ');
     console.error('| ' + reason);
-    console.error('');
-    console.error('Exiting...');
+    console.error('!---------------------------!\n');
+    console.error('--> Exiting...');
     process.exit(1);
   });
 }

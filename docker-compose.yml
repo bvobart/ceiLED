@@ -2,18 +2,18 @@ version: "3.7"
 
 services:
 
-  ceiled-driver:
+  driver:
     build: ./ceiled-driver
     image: ceiled-driver:latest
     restart: unless-stopped
     devices:
       - "/dev/i2c-5:/dev/i2c-5"
     environment:
-      ARGS: --debug
+      ARGS: --pca9685 /dev/i2c-5
     volumes:
       - ceiled-driver:/app
 
-  ceiled-server:
+  server:
     build: ./ceiled-server
     image: ceiled-server:latest
     restart: unless-stopped

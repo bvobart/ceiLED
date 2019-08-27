@@ -36,10 +36,7 @@ class CeiledMessageHandler implements MessageHandler {
         return Promise.resolve(new UnauthorisedResponse());
       }
       if (!process.env.TEST)
-        console.log(
-          'CeiledRequest received from ',
-          (await getNameFromToken(message.authToken)) + '\n',
-        );
+        console.log('--> CeiledRequest received from ', await getNameFromToken(message.authToken));
 
       const request: CeiledRequest = new CeiledRequest(
         message.data.type,
@@ -55,7 +52,7 @@ class CeiledMessageHandler implements MessageHandler {
       return Promise.resolve(new CeiledResponse(StatusType.SUCCES));
     } else {
       const error: Error = new Error('Message is invalid: ' + JSON.stringify(message));
-      console.error('Message is invalid: ', message);
+      console.error('--> Message is invalid: ', message);
       return Promise.resolve(new CeiledResponse(StatusType.FAIL, [error]));
     }
   }
