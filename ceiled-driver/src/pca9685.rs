@@ -115,17 +115,17 @@ impl CeiledDriver for CeiledPca9685 {
   
   fn init(&mut self) -> Result<(), String> {
     // TODO: make cool startup routine :P
-    let mut map = HashMap::new();
     for i in 0..self.channels {
-      map.insert(i, colors::BLACK);
+      self.setColor(i, colors::BLACK)?;
     }
-    self.setColors(map)
+    Ok(())
   }
 
   fn off(&mut self) -> Result<(), String> {
-    let mut pwm = self.pwm.lock();
-    checkErr(pwm.set_channel_on(Channel::All, 0), "pca9685 failed to turn off".to_string())?;
-    checkErr(pwm.set_channel_full_off(Channel::All), "pca9685 failed to turn off".to_string())
+    for i in 0..self.channels {
+      self.setColor(i, colors::BLACK)?;
+    }
+    Ok(())
   }
 
   fn setColor(&mut self, channel: usize, color: Color) -> Result<(), String> {
