@@ -215,13 +215,6 @@ impl CeiledDriver for CeiledPca9685 {
           let rl = roomlight.load(Ordering::Relaxed);
           let mut colors = selfColors.lock();
           let mut pwm = selfPwm.lock();
-          // let mut pwm = match selfPwm.try_lock() {
-          //   Some(pwm) => pwm,
-          //   None => {
-          //     if ct.is_canceled() { break; }
-          //     selfPwm.lock()
-          //   }
-          // };
           
           for (channel, _) in fadeMap.iter() {
             let from = &froms[channel];

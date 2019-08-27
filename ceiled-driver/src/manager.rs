@@ -105,7 +105,8 @@ impl DriverManager {
         Multiple { channels } => { for ch in channels { colors.insert(*ch, color.clone()); }; },
       }
     }
-      
+    
+    self.cancelCurrent();
     self.driver.setColors(colors)
   }
 
