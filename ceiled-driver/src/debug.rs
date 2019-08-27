@@ -5,8 +5,9 @@ use super::commands::Interpolator;
 
 use cancellation::{ CancellationTokenSource };
 use crossterm::{ Colored, Crossterm, TerminalCursor };
+use parking_lot::{ Mutex };
 use std::collections::HashMap;
-use std::sync::{ Arc, Mutex };
+use std::sync::{ Arc };
 use std::sync::atomic::{ AtomicU8, Ordering };
 use std::thread;
 use std::thread::sleep;
@@ -100,9 +101,9 @@ impl CeiledDriver for DebugDriver {
     for _ in 0..self.channels {
       off.push(colors::BLACK);
     }
-    let mut colors = self.colors.lock().unwrap();
+    let mut colors = self.colors.lock();
     *colors = off;
-    printColors(&colors, &self.cursor.lock().unwrap(), self.printX, self.printY);
+    printColors(&colors, &self.cursor.lock(), self.printX, self.printY);
     Ok(())
   }
 
@@ -113,15 +114,15 @@ impl CeiledDriver for DebugDriver {
       .withFlux(self.getFlux())
       .withBrightness(self.getBrightness());
     
-    let mut colors = self.colors.lock().unwrap();
+    let mut colors = self.colors.lock();
     std::mem::replace(&mut colors[channel], adjustedColor);
-    printColors(&colors, &self.cursor.lock().unwrap(), self.printX, self.printY);
+    printColors(&colors, &self.cursor.lock(), self.printX, self.printY);
     Ok(())
   }
 
   fn setColors(&mut self, colors: HashMap<usize, Color>) -> Result<(), String> {
     if colors.len() > self.channels { return Err(format!("too many colors for the amount of channels: {}, max: {}", colors.len(), self.channels )); }
-    let mut selfColors = self.colors.lock().unwrap();
+    let mut selfColors = self.colors.lock();
     for (channel, color) in colors {
       if channel >= self.channels { return Err(format!("channel does not exist: {}, max: {}", channel, self.channels)); }
       let adjustedColor = color
@@ -130,7 +131,7 @@ impl CeiledDriver for DebugDriver {
         .withBrightness(self.getBrightness());
       std::mem::replace(&mut selfColors[channel], adjustedColor);
     }
-    printColors(&selfColors, &self.cursor.lock().unwrap(), self.printX, self.printY);
+    printColors(&selfColors, &self.cursor.lock(), self.printX, self.printY);
     Ok(())
   }
 
@@ -150,7 +151,7 @@ impl CeiledDriver for DebugDriver {
     let totalFrames = (millis as f64 / 1000.0 * FPS as f64).round() as u32;
     let nanosPerFrame = (1_000_000_000.0 / FPS as f64).round() as u64;
     
-    let currentColors = self.colors.lock().unwrap();
+    let currentColors = self.colors.lock();
     let froms: HashMap<usize, Color> = fadeMap.keys().map(|channel| { (*channel, currentColors[*channel].clone()) }).collect();
     let redDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].red as f64 - froms[channel].red as f64) }).collect();
     let greenDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].green as f64 - froms[channel].green as f64) }).collect();
@@ -183,7 +184,7 @@ impl CeiledDriver for DebugDriver {
         let b = brightness.load(Ordering::Relaxed);
         let f = flux.load(Ordering::Relaxed);
         let rl = roomlight.load(Ordering::Relaxed);
-        let mut colors = selfColors.lock().unwrap();
+        let mut colors = selfColors.lock();
         
         for (channel, _) in fadeMap.iter() {
           let from = &froms[channel];
@@ -196,7 +197,7 @@ impl CeiledDriver for DebugDriver {
           std::mem::replace(&mut colors[*channel], adjustedColor);
         }
 
-        printColors(&colors, &cursor.lock().unwrap(), px, py);
+        printColors(&colors, &cursor.lock(), px, py);
       }
     });
 

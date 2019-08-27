@@ -10,9 +10,10 @@ use super::colors;
 use super::colors::{ Color };
 use super::commands::Interpolator;
 
+use parking_lot::{ Mutex };
 use std::collections::HashMap;
 use std::error::Error;
-use std::sync::{ Arc, Mutex };
+use std::sync::{ Arc };
 use std::sync::atomic::{ AtomicU8, Ordering };
 use std::thread;
 use std::thread::sleep;
@@ -122,7 +123,7 @@ impl CeiledDriver for CeiledPca9685 {
   }
 
   fn off(&mut self) -> Result<(), String> {
-    let mut pwm = self.pwm.lock().unwrap();
+    let mut pwm = self.pwm.lock();
     checkErr(pwm.set_channel_on(Channel::All, 0), "pca9685 failed to turn off".to_string())?;
     checkErr(pwm.set_channel_full_off(Channel::All), "pca9685 failed to turn off".to_string())
   }
@@ -133,7 +134,7 @@ impl CeiledDriver for CeiledPca9685 {
       .withFlux(self.getFlux())
       .withBrightness(self.getBrightness());
     
-    let mut pwm = self.pwm.lock().unwrap();
+    let mut pwm = self.pwm.lock();
     checkErr(pwm.set_channel_on(toPwmChannel(channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string())?;
     checkErr(pwm.set_channel_off(toPwmChannel(channel, RED), color.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string())?;    
     checkErr(pwm.set_channel_on(toPwmChannel(channel, GREEN), 0), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string())?;
@@ -141,7 +142,7 @@ impl CeiledDriver for CeiledPca9685 {
     checkErr(pwm.set_channel_on(toPwmChannel(channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string())?;
     checkErr(pwm.set_channel_off(toPwmChannel(channel, BLUE), color.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string())?;    
     
-    let mut colors = self.colors.lock().unwrap();
+    let mut colors = self.colors.lock();
     std::mem::replace(&mut colors[channel], color);
 
     Ok(())
@@ -171,7 +172,7 @@ impl CeiledDriver for CeiledPca9685 {
     let totalFrames = (millis as f64 / 1000.0 * FPS as f64).round() as u32;
     let nanosPerFrame = (1_000_000_000.0 / FPS as f64).round() as u64;
     
-    let currentColors = self.colors.lock().unwrap();
+    let currentColors = self.colors.lock();
     let froms: HashMap<usize, Color> = fadeMap.keys().map(|channel| { (*channel, currentColors[*channel].clone()) }).collect();
     let redDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].red as f64 - froms[channel].red as f64) }).collect();
     let greenDiffs: HashMap<usize, f64> = fadeMap.keys().map(|channel| { (*channel, fadeMap[channel].green as f64 - froms[channel].green as f64) }).collect();
@@ -202,8 +203,8 @@ impl CeiledDriver for CeiledPca9685 {
         let b = brightness.load(Ordering::Relaxed);
         let f = flux.load(Ordering::Relaxed);
         let rl = roomlight.load(Ordering::Relaxed);
-        let mut colors = selfColors.lock().unwrap();
-        let mut pwm = selfPwm.lock().unwrap();
+        let mut colors = selfColors.lock();
+        let mut pwm = selfPwm.lock();
         
         for (channel, _) in fadeMap.iter() {
           let from = &froms[channel];

@@ -22,12 +22,13 @@ use manager::DriverManager;
 use clap::{ App, Arg, ArgMatches };
 use crossterm::{ Colored, Crossterm };
 use crossbeam_channel::{ bounded };
+use parking_lot::{ Mutex };
 
 use std::fs;
 use std::io::prelude::*;
 use std::io::{ ErrorKind, BufRead, BufReader };
 use std::os::unix::net::{ UnixListener, UnixStream };
-use std::sync::{ Arc, Mutex };
+use std::sync::{ Arc };
 use std::thread;
 use std::thread::sleep;
 use std::time::{ Duration };
@@ -91,7 +92,7 @@ fn main() -> Result<(), &'static str> {
   }
 
   for driver in drivers.clone() {
-    driver.lock().unwrap().get().init().expect("driver failed to perform initialisation");
+    driver.lock().get().init().expect("driver failed to perform initialisation");
   }
 
   // set up ctrl-c handler.
@@ -143,7 +144,7 @@ fn main() -> Result<(), &'static str> {
             // for each active driver
             for driver in drivers.clone() {
               // execute the command
-              match driver.lock().unwrap().execute(&command) {
+              match driver.lock().execute(&command) {
                 Err(err) => { 
                   println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err);
                   responder.add("error: ".to_owned() + &err);
@@ -168,7 +169,7 @@ fn main() -> Result<(), &'static str> {
   println!("-> CeiLED driver stopping.");
 
   for driver in drivers.clone() {
-    let mut drv = driver.lock().unwrap();
+    let mut drv = driver.lock();
     match drv.get().off() {
       Ok(())   => println!("-> Device stopped: {}", drv.get().name()),
       Err(err) => println!("-> Failed to properly turn off a driver: {}", err)
