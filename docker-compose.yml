@@ -18,7 +18,7 @@ services:
     image: ceiled-server:latest
     restart: unless-stopped
     depends_on:
-      - ceiled-driver
+      - driver
     ports:
       - "6565:6565"
     environment:
