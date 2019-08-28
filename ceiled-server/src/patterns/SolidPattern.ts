@@ -25,20 +25,25 @@ class SolidPattern implements Pattern {
       return;
     }
 
-    if (this.colors.length === 1) {
-      await driver.setColor([0, 1, 2], this.colors[0]);
-    } else if (this.colors.length === 2) {
-      const colors = new Map<number, Color>();
-      colors.set(0, this.colors[0]);
-      colors.set(1, this.colors[1]);
-      colors.set(2, this.colors[0]);
-      await driver.setColors(colors);
-    } else {
-      const colors = new Map<number, Color>();
-      colors.set(0, this.colors[0]);
-      colors.set(1, this.colors[1]);
-      colors.set(2, this.colors[2]);
-      await driver.setColors(colors);
+    try {
+      if (this.colors.length === 1) {
+        await driver.setColor([0, 1, 2], this.colors[0]);
+      } else if (this.colors.length === 2) {
+        const colors = new Map<number, Color>();
+        colors.set(0, this.colors[0]);
+        colors.set(1, this.colors[1]);
+        colors.set(2, this.colors[0]);
+        await driver.setColors(colors);
+      } else {
+        const colors = new Map<number, Color>();
+        colors.set(0, this.colors[0]);
+        colors.set(1, this.colors[1]);
+        colors.set(2, this.colors[2]);
+        await driver.setColors(colors);
+      }
+    } catch (err) {
+      console.error('--> Error has occurred while applying solid pattern:');
+      console.error('-->', err);
     }
   }
 

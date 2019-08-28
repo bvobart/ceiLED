@@ -8,15 +8,16 @@ const CMD_GET = 'get\n';
 
 export class CeiledDriver implements Driver {
   public channels: number;
-  public isConnected: boolean;
+  public isConnected: boolean = false;
 
   private socketFileName: string;
   private socket: Socket;
   private shouldReconnect: boolean = true;
 
+  private waitingForResponse: Array<(result?: any) => void> = [];
+
   constructor(file: string, channels: number) {
     this.channels = channels;
-    this.isConnected = false;
     this.socketFileName = file;
   }
 
@@ -40,6 +41,15 @@ export class CeiledDriver implements Driver {
               console.log('--> trying to reconnect to ceiled-driver after 1 second...');
               await sleep(1000);
             }
+          }
+        });
+
+        this.socket.on('data', (buf: Buffer) => {
+          const data = buf.toString().trim();
+          if (this.waitingForResponse.length === 0) {
+            console.log('--> driver sent an unsollicited response:', data);
+          } else {
+            this.waitingForResponse.shift()(data);
           }
         });
 
@@ -219,16 +229,15 @@ export class CeiledDriver implements Driver {
   }
 
   private expectResponseOk(resolve: (result?: any) => void, reject: (error?: any) => void): void {
-    this.socket.once('data', (data: Buffer) => {
-      const res = data.toString();
-      if (res.trim() === 'ok') resolve();
-      else reject(res.trim());
+    this.waitingForResponse.push(res => {
+      if (res === 'ok') resolve();
+      else reject(res);
     });
   }
 
   private expectReply(): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.socket.once('data', (data: Buffer) => resolve(data.toString()));
+      this.waitingForResponse.push(resolve);
     });
   }
 }

@@ -37,14 +37,14 @@ export class SettingsMessageHandler implements MessageHandler {
               (await getNameFromToken(message.authToken)) + '\n',
             );
 
-          this.driver.setBrightness(inRange(req.brightness * 2.55, 0, 255));
-          this.driver.setRoomlight(inRange(req.roomLight * 2.55, 0, 255));
+          await this.driver.setBrightness(inRange(req.brightness * 2.55, 0, 255));
+          await this.driver.setRoomlight(inRange(req.roomLight * 2.55, 0, 255));
 
           if (req.flux === -1) {
             this.autoUpdateFlux();
           } else {
             if (this.autoFluxTimeout) clearTimeout(this.autoFluxTimeout);
-            this.driver.setFlux(inRange(req.flux, 0, 5));
+            await this.driver.setFlux(inRange(req.flux, 0, 5));
           }
 
           settings.brightness = inRange(req.brightness, 0, 100);
@@ -52,7 +52,7 @@ export class SettingsMessageHandler implements MessageHandler {
           settings.flux = inRange(req.flux, -1, 5);
 
           if (settings.activePattern && settings.activePattern instanceof SolidPattern) {
-            settings.activePattern.show(this.driver);
+            await settings.activePattern.show(this.driver);
           }
 
           return Promise.resolve(new SettingsSuccessResponse());
