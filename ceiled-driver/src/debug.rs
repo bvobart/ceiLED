@@ -187,9 +187,9 @@ impl CeiledDriver for DebugDriver {
         if ct.is_canceled() { break; }
 
         {
-          let b = brightness.load(Ordering::Relaxed);
-          let f = flux.load(Ordering::Relaxed);
-          let rl = roomlight.load(Ordering::Relaxed);
+          let b = brightness.load(Ordering::Acquire);
+          let f = flux.load(Ordering::Acquire);
+          let rl = roomlight.load(Ordering::Acquire);
           let mut colors = selfColors.lock();
           
           for (channel, _) in fadeMap.iter() {

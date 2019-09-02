@@ -210,9 +210,9 @@ impl CeiledDriver for CeiledPca9685 {
         if ct.is_canceled() { break; }
 
         {
-          let b = brightness.load(Ordering::Relaxed);
-          let f = flux.load(Ordering::Relaxed);
-          let rl = roomlight.load(Ordering::Relaxed);
+          let b = brightness.load(Ordering::Acquire);
+          let f = flux.load(Ordering::Acquire);
+          let rl = roomlight.load(Ordering::Acquire);
           let mut colors = selfColors.lock();
           let mut pwm = selfPwm.lock();
           
@@ -232,7 +232,7 @@ impl CeiledDriver for CeiledPca9685 {
             printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
             printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, BLUE), adjustedColor.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
 
-            std::mem::replace(&mut colors[*channel], adjustedColor);
+            std::mem::replace(&mut colors[*channel], baseColor);
           }
         }
       }
