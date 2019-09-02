@@ -274,8 +274,8 @@ impl CeiledDriver for CeiledPca9685 {
  */
 fn adjustToHardware(color: Color) -> Color {
   Color::new(
-    ((1.0 / 255.0) * color.red.pow(2) as f32).round() as u8,
-    ((1.0 / 255.0) * color.green.pow(2) as f32).round() as u8,
-    ((1.0 / 255.0) * color.blue.pow(2) as f32).round() as u8,
+    ((1.0 / 255.0) * (color.red as f32).powf(2.0)).round() as u8,
+    ((1.0 / 255.0) * (color.green as f32).powf(2.0)).round() as u8,
+    ((1.0 / 255.0) * (color.blue as f32).powf(2.0)).round() as u8,
   )
 }
