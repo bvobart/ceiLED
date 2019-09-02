@@ -55,7 +55,7 @@ impl Interpolator {
       Interpolator::Linear => (delta * currentStep as f64) / totalSteps as f64,
       Interpolator::Sigmoid => {
         let stepRatio = currentStep as f64 / totalSteps as f64;
-        let t = 8.0 * stepRatio - 0.5;
+        let t = 8.0 * (stepRatio - 0.5);
         delta as f64 * (1.0 / (1.0 + consts::E.powf(-t)))
       }
     }
