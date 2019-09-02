@@ -129,10 +129,10 @@ impl CeiledDriver for CeiledPca9685 {
   }
 
   fn setColor(&mut self, channel: usize, color: Color) -> Result<(), String> {
-    let color = color
+    let color = adjustToHardware(color
       .withRoomlight(self.getRoomlight())
       .withFlux(self.getFlux())
-      .withBrightness(self.getBrightness());
+      .withBrightness(self.getBrightness()));
     
     {
       let mut pwm = self.pwm.lock();
@@ -223,7 +223,7 @@ impl CeiledDriver for CeiledPca9685 {
               (from.green as f64 + interp.interpolate(greenDiffs[channel], i + 1, totalFrames).round()) as u8,
               (from.blue as f64 + interp.interpolate(blueDiffs[channel], i + 1, totalFrames).round()) as u8,
             );
-            let adjustedColor = baseColor.withRoomlight(rl).withFlux(f).withBrightness(b);
+            let adjustedColor = adjustToHardware(baseColor.withRoomlight(rl).withFlux(f).withBrightness(b));
 
             printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));
             printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, RED), adjustedColor.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));    
@@ -265,4 +265,17 @@ impl CeiledDriver for CeiledPca9685 {
   fn setFlux(&mut self, flux: u8) {
     self.flux.store(flux, Ordering::Relaxed);
   }
+}
+
+/**
+ * This functions aims to transform a normal colour into one that makes the original colour 
+ * display accurately on the LED strips.
+ * Currently uses the function y = 1/255 * x^2 for every component of the colour.
+ */
+fn adjustToHardware(color: Color) -> Color {
+  Color::new(
+    ((1.0 / 255.0) * color.red.pow(2) as f32).round() as u8,
+    ((1.0 / 255.0) * color.green.pow(2) as f32).round() as u8,
+    ((1.0 / 255.0) * color.blue.pow(2) as f32).round() as u8,
+  )
 }
