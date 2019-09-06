@@ -15,8 +15,8 @@ pub trait CeiledDriver {
   fn off(&mut self) -> Result<(), String>;
   fn setColor(&mut self, channel: usize, color: Color) -> Result<(), String>;
   fn setColors(&mut self, colors: HashMap<usize, Color>) -> Result<(), String>;
-  fn setFade(&mut self, channel: usize, to: Color, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, String>;
-  fn setFades(&mut self, fadeMap: HashMap<usize, Color>, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, String>;
+  fn setFade(&mut self, channel: usize, to: Color, millis: usize, interp: Interpolator) -> Result<CancellationTokenSource, String>;
+  fn setFades(&mut self, fadeMap: HashMap<usize, Color>, millis: usize, interp: Interpolator) -> Result<CancellationTokenSource, String>;
   
   // Gets the brightness level. 0 is minimum brightness, 255 is max brightness.
   fn getBrightness(&self) -> u8;

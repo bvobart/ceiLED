@@ -1,15 +1,17 @@
 #![allow(non_snake_case)]
-#[macro_use] extern crate lazy_static;
 #[macro_use] extern crate crossbeam_channel;
+#[macro_use] extern crate lalrpop_util;
+#[macro_use] extern crate lazy_static;
 extern crate cancellation;
 extern crate clap;
 extern crate crossterm;
 extern crate ctrlc;
 extern crate parking_lot;
 
-mod ceiled;
-mod colors;
+pub mod ceiled;
+pub mod colors;
 mod commands;
+mod command;
 mod debug;
 mod manager;
 mod pca9685;

@@ -135,13 +135,13 @@ impl CeiledDriver for DebugDriver {
     Ok(())
   }
 
-  fn setFade(&mut self, channel: usize, to: Color, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, String> {
+  fn setFade(&mut self, channel: usize, to: Color, millis: usize, interp: Interpolator) -> Result<CancellationTokenSource, String> {
     let mut map = HashMap::new();
     map.insert(channel, to);
     self.setFades(map, millis, interp)
   }
 
-  fn setFades(&mut self, fadeMap: HashMap<usize, Color>, millis: u32, interp: Interpolator) -> Result<CancellationTokenSource, String> {
+  fn setFades(&mut self, fadeMap: HashMap<usize, Color>, millis: usize, interp: Interpolator) -> Result<CancellationTokenSource, String> {
     // apply only the fades for the channels that we actually support.
     let fadeMap: HashMap<usize, Color> = fadeMap.iter().filter_map(|(channel, color)| { 
       if channel < &self.channels { Some((*channel, color.clone())) }

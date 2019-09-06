@@ -92,7 +92,7 @@ impl DriverManager {
     match cmd.pattern() {
       Pattern::None => Ok(()),
       Pattern::Solid(targetColors) => self.executeSetSolid(targetColors),
-      Pattern::Fade(targetColors, millis, interp) => self.executeSetFade(targetColors, *millis, interp.clone()),
+      Pattern::Fade(targetColors, millis, interp) => self.executeSetFade(targetColors, *millis as usize, interp.clone()),
     }
   }
 
@@ -110,7 +110,7 @@ impl DriverManager {
     self.driver.setColors(colors)
   }
 
-  fn executeSetFade(&mut self, targetColors: &Vec<(Target, Color)>, millis: u32, interp: Interpolator) -> Result<(), String> {
+  fn executeSetFade(&mut self, targetColors: &Vec<(Target, Color)>, millis: usize, interp: Interpolator) -> Result<(), String> {
     let mut colors = HashMap::new();
     for (target, color) in targetColors {
       match target {
