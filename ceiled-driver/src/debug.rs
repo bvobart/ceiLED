@@ -1,7 +1,7 @@
 use super::ceiled::{ CeiledDriver };
 use super::colors;
 use super::colors::{ Color };
-use super::commands::Interpolator;
+use super::command::Interpolator;
 
 use cancellation::{ CancellationTokenSource };
 use crossterm::{ Colored, Crossterm, TerminalCursor };

@@ -1,5 +1,5 @@
 use super::colors::{ Color };
-use super::commands::{ Interpolator };
+use super::command::{ Interpolator };
 use super::cancellation::{ CancellationTokenSource };
 
 use std::collections::HashMap;

@@ -8,7 +8,7 @@ use super::cancellation::{ CancellationTokenSource };
 use super::ceiled::{ CeiledDriver };
 use super::colors;
 use super::colors::{ Color };
-use super::commands::Interpolator;
+use super::command::Interpolator;
 
 use parking_lot::{ Mutex };
 use std::collections::HashMap;

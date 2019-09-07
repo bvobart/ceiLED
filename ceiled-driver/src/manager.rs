@@ -1,8 +1,7 @@
 use super::ceiled::{ CeiledDriver };
-use super::commands::{ Action, Command, Interpolator, Pattern, Target, TargetSetting, Setting };
-use super::colors::Color;
+use super::command::{ Command, Interpolator, Pattern, Target, Setting };
+use Pattern::*;
 use Target::*;
-use TargetSetting::*;
 use Setting::*;
 
 use cancellation::{ CancellationTokenSource };
@@ -14,7 +13,6 @@ use std::collections::HashMap;
  */
 pub struct DriverManager {
   driver: Box<CeiledDriver + Send>,
-  lastCommand: Option<Command>,
   toBeCancelled: Option<CancellationTokenSource>,
 }
 
@@ -25,7 +23,6 @@ impl DriverManager {
   pub fn new(driver: Box<CeiledDriver + Send>) -> Self {
     DriverManager {
       driver,
-      lastCommand: None,
       toBeCancelled: None
     }
   }
@@ -37,10 +34,6 @@ impl DriverManager {
 impl DriverManager {
   pub fn get(&mut self) -> &mut Box<CeiledDriver + Send> {
     &mut self.driver
-  }
-
-  pub fn getLastCommand(&self) -> Option<Command> {
-    self.lastCommand.clone()
   }
 
   fn cancelCurrent(&mut self) {
@@ -59,85 +52,91 @@ impl DriverManager {
  */
 impl DriverManager {
   pub fn execute(&mut self, cmd: &Command) -> Result<Option<String>, String> {
-    match cmd.action() {
-      Action::SET => { self.executeSet(cmd) },
-      Action::GET => { self.executeGet(cmd.arg1()) },
+    match cmd {
+      Command::GetSetting(id, setting) => self.executeGetSetting(*id, setting),
+      Command::SetSetting(id, setting, value) => self.executeSetSetting(*id, setting, *value),
+      Command::SetPattern(id, targetPatterns) => self.executeSetPattern(*id, targetPatterns),
     }
   }
 
-  fn executeGet(&self, target: &TargetSetting) -> Result<Option<String>, String> {
-    match target {
-      Setting(Brightness) => Ok(Some(self.driver.getBrightness().to_string())),
-      Setting(Roomlight) => Ok(Some(self.driver.getRoomlight().to_string())),
-      Setting(Flux) => Ok(Some(self.driver.getFlux().to_string())),
-      _ => match &self.lastCommand {
-        None => Ok(Some("none".to_string())),
-        Some(cmd) => Ok(Some(cmd.toCmd()))
-      }
+  fn executeGetSetting(&self, id: Option<usize>, setting: &Setting) -> Result<Option<String>, String> {
+    match setting {
+      Brightness => Ok(Some(idString(id) + &self.driver.getBrightness().to_string())),
+      Roomlight => Ok(Some(idString(id) + &self.driver.getRoomlight().to_string())),
+      Flux => Ok(Some(idString(id) + &self.driver.getFlux().to_string())),
     }
   }
 
-  fn executeSet(&mut self, cmd: &Command) -> Result<Option<String>, String> {
-    match cmd.arg1() {
-      Target(_) => self.executeSetPattern(cmd)?,
-      Setting(Brightness) => { self.executeSetBrightness(*cmd.number())?; return Ok(Some("ok".to_string())); },
-      Setting(Roomlight) => { self.executeSetRoomlight(*cmd.number())?; return Ok(Some("ok".to_string())); },
-      Setting(Flux) => { self.executeSetFlux(*cmd.number())?; return Ok(Some("ok".to_string())); },
-    }
-    self.lastCommand = Some(cmd.clone());
-    Ok(Some("ok".to_string()))
-  }
-
-  fn executeSetPattern(&mut self, cmd: &Command) -> Result<(), String> {
-    match cmd.pattern() {
-      Pattern::None => Ok(()),
-      Pattern::Solid(targetColors) => self.executeSetSolid(targetColors),
-      Pattern::Fade(targetColors, millis, interp) => self.executeSetFade(targetColors, *millis as usize, interp.clone()),
+  fn executeSetSetting(&mut self, id: Option<usize>, setting: &Setting, value: u8) -> Result<Option<String>, String> {
+    match setting {
+      Brightness => { 
+        self.driver.setBrightness(value);
+        Ok(Some(idString(id) + &"ok".to_string()))
+      },
+      Roomlight => { 
+        self.driver.setRoomlight(value);
+        Ok(Some(idString(id) + &"ok".to_string()))
+      },
+      Flux => { 
+        self.driver.setFlux(value);
+        Ok(Some(idString(id) + &"ok".to_string()))
+      },
     }
   }
 
-  fn executeSetSolid(&mut self, targetColors: &Vec<(Target, Color)>) -> Result<(), String> {
-    let mut colors = HashMap::new();
-    for (target, color) in targetColors {
+  fn executeSetPattern(&mut self, id: Option<usize>, targetPatterns: &Vec<(Target, Pattern)>) -> Result<Option<String>, String> {
+    let mut solidColors = HashMap::new();
+    let mut fadeColors = HashMap::new();
+    let mut longestMillis = 0;
+    let mut fadeInterp = &Interpolator::Linear;
+
+    for (target, pattern) in targetPatterns {
       match target {
-        All => for ch in 0..self.driver.channels() { colors.insert(ch, color.clone()); },
-        One { channel } => { colors.insert(*channel, color.clone()); },
-        Multiple { channels } => { for ch in channels { colors.insert(*ch, color.clone()); }; },
-      }
-    }
-    
-    self.cancelCurrent();
-    self.driver.setColors(colors)
-  }
+        All => match pattern {
+          Solid(color) => for ch in 0..self.driver.channels() { solidColors.insert(ch, color.clone()); },
+          Fade(color, millis, interp) => {
+            longestMillis = *millis;
+            fadeInterp = interp;
+            for ch in 0..self.driver.channels() { 
+              fadeColors.insert(ch, color.clone()); 
+            }
+          },
+        },
 
-  fn executeSetFade(&mut self, targetColors: &Vec<(Target, Color)>, millis: usize, interp: Interpolator) -> Result<(), String> {
-    let mut colors = HashMap::new();
-    for (target, color) in targetColors {
-      match target {
-        All => for ch in 0..self.driver.channels() { colors.insert(ch, color.clone()); },
-        One { channel } => { colors.insert(*channel, color.clone()); },
-        Multiple { channels } => { for ch in channels { colors.insert(*ch, color.clone()); }; },
+        One(channel) => match pattern {
+          Solid(color) => { solidColors.insert(*channel, color.clone()); },
+          Fade(color, millis, interp) => {
+            longestMillis = *millis;
+            fadeInterp = interp;
+            fadeColors.insert(*channel, color.clone());
+          },
+        },
+
+        Multiple(channels) => match pattern {
+          Solid(color) => for ch in channels { solidColors.insert(*ch, color.clone()); },
+          Fade(color, millis, interp) => {
+            longestMillis = *millis;
+            fadeInterp = interp;
+            for ch in channels { 
+              fadeColors.insert(*ch, color.clone()); 
+            }
+          },
+        },
       }
     }
-        
+
     self.cancelCurrent();
-    let cts = self.driver.setFades(colors, millis, interp)?;
+    self.driver.setColors(solidColors)?;
+    let cts = self.driver.setFades(fadeColors, longestMillis, fadeInterp.clone())?;
     self.toBeCancelled = Some(cts);
-    Ok(())
-  }
 
-  fn executeSetBrightness(&mut self, value: u8) -> Result<(), String> {
-    self.driver.setBrightness(value);
-    Ok(())
+    Ok(Some(idString(id) + &"ok".to_string()))
   }
+}
 
-  fn executeSetRoomlight(&mut self, value: u8) -> Result<(), String> {
-    self.driver.setRoomlight(value);
-    Ok(())
-  }
-
-  fn executeSetFlux(&mut self, value: u8) -> Result<(), String> {
-    self.driver.setFlux(value);
-    Ok(())
+fn idString(id: Option<usize>) -> String {
+  match id {
+    None => "".to_owned(),
+    Some(i) => "id ".to_owned() + &i.to_string() + " ",
   }
 }

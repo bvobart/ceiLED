@@ -10,13 +10,11 @@ extern crate parking_lot;
 
 pub mod ceiled;
 pub mod colors;
-mod commands;
 mod command;
 mod debug;
 mod manager;
 mod pca9685;
 
-use commands::{ Command };
 use debug::{ DebugDriver };
 use pca9685::{ CeiledPca9685 };
 use manager::DriverManager;
@@ -37,6 +35,8 @@ use std::time::{ Duration };
 
 static SOCKET_PATH: &'static str = "ceiled.sock";
 static VERSION: &'static str = "0.1.0";
+
+lalrpop_mod!(pub api);
 
 lazy_static! {
   static ref CTERM: Crossterm = Crossterm::new();
@@ -125,13 +125,15 @@ fn main() -> Result<(), &'static str> {
         thread::spawn(move || {
           let stream = &stream.unwrap();
           let reader = BufReader::new(stream);
+          let parser = api::CommandParser::new();
+
           // on receiving new command from the socket
           for l in reader.lines() {
             let mut responder = StreamResponder::new(stream);
 
             // parse the command
             let line = l.unwrap();
-            let command = match Command::parse(&line) {
+            let command = match parser.parse(&line) {
               Ok(c) => c,
               Err(err) => {
                 println!("{}invalid command given: {}, command: {}", Colored::Bg(crossterm::Color::Reset), err, line);
@@ -162,6 +164,7 @@ fn main() -> Result<(), &'static str> {
           }
         });
       },
+
       // on ctrl-c, exit.
       recv(exit) -> _ => break
     }
