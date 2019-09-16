@@ -26,16 +26,22 @@ class SolidPattern implements Pattern {
     }
 
     try {
+      const colors = new Map<number, Color>();
+
       if (this.colors.length === 1) {
-        await driver.setColor([0, 1, 2], this.colors[0]);
+        // single channel
+        colors.set(0, this.colors[0]);
+        colors.set(1, this.colors[0]);
+        colors.set(2, this.colors[0]);
+        await driver.setColors(colors);
       } else if (this.colors.length === 2) {
-        const colors = new Map<number, Color>();
+        // dual channel
         colors.set(0, this.colors[0]);
         colors.set(1, this.colors[1]);
         colors.set(2, this.colors[0]);
         await driver.setColors(colors);
       } else {
-        const colors = new Map<number, Color>();
+        // triple channel
         colors.set(0, this.colors[0]);
         colors.set(1, this.colors[1]);
         colors.set(2, this.colors[2]);

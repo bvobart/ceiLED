@@ -1,5 +1,5 @@
 import { getNameFromToken, isAuthorised } from '../../auth/auth';
-import { millisUntilNextFluxChange, currentFluxLevel } from '../../common/flux';
+import { currentFluxLevel, millisUntilNextFluxChange } from '../../common/flux';
 import { settings } from '../../ControllerSettings';
 import { CeiledDriver } from '../../hardware/CeiledDriver';
 import SolidPattern from '../../patterns/SolidPattern';
@@ -31,11 +31,12 @@ export class SettingsMessageHandler implements MessageHandler {
           if (!message.authToken || !(await isAuthorised(message.authToken))) {
             return Promise.resolve(new UnauthorisedResponse());
           }
-          if (!process.env.TEST)
+          if (!process.env.TEST) {
             console.log(
-              'SettingsRequest received from ',
-              (await getNameFromToken(message.authToken)) + '\n',
+              '--> SettingsRequest received from ',
+              await getNameFromToken(message.authToken),
             );
+          }
 
           await this.driver.setBrightness(inRange(req.brightness * 2.55, 0, 255));
           await this.driver.setRoomlight(inRange(req.roomLight * 2.55, 0, 255));

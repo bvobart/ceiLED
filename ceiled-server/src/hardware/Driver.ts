@@ -27,37 +27,10 @@ export interface Driver {
   off(): Promise<void>;
 
   /**
-   * Gets the colour of the specified channel.
-   */
-  getColor(channel: number): Promise<Color>;
-
-  /**
-   * Sets a colour on the specified channels
-   * @param channels the channels should be set to the given colour
-   * @param color the colour to set
-   */
-  setColor(channels: number[], color: Color): Promise<void>;
-
-  /**
    * Sets the specified channels to the specified colours.
    * @param colors mapping of channel numbers to colours
    */
   setColors(colors: Map<number, Color>): Promise<void>;
-
-  /**
-   * Sets a fade to a specific colour on the given channels, taking `millis` milliseconds and using the
-   * specified interpolation type.
-   * @param channels the channels to fade on
-   * @param to the colour to fade to
-   * @param millis the amount of milliseconds that a fade takes
-   * @param interpolation the interpolation type, i.e. linear or sigmoid.
-   */
-  setFade(
-    channels: number[],
-    to: Color,
-    millis: number,
-    interpolation: InterpolationType,
-  ): Promise<void>;
 
   /**
    * Sets the specified channels to fade to their respective colours, taking `millis` milliseconds and using the

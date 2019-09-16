@@ -4,7 +4,6 @@ import { InterpolationType } from '../patterns/options/FadePatternOptions';
 import { Driver } from './Driver';
 
 const CMD_OFF = 'set all solid 0 0 0\n';
-const CMD_GET = 'get\n';
 
 export class CeiledDriver implements Driver {
   public channels: number;
@@ -14,7 +13,8 @@ export class CeiledDriver implements Driver {
   private socket: Socket;
   private shouldReconnect: boolean = true;
 
-  private waitingForResponse: Array<(result?: any) => void> = [];
+  private nextRequestId: number = 0;
+  private waitingForResponse: Map<number, (result?: any) => void> = new Map();
 
   constructor(file: string, channels: number) {
     this.channels = channels;
@@ -28,6 +28,7 @@ export class CeiledDriver implements Driver {
         this.isConnected = true;
         this.shouldReconnect = true;
 
+        this.socket.on('data', this.onResponse.bind(this));
         this.socket.on('close', async hadErr => {
           this.isConnected = false;
           console.error('--> ceiled-driver disconnected', hadErr ? 'with error' : '');
@@ -41,15 +42,6 @@ export class CeiledDriver implements Driver {
               console.log('--> trying to reconnect to ceiled-driver after 1 second...');
               await sleep(1000);
             }
-          }
-        });
-
-        this.socket.on('data', (buf: Buffer) => {
-          const data = buf.toString().trim();
-          if (this.waitingForResponse.length === 0) {
-            console.log('--> driver sent an unsollicited response:', data);
-          } else {
-            this.waitingForResponse.shift()(data);
           }
         });
 
@@ -77,76 +69,21 @@ export class CeiledDriver implements Driver {
     });
   }
 
-  public getColor(): Promise<Color> {
-    return new Promise((resolve, reject) => {
-      if (!this.socket) return reject('ceiled-driver not connected');
-      // TODO: this technically only gets the last set color, without care for which channel it was set on
-      // TODO: needs better implementation in Rust ceiled-driver.
-      this.socket.once('data', (data: Buffer) => {
-        const res = data.toString();
-        if (res.trim() === 'none') resolve(Color.BLACK);
-
-        const rgbStr = res.match(/\d{1,3} \d{1,3} \d{1,3}/g);
-        if (rgbStr) {
-          const rgb = rgbStr[0].split(' ');
-          resolve(
-            new Color({
-              red: parseInt(rgb[0], 10),
-              green: parseInt(rgb[1], 10),
-              blue: parseInt(rgb[2], 10),
-            }),
-          );
-        } else {
-          reject('invalid format in response from ceiled-driver: ' + res);
-        }
-      });
-      this.socket.write(CMD_GET);
-    });
-  }
-
-  public setColor(channels: number[], color: Color): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
-      const chStr = buildChannelString(channels);
-      this.expectResponseOk(resolve, reject);
-      this.socket.write(`set ${chStr} solid ${color.red} ${color.green} ${color.blue}\n`);
-    });
-  }
-
   public setColors(colors: Map<number, Color>): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       if (colors.size === 0) return resolve();
 
-      const channels = colors.keys();
-      const firstChannel = channels.next().value;
-      const firstColor = colors.get(firstChannel);
-      let cmd = `set ${firstChannel} solid ${firstColor.red} ${firstColor.green} ${firstColor.blue}`;
+      const id = this.nextRequestId++;
+      let cmd = `id ${id} set`;
 
-      for (const channel of channels) {
+      for (const channel of colors.keys()) {
         const color = colors.get(channel);
-        cmd = cmd + ` , ${channel} ${color.red} ${color.green} ${color.blue}`;
+        cmd = cmd + ` ${channel} solid ${color.red} ${color.green} ${color.blue},`;
       }
 
-      this.expectResponseOk(resolve, reject);
+      this.expectResponseOk(id, resolve, reject);
       this.socket.write(`${cmd}\n`);
-    });
-  }
-
-  public setFade(
-    channels: number[],
-    to: Color,
-    millis: number,
-    interpolation: InterpolationType = InterpolationType.LINEAR,
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
-      const chStr = buildChannelString(channels);
-      const interpStr = interpolation === InterpolationType.SIGMOID ? 'sigmoid' : 'linear';
-      this.expectResponseOk(resolve, reject);
-      this.socket.write(
-        `set ${chStr} fade ${to.red} ${to.green} ${to.blue} ${Math.round(millis)} ${interpStr}\n`,
-      );
     });
   }
 
@@ -157,26 +94,31 @@ export class CeiledDriver implements Driver {
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
-      const channels = colors.keys();
-      const firstChannel = channels.next().value;
-      const firstColor = colors.get(firstChannel);
-      let cmd = `set ${firstChannel} fade ${firstColor.red} ${firstColor.green} ${firstColor.blue}`;
+      if (colors.size === 0) return resolve();
 
-      for (const channel of channels) {
+      const id = this.nextRequestId++;
+      let cmd = `id ${id} set`;
+
+      for (const channel of colors.keys()) {
         const color = colors.get(channel);
-        cmd = cmd + ` , ${channel} ${color.red} ${color.green} ${color.blue}`;
+        cmd =
+          cmd +
+          ` ${channel} fade ${color.red} ${color.green} ${color.blue} ${Math.round(
+            millis,
+          )} ${interpolation},`;
       }
 
-      this.expectResponseOk(resolve, reject);
-      this.socket.write(`${cmd} ${Math.round(millis)} ${interpolation}\n`);
+      this.expectResponseOk(id, resolve, reject);
+      this.socket.write(`${cmd}\n`);
     });
   }
 
   public setBrightness(brightness: number): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
-      const cmd = `set brightness ${Math.round(brightness)}\n`;
-      this.expectResponseOk(resolve, reject);
+      const id = this.nextRequestId++;
+      const cmd = `id ${id} set brightness ${Math.round(brightness)}\n`;
+      this.expectResponseOk(id, resolve, reject);
       this.socket.write(cmd);
     });
   }
@@ -188,8 +130,9 @@ export class CeiledDriver implements Driver {
   public setRoomlight(roomlight: number): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
-      const cmd = `set roomlight ${Math.round(roomlight)}\n`;
-      this.expectResponseOk(resolve, reject);
+      const id = this.nextRequestId++;
+      const cmd = `id ${id} set roomlight ${Math.round(roomlight)}\n`;
+      this.expectResponseOk(id, resolve, reject);
       this.socket.write(cmd);
     });
   }
@@ -201,8 +144,9 @@ export class CeiledDriver implements Driver {
   public setFlux(flux: number): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
-      const cmd = `set flux ${Math.round(flux)}\n`;
-      this.expectResponseOk(resolve, reject);
+      const id = this.nextRequestId++;
+      const cmd = `id ${id} set flux ${Math.round(flux)}\n`;
+      this.expectResponseOk(id, resolve, reject);
       this.socket.write(cmd);
     });
   }
@@ -214,8 +158,9 @@ export class CeiledDriver implements Driver {
   private getNumber(name: string): Promise<number> {
     return new Promise(async (resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
-      const cmd = `get ${name}\n`;
-      const promise = this.expectReply();
+      const id = this.nextRequestId++;
+      const cmd = `id ${id} get ${name}\n`;
+      const promise = this.expectReply(id);
       this.socket.write(cmd);
       const reply = await promise;
 
@@ -228,17 +173,40 @@ export class CeiledDriver implements Driver {
     });
   }
 
-  private expectResponseOk(resolve: (result?: any) => void, reject: (error?: any) => void): void {
-    this.waitingForResponse.push(res => {
+  private expectResponseOk(
+    id: number,
+    resolve: (result?: any) => void,
+    reject: (error?: any) => void,
+  ): void {
+    this.waitingForResponse.set(id, res => {
       if (res === 'ok') resolve();
       else reject(res);
     });
   }
 
-  private expectReply(): Promise<string> {
+  private expectReply(id: number): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.waitingForResponse.push(resolve);
+      this.waitingForResponse.set(id, resolve);
     });
+  }
+
+  private onResponse(buf: Buffer) {
+    const data = buf.toString().trim();
+    const ids = data.match(/id \d*/);
+
+    if (ids.length > 0) {
+      const id = parseInt(ids[0].substring(2), 10);
+      const resolveFunc = this.waitingForResponse.get(id);
+
+      if (resolveFunc) {
+        const trimmedData = data.replace(ids[0], '').trim();
+        resolveFunc(trimmedData);
+      } else {
+        console.log('--> driver sent an unsollicited response:', data);
+      }
+    } else {
+      console.log('--> driver returned an error:', data);
+    }
   }
 }
 
