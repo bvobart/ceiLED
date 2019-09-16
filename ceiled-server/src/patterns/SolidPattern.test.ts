@@ -9,7 +9,11 @@ describe('SolidPattern', () => {
     const driver = new CeiledDriver(null, 3);
     const pattern: SolidPattern = new SolidPattern([Color.RED]);
     pattern.show(driver);
-    expect(driver.setColor).toHaveBeenCalledWith([0, 1, 2], Color.RED);
+    const colors = new Map<number, Color>();
+    colors.set(0, Color.RED);
+    colors.set(1, Color.RED);
+    colors.set(2, Color.RED);
+    expect(driver.setColors).toHaveBeenCalledWith(colors);
   });
 
   it('shows two solid colours', () => {

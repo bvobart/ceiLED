@@ -22,20 +22,23 @@ describe('FadePattern', () => {
       );
 
       await pattern.show(driver);
-      expect(driver.setFade).toHaveBeenCalledWith(
-        [0, 1, 2],
-        Color.RED,
-        500,
-        InterpolationType.LINEAR,
-      );
+
+      const colors1 = new Map<number, Color>();
+      colors1.set(0, Color.RED);
+      colors1.set(1, Color.RED);
+      colors1.set(2, Color.RED);
+      expect(driver.setFades).toHaveBeenCalledWith(colors1, 500, InterpolationType.LINEAR);
       expect(setInterval).toHaveBeenCalled();
+
       jest.advanceTimersByTime(500);
-      expect(driver.setFade).toHaveBeenLastCalledWith(
-        [0, 1, 2],
-        Color.GREEN,
-        500,
-        InterpolationType.LINEAR,
-      );
+
+      const colors2 = new Map<number, Color>();
+      colors2.set(0, Color.GREEN);
+      colors2.set(1, Color.GREEN);
+      colors2.set(2, Color.GREEN);
+      expect(driver.setFades).toHaveBeenLastCalledWith(colors2, 500, InterpolationType.LINEAR);
+      expect(setInterval).toHaveBeenCalled();
+
       await pattern.stop();
       done();
     });

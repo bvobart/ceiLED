@@ -32,24 +32,26 @@ describe('ceiled-driver', () => {
     });
     afterEach(() => driver.close());
 
-    it.skip('gets a color', async done => {
-      expect(await driver.getColor()).toBeInstanceOf(Color);
-      done();
-    });
-
     it.skip('turns off', async done => {
       driver.off();
-      expect(await driver.getColor()).toEqual(Color.BLACK);
       done();
     });
 
     it.skip('sets a color', async done => {
-      await driver.setColor([0, 1, 2], Color.PURPLE);
+      const colors = new Map<number, Color>();
+      colors.set(0, Color.PURPLE);
+      colors.set(1, Color.PURPLE);
+      colors.set(2, Color.PURPLE);
+      await driver.setColors(colors);
       done();
     });
 
     it.skip('sets a fade', async done => {
-      await driver.setFade([0, 1, 2], Color.GREEN, 3000);
+      const colors = new Map<number, Color>();
+      colors.set(0, Color.GREEN);
+      colors.set(1, Color.GREEN);
+      colors.set(2, Color.GREEN);
+      await driver.setFades(colors, 3000);
       done();
     });
   });
