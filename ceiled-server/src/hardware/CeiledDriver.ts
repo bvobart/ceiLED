@@ -64,8 +64,9 @@ export class CeiledDriver implements Driver {
   public off(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
-      this.socket.write(CMD_OFF);
-      resolve();
+      const id = this.nextRequestId++;
+      this.expectResponseOk(id, resolve, reject);
+      this.socket.write(id, CMD_OFF);
     });
   }
 
@@ -194,7 +195,7 @@ export class CeiledDriver implements Driver {
     const data = buf.toString().trim();
     const ids = data.match(/id \d*/);
 
-    if (ids.length > 0) {
+    if (ids && ids.length > 0) {
       const id = parseInt(ids[0].substring(2), 10);
       const resolveFunc = this.waitingForResponse.get(id);
 

@@ -1,6 +1,10 @@
 # [CeiLED](https://bart.vanoort.is)
 
-Repository for the software written in order to control the LED strips on my room's ceiling. The software consists of a low-level hardware driver written in Rust called `ceiled-driver`, a TypeScript NodeJS webserver `ceiled-server` that hosts the JSON WebSocket API, and a ReactJS web interface `ceiled-web` that serves as a remote control for displaying cool RGB colour patterns on the LED strips.
+Repository for the software written in order to control the LED strips on my room's ceiling. The software consists of three distinct parts:
+
+- `ceiled-web`: a ReactJS website that serves as a remote control for displaying cool RGB colour patterns on the LED strips.
+- `ceiled-server`: a TypeScript NodeJS web server that hosts a JSON WebSocket API and connects to a MongoDB database for authorisation. It is what `ceiled-web` talks to in order to show its cool colours, and it is what carefully exposes `ceiled-driver` to the internet.
+- `ceiled-driver`: a low-level hardware driver written in Rust. This is what actually controls the LED strips. It accepts a simple yet powerful API through a UNIX socket.
 
 Branch  | Build status
 --------|--------
@@ -45,4 +49,8 @@ DB_PASSWORD=dbpass
 
 or replace `INSECURE="true"` with `HTTPS_FILES=https` in order to specify that the `ceiled-server` should use the `localhost.key.pem` and `localhost.cert.pem` HTTPS key and certificate files in the `https` directory.
 
-- `docker compose up --build`
+- `docker compose up --build -d`
+
+### Install scripts
+
+I'm working on some installation scripts to make it much easier for others to start using the CeiLED suite and keep it up to date. I will update this ReadMe once they are in this repository.

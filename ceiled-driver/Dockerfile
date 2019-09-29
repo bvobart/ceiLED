@@ -12,6 +12,7 @@ RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-li
 
 # clean and build source code
 RUN rm src/*.rs && rm ./target/x86_64-unknown-linux-musl/release/deps/ceiled_driver*
+COPY ./build.rs ./build.rs
 COPY ./src ./src
 RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
 
