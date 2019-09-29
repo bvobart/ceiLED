@@ -20,9 +20,9 @@ services:
     depends_on:
       - driver
     ports:
-      - "6565:6565"
+      - "${PORT}:${PORT}"
     environment:
-      PORT: 6565
+      PORT: ${PORT}
       CEILED_SOCKET: ceiled-driver/ceiled.sock
       INSECURE: ${INSECURE}
       KEY_FILE: https/localhost.key.pem
