@@ -20,7 +20,7 @@ services:
     depends_on:
       - driver
     ports:
-      - "${PORT}:${PORT}"
+      - ${PORT}:${PORT}
     environment:
       PORT: ${PORT}
       CEILED_SOCKET: ceiled-driver/ceiled.sock
@@ -39,3 +39,10 @@ services:
 
 volumes:
   ceiled-driver:
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/16
