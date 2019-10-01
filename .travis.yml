@@ -1,20 +1,37 @@
 stages:
   - build
-  - test
   - deploy
 
 jobs:
   include:
+
+    # ceiled-driver: build, test
+    - language: rust
+      rust: stable
+      cache: cargo
+      name: "Build & Test - ceiled-driver"
+      stage: build
+      before_script: cd ceiled-driver
+      script: 
+        - cargo build
+        - cargo test
+
+    # ceiled-server: build, test
     - language: node_js
       node_js:
         - 10
       cache: yarn
-      name: Build ceiled-server
+      name: Build & Test - ceiled-server
       stage: build
+      services:
+        - mongodb
       before_install: cd ceiled-server
       install: yarn install
-      script: yarn build
+      script: 
+        - yarn build
+        - yarn test
 
+    # ceiled-web, build
     - language: node_js
       node_js:
         - 10
@@ -25,18 +42,7 @@ jobs:
       install: yarn install
       script: yarn build
 
-    - language: node_js
-      node_js:
-        - 10
-      cache: yarn
-      name: Test ceiled-server
-      stage: test
-      before_install: cd ceiled-server
-      install: yarn install
-      script: yarn test
-      services: 
-        - mongodb
-
+    # deploy
     - language: node_js
       node_js:
         - 10
@@ -57,19 +63,3 @@ jobs:
         on:
           all_branches: true
           condition: $TRAVIS_BRANCH =~ ^develop|master$
-    
-    - language: rust
-      rust: stable
-      cache: cargo
-      name: "Build ceiled-driver"
-      stage: build
-      before_script: cd ceiled-driver
-      script: cargo build --verbose
-
-    - language: rust
-      rust: stable
-      cache: cargo
-      name: "Test ceiled-driver"
-      stage: test
-      before_script: cd ceiled-driver
-      script: cargo test
