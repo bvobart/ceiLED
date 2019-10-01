@@ -21,11 +21,11 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch All Controller tests",
-      "cwd": "${workspaceFolder}/controller",
+      "name": "Launch All Server tests",
+      "cwd": "${workspaceFolder}/ceiled-server",
       "runtimeArgs": [
         "--inspect-brk", 
-        "${workspaceFolder}/controller/node_modules/jest/bin/jest.js", 
+        "${workspaceFolder}/ceiled-server/node_modules/jest/bin/jest.js", 
         "--runInBand"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
@@ -34,11 +34,11 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Current Controller test",
-      "cwd": "${workspaceFolder}/controller",
+      "name": "Launch Current Server test",
+      "cwd": "${workspaceFolder}/ceiled-server",
       "runtimeArgs": [
         "--inspect-brk", 
-        "${workspaceFolder}/controller/node_modules/jest/bin/jest.js", 
+        "${workspaceFolder}/ceiled-server/node_modules/jest/bin/jest.js", 
         "--runInBand",
         "${relativeFile}"
       ],
@@ -49,12 +49,12 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Controller",
-      "cwd": "${workspaceFolder}/controller",
-      "program": "${workspaceFolder}/controller/src/server.ts",
-      "preLaunchTask": "tsc: build - controller/tsconfig.json",
+      "name": "Launch ceiled-server",
+      "cwd": "${workspaceFolder}/ceiled-server",
+      "program": "${workspaceFolder}/ceiled-server/src/server.ts",
+      "preLaunchTask": "tsc: build - ceiled-server/tsconfig.json",
       "outFiles": [
-        "${workspaceFolder}/controller/build/**/*.js"
+        "${workspaceFolder}/ceiled-server/build/**/*.js"
       ],
       "env": {
         "DEBUG": "true",

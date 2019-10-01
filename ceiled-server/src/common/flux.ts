@@ -1,3 +1,4 @@
+import Duration = require('duration');
 import Color from './Color';
 
 export class TimeOfDay {
@@ -19,15 +20,19 @@ export class TimeOfDay {
     return this.hours < other.hours || (this.hours === other.hours && this.minutes < other.minutes);
   }
 
-  public timeUntil(other: TimeOfDay): TimeOfDay {
-    const minsUntil = other.minutes - this.minutes;
-    const hrsDiff = other.hours - this.hours;
-    const hrsUntil = minsUntil < 0 ? hrsDiff - 1 : hrsDiff;
+  /**
+   * Returns the next Date on which this time of day occurs.
+   * @param now Date from which point on to calculate the next time this time of day occurs.
+   */
+  public nextDate(now: Date): Date {
+    const msUntil = now.getMilliseconds() === 0 ? 0 : 1000 - now.getMilliseconds();
+    const secsUntil = (now.getSeconds() === 0 ? 0 : 60 - now.getSeconds()) + msUntil / 1000;
+    const minsUntil = this.minutes - now.getMinutes() - secsUntil / 60;
 
-    return new TimeOfDay(
-      hrsUntil >= 0 ? hrsUntil : hrsUntil + 24,
-      minsUntil >= 0 ? minsUntil : minsUntil + 60,
-    );
+    const hrsUntil = minsUntil < 0 ? this.hours - now.getHours() - 1 : this.hours - now.getHours();
+    const nextDay = hrsUntil < 0 ? now.getDate() + 1 : now.getDate();
+
+    return new Date(now.getFullYear(), now.getMonth(), nextDay, this.hours, this.minutes, 0, 0);
   }
 
   public isWithin(time: FluxTime): boolean {
@@ -116,31 +121,23 @@ export const currentFluxLevel = (now: Date): number => {
 };
 
 export const millisUntilNextFluxChange = (now: Date): number => {
-  const nowTime = new TimeOfDay(now.getHours(), now.getMinutes());
   const timesUntil = [
-    nowTime.timeUntil(flux5.start),
-    nowTime.timeUntil(flux5.end),
-    nowTime.timeUntil(flux4.start),
-    nowTime.timeUntil(flux4.end),
-    nowTime.timeUntil(flux3.start),
-    nowTime.timeUntil(flux3.end),
-    nowTime.timeUntil(flux2.start),
-    nowTime.timeUntil(flux2.end),
-    nowTime.timeUntil(flux1.start),
-    nowTime.timeUntil(flux1.end),
+    new Duration(now, flux5.start.nextDate(now)),
+    new Duration(now, flux5.end.nextDate(now)),
+    new Duration(now, flux4.start.nextDate(now)),
+    new Duration(now, flux4.end.nextDate(now)),
+    new Duration(now, flux3.start.nextDate(now)),
+    new Duration(now, flux3.end.nextDate(now)),
+    new Duration(now, flux2.start.nextDate(now)),
+    new Duration(now, flux2.end.nextDate(now)),
+    new Duration(now, flux1.start.nextDate(now)),
+    new Duration(now, flux1.end.nextDate(now)),
   ];
-  const nextTime = timesUntil.sort((one, two) => {
-    return one.hours * 60 - two.hours * 60 + one.minutes - two.minutes;
+
+  const nextTime = timesUntil.sort((one: Duration, two: Duration) => {
+    return one.valueOf() - two.valueOf();
   })[0];
-  return (
-    new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      now.getHours() + nextTime.hours,
-      now.getMinutes() + nextTime.minutes,
-    ).valueOf() - now.valueOf()
-  );
+  return nextTime.valueOf();
 };
 
 export default determineCurrentFlux;

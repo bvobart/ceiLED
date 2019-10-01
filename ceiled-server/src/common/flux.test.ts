@@ -199,8 +199,17 @@ describe('millisUntilNextFluxChange', () => {
     const date = new Date();
     date.setHours(22, 0, 0, 0);
     expect(millisUntilNextFluxChange(date)).toEqual(0);
+  });
+
+  it('returns next time, even when just past last change', () => {
+    const date = new Date();
     date.setHours(22, 0, 0, 1);
-    // bit strange
-    expect(millisUntilNextFluxChange(date)).toEqual(-1);
+    expect(millisUntilNextFluxChange(date)).toEqual(2 * 60 * 60 * 1000 - 1);
+
+    date.setHours(22, 0, 1, 0);
+    expect(millisUntilNextFluxChange(date)).toEqual(2 * 60 * 60 * 1000 - 1000);
+
+    date.setHours(22, 1, 0, 0);
+    expect(millisUntilNextFluxChange(date)).toEqual(2 * 60 * 60 * 1000 - 60000);
   });
 });

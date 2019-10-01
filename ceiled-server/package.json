@@ -2,7 +2,8 @@
   "name": "ceiled-server",
   "version": "2.0.0",
   "description": "TypeScript NodeJS WebSocket server for displaying patterns on LED devices connected through ceiled-driver.",
-  "main": "src/server.js",
+  "main": "src/server.ts",
+  "typings": "src/typings.d.ts",
   "author": "Bart van Oort",
   "license": "ISC",
   "bugs": {
@@ -22,6 +23,7 @@
   },
   "dependencies": {
     "bluebird": "3.5.5",
+    "duration": "0.2.2",
     "mongodb": "3.3.0",
     "typescript": "3.5.3",
     "ws": "7.1.2"
