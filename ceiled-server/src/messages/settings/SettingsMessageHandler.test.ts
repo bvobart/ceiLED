@@ -8,7 +8,8 @@ jest.mock('../../auth/auth');
 jest.mock('../../hardware/CeiledDriver');
 
 describe('SettingsMessageHandler', () => {
-  const handler = new SettingsMessageHandler(new CeiledDriver(null, 3));
+  const driver = new CeiledDriver(null, 3);
+  const handler = new SettingsMessageHandler(driver);
 
   describe('get message', () => {
     it('gets the settings', async done => {
@@ -34,8 +35,11 @@ describe('SettingsMessageHandler', () => {
       expect(response).toBeInstanceOf(SettingsSuccessResponse);
       expect(response.status).toBe(StatusType.SUCCES);
       expect(settings.brightness).toBe(msg.settings.brightness);
+      expect(driver.setBrightness).toBeCalledWith(65 * 2.55);
       expect(settings.roomLight).toBe(msg.settings.roomLight);
+      expect(driver.setRoomlight).toBeCalledWith(42 * 2.55);
       expect(settings.flux).toBe(msg.settings.flux);
+      expect(driver.setFlux).toBeCalledWith(3);
       done();
     });
   });

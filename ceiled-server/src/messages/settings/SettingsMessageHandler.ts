@@ -55,14 +55,13 @@ export class SettingsMessageHandler implements MessageHandler {
 
           // set flux
           if (settings.flux !== newFlux) {
-            if (req.flux === -1) {
-              this.autoUpdateFlux();
+            if (newFlux > -1) {
+              this.clearAutoFluxTimer();
+              settings.flux = newFlux;
+              await this.driver.setFlux(newFlux);
             } else {
-              if (this.autoFluxTimeout) {
-                clearTimeout(this.autoFluxTimeout);
-                this.autoFluxTimeout = undefined;
-              }
-              await this.driver.setFlux(inRange(req.flux, 0, 5));
+              // newFlux === -1
+              this.autoUpdateFlux();
             }
           }
 
@@ -80,14 +79,20 @@ export class SettingsMessageHandler implements MessageHandler {
   }
 
   private autoUpdateFlux() {
+    const newFlux = currentFluxLevel(new Date());
+    settings.flux = newFlux;
+    this.driver.setFlux(newFlux);
+
+    this.clearAutoFluxTimer();
+    const millis = millisUntilNextFluxChange(new Date());
+    this.autoFluxTimeout = setTimeout(this.autoUpdateFlux, millis);
+  }
+
+  private clearAutoFluxTimer() {
     if (this.autoFluxTimeout) {
       clearTimeout(this.autoFluxTimeout);
+      this.autoFluxTimeout = undefined;
     }
-
-    this.driver.setFlux(currentFluxLevel(new Date()));
-    const millis = millisUntilNextFluxChange(new Date());
-
-    this.autoFluxTimeout = setTimeout(this.autoUpdateFlux, millis);
   }
 }
 
