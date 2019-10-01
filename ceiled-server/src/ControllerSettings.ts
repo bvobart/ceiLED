@@ -3,11 +3,6 @@ import Pattern from './patterns/Pattern';
 export const test = process.env.TEST || false;
 export const debug = process.env.DEBUG || false;
 
-export enum DriverType {
-  PCA9685 = 'PCA9685',
-  DEBUG = 'DEBUG',
-}
-
 export interface IControllerSettings {
   brightness: number;
   roomLight: number;

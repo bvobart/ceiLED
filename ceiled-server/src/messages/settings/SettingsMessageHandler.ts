@@ -27,30 +27,44 @@ export class SettingsMessageHandler implements MessageHandler {
       switch (req.action) {
         case 'get':
           return Promise.resolve(new SettingsSuccessResponse(SettingsMessage.buildGet(settings)));
+
         case 'set':
           if (!message.authToken || !(await isAuthorised(message.authToken))) {
             return Promise.resolve(new UnauthorisedResponse());
           }
           if (!process.env.TEST) {
-            console.log(
-              '--> SettingsRequest received from ',
-              await getNameFromToken(message.authToken),
-            );
+            const user = await getNameFromToken(message.authToken);
+            console.log(`--> SettingsRequest received from ${user}`);
           }
 
-          await this.driver.setBrightness(inRange(req.brightness * 2.55, 0, 255));
-          await this.driver.setRoomlight(inRange(req.roomLight * 2.55, 0, 255));
+          const newBrightness = inRange(req.brightness, 0, 100);
+          const newRoomlight = inRange(req.roomLight, 0, 100);
+          const newFlux = inRange(req.flux, -1, 5);
 
-          if (req.flux === -1) {
-            this.autoUpdateFlux();
-          } else {
-            if (this.autoFluxTimeout) clearTimeout(this.autoFluxTimeout);
-            await this.driver.setFlux(inRange(req.flux, 0, 5));
+          // set brightness
+          if (settings.brightness !== newBrightness) {
+            settings.brightness = newBrightness;
+            await this.driver.setBrightness(newBrightness * 2.55);
           }
 
-          settings.brightness = inRange(req.brightness, 0, 100);
-          settings.roomLight = inRange(req.roomLight, 0, 100);
-          settings.flux = inRange(req.flux, -1, 5);
+          // set roomlight
+          if (settings.roomLight !== newRoomlight) {
+            settings.roomLight = newRoomlight;
+            await this.driver.setRoomlight(newRoomlight * 2.55);
+          }
+
+          // set flux
+          if (settings.flux !== newFlux) {
+            if (req.flux === -1) {
+              this.autoUpdateFlux();
+            } else {
+              if (this.autoFluxTimeout) {
+                clearTimeout(this.autoFluxTimeout);
+                this.autoFluxTimeout = undefined;
+              }
+              await this.driver.setFlux(inRange(req.flux, 0, 5));
+            }
+          }
 
           if (settings.activePattern && settings.activePattern instanceof SolidPattern) {
             await settings.activePattern.show(this.driver);
@@ -66,12 +80,14 @@ export class SettingsMessageHandler implements MessageHandler {
   }
 
   private autoUpdateFlux() {
-    this.driver.setFlux(currentFluxLevel(new Date()));
+    if (this.autoFluxTimeout) {
+      clearTimeout(this.autoFluxTimeout);
+    }
 
+    this.driver.setFlux(currentFluxLevel(new Date()));
     const millis = millisUntilNextFluxChange(new Date());
-    this.autoFluxTimeout = setTimeout(() => {
-      this.autoUpdateFlux();
-    }, millis);
+
+    this.autoFluxTimeout = setTimeout(this.autoUpdateFlux, millis);
   }
 }
 
