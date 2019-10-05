@@ -53,38 +53,38 @@ impl DriverManager {
 impl DriverManager {
   pub fn execute(&mut self, cmd: &Command) -> Result<Option<String>, String> {
     match cmd {
-      Command::GetSetting(id, setting) => self.executeGetSetting(*id, setting),
-      Command::SetSetting(id, setting, value) => self.executeSetSetting(*id, setting, *value),
-      Command::SetPattern(id, targetPatterns) => self.executeSetPattern(*id, targetPatterns),
+      Command::GetSetting(_, setting) => self.executeGetSetting(setting),
+      Command::SetSetting(_, setting, value) => self.executeSetSetting(setting, *value),
+      Command::SetPattern(_, targetPatterns) => self.executeSetPattern(targetPatterns),
     }
   }
 
-  fn executeGetSetting(&self, id: Option<usize>, setting: &Setting) -> Result<Option<String>, String> {
+  fn executeGetSetting(&self, setting: &Setting) -> Result<Option<String>, String> {
     match setting {
-      Brightness => Ok(Some(idString(id) + &self.driver.getBrightness().to_string())),
-      Roomlight => Ok(Some(idString(id) + &self.driver.getRoomlight().to_string())),
-      Flux => Ok(Some(idString(id) + &self.driver.getFlux().to_string())),
+      Brightness => Ok(Some(self.driver.getBrightness().to_string())),
+      Roomlight => Ok(Some(self.driver.getRoomlight().to_string())),
+      Flux => Ok(Some(self.driver.getFlux().to_string())),
     }
   }
 
-  fn executeSetSetting(&mut self, id: Option<usize>, setting: &Setting, value: u8) -> Result<Option<String>, String> {
+  fn executeSetSetting(&mut self, setting: &Setting, value: u8) -> Result<Option<String>, String> {
     match setting {
       Brightness => { 
         self.driver.setBrightness(value);
-        Ok(Some(idString(id) + &"ok".to_string()))
+        Ok(None)
       },
       Roomlight => { 
         self.driver.setRoomlight(value);
-        Ok(Some(idString(id) + &"ok".to_string()))
+        Ok(None)
       },
       Flux => { 
         self.driver.setFlux(value);
-        Ok(Some(idString(id) + &"ok".to_string()))
+        Ok(None)
       },
     }
   }
 
-  fn executeSetPattern(&mut self, id: Option<usize>, targetPatterns: &Vec<(Target, Pattern)>) -> Result<Option<String>, String> {
+  fn executeSetPattern(&mut self, targetPatterns: &Vec<(Target, Pattern)>) -> Result<Option<String>, String> {
     let mut solidColors = HashMap::new();
     let mut fadeColors = HashMap::new();
     let mut longestMillis = 0;
@@ -130,13 +130,6 @@ impl DriverManager {
     let cts = self.driver.setFades(fadeColors, longestMillis, fadeInterp.clone())?;
     self.toBeCancelled = Some(cts);
 
-    Ok(Some(idString(id) + &"ok".to_string()))
-  }
-}
-
-fn idString(id: Option<usize>) -> String {
-  match id {
-    None => "".to_owned(),
-    Some(i) => "id ".to_owned() + &i.to_string() + " ",
+    Ok(None)
   }
 }

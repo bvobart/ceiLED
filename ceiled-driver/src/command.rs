@@ -10,6 +10,16 @@ pub enum Command {
   SetPattern(Option<usize>, Vec<(Target, Pattern)>),
 }
 
+impl Command {
+  pub fn id(&self) -> Option<usize> {
+    match self {
+      Command::GetSetting(id, _) => id.clone(),
+      Command::SetSetting(id, _, _) => id.clone(),
+      Command::SetPattern(id, _) => id.clone(),
+    }
+  }
+}
+
 #[derive(Clone,Debug,PartialEq)]
 pub enum Setting {
   Brightness,

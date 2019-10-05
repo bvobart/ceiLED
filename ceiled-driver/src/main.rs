@@ -137,8 +137,7 @@ fn main() -> Result<(), &'static str> {
               Ok(c) => c,
               Err(err) => {
                 println!("{}invalid command given: {}, command: {}", Colored::Bg(crossterm::Color::Reset), err, line);
-                responder.add(format!("error: invalid command: {}", err));
-                responder.send();
+                responder.send(format!("error: invalid command: {}", err));
                 continue;
               }
             };
@@ -151,17 +150,17 @@ fn main() -> Result<(), &'static str> {
               match driver.lock().execute(&command) {
                 Err(err) => { 
                   println!("{}{}Error applying command: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err);
-                  responder.add("error: ".to_owned() + &err);
+                  responder.send(idString(command.id()) + "error: " + &err);
                 },
-                Ok(None) => {},
                 Ok(Some(msg)) => {
-                  responder.add(msg);
+                  responder.send(idString(command.id()) + &msg);
                 }
+                Ok(None) => {},
               }
             }
-
-            responder.send();
           }
+
+          println!("-> Connection closed")
         });
       },
 
@@ -209,30 +208,20 @@ fn initSocketListener(address: &str) -> Result<UnixListener, &'static str> {
 
 struct StreamResponder<'a> {
   stream: &'a UnixStream,
-  responses: Vec<String>,
 }
 
 impl<'a> StreamResponder<'a> {
   fn new(stream: &'a UnixStream) -> Self {
-    let responses = Vec::new();
-    return StreamResponder { stream, responses }
+    return StreamResponder { stream }
   }
 
-  fn add(&mut self, response: String) {
-    self.responses.push(response);
-  }
-
-  fn send(&mut self) {
-    let mut finalRes = "ok";
-    for res in &self.responses {
-      if res == "ok" { continue }
-      finalRes = res;
-    }
-
-    let finalRes = finalRes.to_owned() + "\n";
-    match self.stream.write_all(finalRes.as_bytes()) {
+  fn send(&mut self, response: String) {
+    let res = response + "\n";
+    match self.stream.write_all(res.as_bytes()) {
       Ok(()) => {},
-      Err(err) => { println!("{}{}Error sending response message: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err); }
+      Err(err) => { 
+        println!("{}{}Error sending response message: {}", Colored::Bg(crossterm::Color::Reset), Colored::Fg(crossterm::Color::Red), err); 
+      }
     }
   }
 }
@@ -243,23 +232,30 @@ fn enableDeadlockDetection() {
 
     // Create a background thread which checks for deadlocks every 10s
     thread::spawn(move || {
-        println!("-> Deadlock detection enabled!");
-        loop {
-            thread::sleep(Duration::from_secs(10));
-            let deadlocks = deadlock::check_deadlock();
-            if deadlocks.is_empty() {
-                continue;
-            }
-
-            println!("-> {} deadlocks detected", deadlocks.len());
-            for (i, threads) in deadlocks.iter().enumerate() {
-                println!("-> Deadlock #{}", i);
-                for t in threads {
-                    println!("-> Thread Id {:#?}", t.thread_id());
-                    println!("-> {:#?}", t.backtrace());
-                }
-            }
+      println!("-> Deadlock detection enabled!");
+      loop {
+        thread::sleep(Duration::from_secs(10));
+        let deadlocks = deadlock::check_deadlock();
+        if deadlocks.is_empty() {
+          continue;
         }
+
+        println!("-> {} deadlocks detected", deadlocks.len());
+        for (i, threads) in deadlocks.iter().enumerate() {
+          println!("-> Deadlock #{}", i);
+          for t in threads {
+              println!("-> Thread Id {:#?}", t.thread_id());
+              println!("-> {:#?}", t.backtrace());
+          }
+        }
+      }
     });
+  }
+}
+
+fn idString(id: Option<usize>) -> String {
+  match id {
+    None => "".to_owned(),
+    Some(i) => "id ".to_owned() + &i.to_string() + " ",
   }
 }

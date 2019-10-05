@@ -23,7 +23,7 @@ fn printColors(colors: &Vec<Color>, cursor: &TerminalCursor, printX: u16, printY
     print!("{}        ", Colored::Bg(crossterm::Color::Rgb{ r: c.red, g: c.green, b: c.blue }));
   }
   
-  cursor.reset_position().expect("failed to reset debug driver cursor position");
+  cursor.restore_position().expect("failed to reset debug driver cursor position");
 }
 
 pub struct DebugDriver {
@@ -41,7 +41,7 @@ pub struct DebugDriver {
 impl DebugDriver {
   pub fn new(cterm: &Crossterm, channels: usize) -> Self {
     let cursor = cterm.cursor();
-    let (xmax, ymax) = cterm.terminal().terminal_size();
+    let (xmax, ymax) = cterm.terminal().size().unwrap();
     let mut colors = Vec::new();
     for _ in 0..channels { colors.push(colors::BLACK) }
     DebugDriver { 
