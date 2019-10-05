@@ -1,3 +1,4 @@
+/// <reference types="../typings" />
 import Duration = require('duration');
 import Color from './Color';
 
