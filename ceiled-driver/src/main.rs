@@ -33,7 +33,6 @@ use std::thread;
 use std::thread::sleep;
 use std::time::{ Duration };
 
-static SOCKET_PATH: &'static str = "ceiled.sock";
 static VERSION: &'static str = "0.1.0";
 
 lalrpop_mod!(pub api);
@@ -45,7 +44,7 @@ lazy_static! {
 /**
  * Initialize the drivers.
  */
-fn initDrivers(args: ArgMatches) -> Vec<Arc<Mutex<DriverManager>>> {
+fn initDrivers(args: &ArgMatches) -> Vec<Arc<Mutex<DriverManager>>> {
   let mut drivers = Vec::new();
 
   if let Some(location) = args.value_of("pca9685") {
@@ -82,13 +81,18 @@ fn main() -> Result<(), &'static str> {
       .long("pca9685")
       .help("Enables the PCA9685 driver. Please specify the location of this device on the filesystem, e.g. /dev/i2c-5")
       .takes_value(true))
+    .arg(Arg::with_name("socketFile")
+      .long("socketFile")
+      .help("Specifies where to place the Unix socket file")
+      .takes_value(true)
+      .default_value("./ceiled.sock"))
     .get_matches();
 
   println!("{}-> CeiLED driver starting...", Colored::Bg(crossterm::Color::Reset));
   enableDeadlockDetection();
 
   // make list of enabled drivers.
-  let drivers = initDrivers(args);
+  let drivers = initDrivers(&args);
   if drivers.is_empty() {
     return Err("No drivers were successfully initialised")
   }
@@ -102,7 +106,7 @@ fn main() -> Result<(), &'static str> {
   ctrlc::set_handler(move || { notifyExit.send(()).unwrap(); }).expect("failed to set ctrl-c handler");
 
   // set up ceiled.sock listener
-  let sockListener = initSocketListener(SOCKET_PATH)?;
+  let sockListener = initSocketListener(args.value_of("socketFile").unwrap())?;
   let (notifyStream, streams) = bounded(65);
   thread::spawn(move || {
     for s in sockListener.incoming() {
@@ -179,7 +183,7 @@ fn main() -> Result<(), &'static str> {
       Err(err) => println!("-> Failed to properly turn off a driver: {}", err)
     }
   }
-  fs::remove_file(SOCKET_PATH).expect("cannot remove ceiled.sock");
+  fs::remove_file(args.value_of("socketFile").unwrap()).expect("cannot remove unix socket");
 
   println!("-> CeiLED driver stopped.");
   Ok(())
@@ -194,7 +198,7 @@ fn initSocketListener(address: &str) -> Result<UnixListener, &'static str> {
     Ok(l) => Ok(l),
     Err(err) => { 
       if err.kind() == ErrorKind::AddrInUse {
-        fs::remove_file(SOCKET_PATH).expect("failed to remove socket");
+        fs::remove_file(address).expect("failed to remove socket");
         sleep(Duration::from_millis(5));
         match UnixListener::bind(address) {
           Ok(l) => return Ok(l),
