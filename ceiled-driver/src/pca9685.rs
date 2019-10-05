@@ -114,10 +114,18 @@ impl CeiledDriver for CeiledPca9685 {
   }
   
   fn init(&mut self) -> Result<(), String> {
-    // TODO: make cool startup routine :P
+    // set all to black
     for i in 0..self.channels {
       self.setColor(i, colors::BLACK)?;
     }
+
+    // flash red on each channel
+    for i in 0..self.channels {
+      self.setColor(i, colors::RED)?;
+      thread::sleep(Duration::from_millis(10));
+      self.setColor(i, colors::BLACK)?;
+    }
+    
     Ok(())
   }
 
