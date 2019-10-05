@@ -1,0 +1,74 @@
+use crate::colors::Color;
+use crate::command::{ Command, Interpolator, Pattern, Setting, Target };
+
+grammar;
+
+pub Command: Command = {
+  <RequestId?> "get" <Setting> => Command::GetSetting(<>),
+  <RequestId?> "set" <Setting> <UInt8> => Command::SetSetting(<>),
+  <id:RequestId?> "set" <t:Target> <p:Pattern> => Command::SetPattern(id, vec![(t, p)]),
+  <RequestId?> "set" <Comma<(<Target> <Pattern>)>> => Command::SetPattern(<>),
+};
+
+pub Pattern: Pattern = {
+  "solid" <Color> => Pattern::Solid(<>),
+  "fade" <Color> <USize> <FadeInterp> => Pattern::Fade(<>)
+}
+
+Color: Color = {
+  <red:UInt8> <green:UInt8> <blue:UInt8> => Color { <> }
+}
+
+Setting: Setting = {
+  "brightness" => Setting::Brightness,
+  "roomlight" => Setting::Roomlight,
+  "flux" => Setting::Flux,
+};
+
+Target: Target = {
+  "all" => Target::All,
+  USize => Target::One(<>),
+  Comma<USize> => Target::Multiple(<>)
+};
+
+FadeInterp: Interpolator = {
+  "linear" => Interpolator::Linear,
+  "sigmoid" => Interpolator::Sigmoid,
+}
+
+RequestId: usize = {
+  "id" <USize> => <>
+}
+
+// Numbers
+UInt8: u8 = {
+  under200 => <>.parse::<u8>().unwrap(),
+  under249 => <>.parse::<u8>().unwrap(),
+  under255 => <>.parse::<u8>().unwrap(),
+};
+
+USize: usize = {
+  UInt8 => <> as usize,
+  number => <>.parse::<usize>().unwrap()
+};
+
+match {
+  r"1?[0-9]{1,2}" => under200,
+  r"2[0-4][0-9]" => under249,
+  r"25[0-5]" => under255
+} else {
+  r"\d+" => number,
+  _
+}
+
+// Comma separated list of type T. Optional trailing comma.
+Comma<T>: Vec<T> = {
+  <v:(<T> ",")+> <e:T?> => match e { // (1)
+    None => v,
+    Some(e) => {
+      let mut v = v;
+      v.push(e);
+      v
+    }
+  }
+};
