@@ -9,9 +9,9 @@ services:
     devices:
       - "/dev/i2c-5:/dev/i2c-5"
     environment:
-      ARGS: --pca9685 /dev/i2c-5
+      ARGS: --pca9685 /dev/i2c-5 --socketFile /app/socket/ceiled.sock 
     volumes:
-      - ceiled-driver:/app
+      - ceiled-driver:/app/socket
 
   server:
     build: ./ceiled-server
