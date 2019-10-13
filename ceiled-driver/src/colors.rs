@@ -38,6 +38,10 @@ impl Color {
     }
   }
 
+  /**
+   * Calculates the colour between this colour and another colour, where `factor` is the
+   * point in the blend (number between 0 and 1) between this colour and the other colour.
+   */
   pub fn blend(&self, color: &Color, factor: f64) -> Self {
     let fracSelfRed = self.red as f64 / 255.0;
     let fracSelfGreen = self.green as f64 / 255.0;
@@ -70,14 +74,12 @@ impl Color {
 
   /**
    * Applies roomlight correction to a color.
-   * Does so by blending (see https://stackoverflow.com/a/29321264) self with the roomlight colour
-   * and then capping that to the brightness of the brightest component in self.
-   * That way black is black and roomlight is roomlight, yet everything in between blends smoothly.
+   * Does so by blending self with the roomlight colour at the brightness of the brightest component of self
    */
   pub fn withRoomlight(&self, roomlight: u8) -> Self {
     let brightest = max(self.red, max(self.green, self.blue));
     let factor = roomlight as f64 / 255.0;
-    self.blend(&ROOMLIGHT, factor).withBrightness(brightest)
+    self.blend(&ROOMLIGHT.withBrightness(brightest), factor)
   }
 
   /**

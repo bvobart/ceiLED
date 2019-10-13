@@ -122,7 +122,7 @@ impl CeiledDriver for CeiledPca9685 {
     // flash red on each channel
     for i in 0..self.channels {
       self.setColor(i, colors::RED)?;
-      thread::sleep(Duration::from_millis(10));
+      thread::sleep(Duration::from_millis(50));
       self.setColor(i, colors::BLACK)?;
     }
     

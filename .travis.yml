@@ -13,7 +13,7 @@ jobs:
       stage: build
       before_script: cd ceiled-driver
       script: 
-        - cargo build
+        - cargo check
         - cargo test
 
     # ceiled-server: build, test
