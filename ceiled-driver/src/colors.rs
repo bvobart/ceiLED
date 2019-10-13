@@ -73,13 +73,13 @@ impl Color {
   }
 
   /**
-   * Applies roomlight correction to a color.
-   * Does so by blending self with the roomlight colour at the brightness of the brightest component of self
+   * Applies roomlight correction to a color. Does so by blending self with the roomlight colour.
+   * Thus, this means that there will always be a little bit of roomlight showing through,
+   * even if self is black.
    */
   pub fn withRoomlight(&self, roomlight: u8) -> Self {
-    let brightest = max(self.red, max(self.green, self.blue));
     let factor = roomlight as f64 / 255.0;
-    self.blend(&ROOMLIGHT.withBrightness(brightest), factor)
+    self.blend(&ROOMLIGHT, factor)
   }
 
   /**
@@ -95,26 +95,5 @@ impl Color {
       4 => self.multiply(&FLUX4),
       _ => self.multiply(&FLUX5)
     }
-  }
-}
-
-#[cfg(test)]
-mod ColorTests {
-  use super::*;
-
-  #[test]
-  fn testWithRoomlight() {
-    // Black stays black
-    assert_eq!(BLACK.withRoomlight(0), BLACK);
-    assert_eq!(BLACK.withRoomlight(64), BLACK);
-    assert_eq!(BLACK.withRoomlight(128), BLACK);
-    assert_eq!(BLACK.withRoomlight(255), BLACK);
-
-    assert_eq!(RED.withRoomlight(0), RED);
-    assert_eq!(RED.withRoomlight(255), ROOMLIGHT);
-    assert_eq!(GREEN.withRoomlight(0), GREEN);
-    assert_eq!(GREEN.withRoomlight(255), ROOMLIGHT);
-    assert_eq!(BLUE.withRoomlight(0), BLUE);
-    assert_eq!(BLUE.withRoomlight(255), ROOMLIGHT);
   }
 }

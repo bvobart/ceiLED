@@ -130,6 +130,7 @@ impl CeiledDriver for CeiledPca9685 {
   }
 
   fn off(&mut self) -> Result<(), String> {
+    self.setRoomlight(0);
     for i in 0..self.channels {
       self.setColor(i, colors::BLACK)?;
     }
