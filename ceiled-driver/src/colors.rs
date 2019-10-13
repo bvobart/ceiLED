@@ -6,7 +6,7 @@ pub const RED: Color = Color { red: 255, green: 0, blue: 0 };
 pub const GREEN: Color = Color { red: 0, green: 255, blue: 0 };
 pub const BLUE: Color = Color { red: 0, green: 0, blue: 255 };
 
-pub const ROOMLIGHT: Color = Color { red: 255, green: 132, blue: 24 };
+pub const ROOMLIGHT: Color = Color { red: 255, green: 142, blue: 64 };
 pub const FLUX1: Color = Color { red: 255, green: 246, blue: 237 };
 pub const FLUX2: Color = Color { red: 255, green: 237, blue: 222 };
 pub const FLUX3: Color = Color { red: 255, green: 228, blue: 206 };
@@ -38,6 +38,22 @@ impl Color {
     }
   }
 
+  pub fn blend(&self, color: &Color, factor: f64) -> Self {
+    let fracSelfRed = self.red as f64 / 255.0;
+    let fracSelfGreen = self.green as f64 / 255.0;
+    let fracSelfBlue = self.blue as f64 / 255.0;
+
+    let fracColorRed = color.red as f64 / 255.0;
+    let fracColorGreen = color.green as f64 / 255.0;
+    let fracColorBlue = color.blue as f64 / 255.0;
+
+    let red = ((1.0 - factor) * fracSelfRed * fracSelfRed + factor * fracColorRed * fracColorRed).sqrt() * 255.0;
+    let green = ((1.0 - factor) * fracSelfGreen * fracSelfGreen + factor * fracColorGreen * fracColorGreen).sqrt() * 255.0;
+    let blue = ((1.0 - factor) * fracSelfBlue * fracSelfBlue + factor * fracColorBlue * fracColorBlue).sqrt() * 255.0;
+
+    Color { red: red.round() as u8, green: green.round() as u8, blue: blue.round() as u8 }
+  }
+
   /**
    * Applies brightness correction to a color.
    */
@@ -54,18 +70,14 @@ impl Color {
 
   /**
    * Applies roomlight correction to a color.
-   * TODO: apply using screen blending method?
-   * i.e. f(a, b) = 1 - (1 - a)(1 - b)
+   * Does so by blending (see https://stackoverflow.com/a/29321264) self with the roomlight colour
+   * and then capping that to the brightness of the brightest component in self.
+   * That way black is black and roomlight is roomlight, yet everything in between blends smoothly.
    */
   pub fn withRoomlight(&self, roomlight: u8) -> Self {
-    if roomlight == 0 { return self.clone(); }
-    if roomlight == 255 { return ROOMLIGHT };
-    
-    let factor = roomlight as f32 / 255.0;
-    let red = max(self.red, (ROOMLIGHT.red as f32 * factor).round() as u8);
-    let green = max(self.green, (ROOMLIGHT.green as f32 * factor).round() as u8);
-    let blue = max(self.blue, (ROOMLIGHT.blue as f32 * factor).round() as u8);
-    Color { red, green, blue }
+    let brightest = max(self.red, max(self.green, self.blue));
+    let factor = roomlight as f64 / 255.0;
+    self.blend(&ROOMLIGHT, factor).withBrightness(brightest)
   }
 
   /**
@@ -81,5 +93,26 @@ impl Color {
       4 => self.multiply(&FLUX4),
       _ => self.multiply(&FLUX5)
     }
+  }
+}
+
+#[cfg(test)]
+mod ColorTests {
+  use super::*;
+
+  #[test]
+  fn testWithRoomlight() {
+    // Black stays black
+    assert_eq!(BLACK.withRoomlight(0), BLACK);
+    assert_eq!(BLACK.withRoomlight(64), BLACK);
+    assert_eq!(BLACK.withRoomlight(128), BLACK);
+    assert_eq!(BLACK.withRoomlight(255), BLACK);
+
+    assert_eq!(RED.withRoomlight(0), RED);
+    assert_eq!(RED.withRoomlight(255), ROOMLIGHT);
+    assert_eq!(GREEN.withRoomlight(0), GREEN);
+    assert_eq!(GREEN.withRoomlight(255), ROOMLIGHT);
+    assert_eq!(BLUE.withRoomlight(0), BLUE);
+    assert_eq!(BLUE.withRoomlight(255), ROOMLIGHT);
   }
 }
