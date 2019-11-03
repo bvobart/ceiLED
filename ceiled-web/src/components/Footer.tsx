@@ -1,12 +1,14 @@
 import React from 'react';
-import { Card, Typography, Button, CardContent } from '@material-ui/core';
+import { Card, Typography, Button, CardContent, Grid } from '@material-ui/core';
 
 const Footer = () => {
   return (
     <Card square={true}>
       <CardContent>
-        <Typography>Status: TODO</Typography>
-        <Button variant='text'>About</Button>
+        <Grid container justify='space-between' alignItems='center'>
+          <Button variant='text'>About</Button>
+          <Typography variant='subtitle2'>Status: TODO</Typography>
+        </Grid>
       </CardContent>
     </Card>
   )

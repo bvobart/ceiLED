@@ -1,15 +1,16 @@
 {
   "name": "ceiled-web",
-  "version": "0.1.0",
+  "version": "2.0.0-alpha",
   "private": true,
   "dependencies": {
-    "@material-ui/core": "^4.5.2",
-    "@types/jest": "24.0.20",
-    "@types/node": "12.11.7",
+    "@material-ui/core": "4.5.2",
+    "@material-ui/icons": "4.5.1",
+    "@types/jest": "24.0.21",
+    "@types/node": "12.12.5",
     "@types/react": "16.9.11",
     "@types/react-dom": "16.9.3",
-    "react": "^16.11.0",
-    "react-dom": "^16.11.0",
+    "react": "16.11.0",
+    "react-dom": "16.11.0",
     "react-scripts": "3.2.0",
     "typescript": "3.6.4"
   },
