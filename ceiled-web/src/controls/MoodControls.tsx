@@ -7,6 +7,16 @@ const useStyles = makeStyles({
   },
 });
 
+/**
+ * Ideas for moods to be developed:
+ * - Productive: primarily light blue, some greenish and purpleish tones to keep you awake.
+ * - Cool: primarily blue, some purple / pink tones
+ * - Colourful: red, green and blue mixed
+ * - Calm: primarily roomlight, but with nuanced warm colour accents
+ * - Warm: primarily orange (bit warmer than roomlight) with some red and yellow tones
+ * - Loving: primarily deep red with a bit of purple / pink
+ */
+
 const MoodControls = () => {
   const classes = useStyles();
   return (
