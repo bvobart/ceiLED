@@ -1,12 +1,25 @@
 import React from 'react';
-import { Typography, Card } from '@material-ui/core';
+import { Card, Grid, makeStyles } from '@material-ui/core';
+import BrightnessSlider from '../components/controls/BrightnessSlider';
+import RoomlightSlider from '../components/controls/RoomlightSlider';
+import FluxSlider from '../components/controls/FluxSlider';
+
+const useStyles = makeStyles({
+  card: {
+    minWidth: '368px', // 400 - padding-left - padding-right
+    padding: '8px 16px 8px 16px',
+  },
+});
 
 const GlobalControls = () => {
+  const classes = useStyles();
   return (
-    <Card square={true}>
-      <Typography variant='caption'>Brightness: TODO</Typography>
-      <Typography variant='caption'>Roomlight: TODO</Typography>
-      <Typography variant='caption'>Flux: TODO</Typography>
+    <Card square className={classes.card}>
+      <Grid container justify='space-between' alignItems='center' spacing={1}>
+        <BrightnessSlider />
+        <RoomlightSlider />
+        <FluxSlider />
+      </Grid>
     </Card>
   )
 }

@@ -1,9 +1,16 @@
 import React from 'react';
-import { ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails } from '@material-ui/core';
+import { ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails, makeStyles } from '@material-ui/core';
+
+const useStyles = makeStyles({
+  panel: {
+    minWidth: '400px',
+  },
+});
 
 const SolidControls = () => {
+  const classes = useStyles();
   return (
-    <ExpansionPanel>
+    <ExpansionPanel className={classes.panel}>
       <ExpansionPanelSummary>
         <Typography variant='h6'>Solids</Typography>
       </ExpansionPanelSummary>

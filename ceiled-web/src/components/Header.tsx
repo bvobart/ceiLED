@@ -17,7 +17,7 @@ const useStyles = makeStyles({
   powerButtonOn: {
     color: green.A400,
   }
-})
+});
 
 const Header = () => {
   const classes = useStyles();
@@ -26,7 +26,7 @@ const Header = () => {
   // TODO: add CeiLED functionality
 
   return (
-    <Card className={classes.card} square={true}>
+    <Card square className={classes.card}>
       <CardContent>
         <Grid container justify='space-between' alignItems='center'>
           <Grid item>
