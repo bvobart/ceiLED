@@ -1,6 +1,7 @@
 import React from 'react';
 import { createMuiTheme, Container } from '@material-ui/core';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
+import { deepPurple } from '@material-ui/core/colors';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import GlobalControls from './controls/GlobalControls';
@@ -18,6 +19,7 @@ const App = () => {
   const theme = createMuiTheme({
     palette: {
       type: 'dark',
+      primary: deepPurple,
     },
   });
 

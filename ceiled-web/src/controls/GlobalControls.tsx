@@ -1,8 +1,8 @@
 import React from 'react';
 import { Card, Grid, makeStyles } from '@material-ui/core';
-import BrightnessSlider from '../components/controls/BrightnessSlider';
-import RoomlightSlider from '../components/controls/RoomlightSlider';
-import FluxSlider from '../components/controls/FluxSlider';
+import BrightnessSlider from '../components/global/BrightnessSlider';
+import RoomlightSlider from '../components/global/RoomlightSlider';
+import FluxSlider from '../components/global/FluxSlider';
 
 const useStyles = makeStyles({
   card: {
