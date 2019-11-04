@@ -10,11 +10,16 @@ const BrightnessSlider = (props: BrightnessSliderProps) => {
   // TODO: change to useCeiled or so
 
   return (
-    <Grid container item className={props.className} alignItems='center'>
-      <Grid item xs={12} sm={2}>
-        <Typography variant='caption'>Brightness: {brightness}%</Typography>
+    <Grid container item className={props.className} alignItems='center' justify='space-between'>
+      <Grid container item xs={6} sm={2} alignItems='center' justify='space-between'>
+        <Grid item xs={4} sm={1}>
+          <Typography variant='caption'>Brightness</Typography>
+        </Grid>
+        <Grid item xs={2} sm={1}>
+          <Typography variant='caption'>{brightness}%</Typography>
+        </Grid>
       </Grid>
-      <Grid item xs={12} sm={10}>
+      <Grid item xs={12} sm={9}>
         <Slider
           value={brightness}
           onChange={(_, newBrightness) => setBrightness(newBrightness as number)}

@@ -6,8 +6,8 @@ import FluxSlider from '../components/controls/FluxSlider';
 
 const useStyles = makeStyles({
   card: {
-    minWidth: '368px', // 400 - padding-left - padding-right
-    padding: '8px 16px 8px 16px',
+    minWidth: '360px', // 400 - padding-left - padding-right
+    padding: '8px 24px 16px 16px',
   },
 });
 
