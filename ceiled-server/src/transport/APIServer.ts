@@ -2,8 +2,9 @@ import { readFileSync } from 'fs';
 import { createServer } from 'https';
 import * as SocketIO from 'socket.io';
 import { Service } from '../service/Service';
+import { InvalidRequestMessage } from './messages/errors';
 
-enum Events {
+export enum Events {
   CONNECT = 'connect',
   DISCONNECT = 'disconnect',
   SERVER = 'server',
@@ -62,47 +63,70 @@ export class APIServer {
     });
   }
 
+  /**
+   * Handles a newly established socket connection.
+   * @param socket the newly connected socket
+   */
   public handleConnect(socket: SocketIO.Socket) {
     console.log('--> Client connected.');
 
     socket.on(Events.DISCONNECT, this.handleDisconnect);
-    socket.on(Events.BRIGHTNESS, this.handleBrightness);
-    socket.on(Events.ROOMLIGHT, this.handleRoomlight);
-    socket.on(Events.FLUX, this.handleRoomlight);
+    socket.on(Events.BRIGHTNESS, (m: any) => this.handleBrightness(socket, m));
+    socket.on(Events.ROOMLIGHT, (m: any) => this.handleRoomlight(socket, m));
+    socket.on(Events.FLUX, (m: any) => this.handleFlux(socket, m));
     // TODO: add handler for CeiLED messages.
   }
 
+  /**
+   * Handles a disconnected socket.
+   * @param socket the newly connected socket
+   */
   public handleDisconnect(): void {
     console.log('--> Client disconnected.');
   }
 
-  public handleBrightness(message: any): void {
+  /**
+   * Handles an incoming message on `Events.BRIGHTNESS`.
+   * @param socket the active socket that the message was sent through
+   * @param message the incoming message
+   */
+  public handleBrightness(socket: SocketIO.Socket, message: any): void {
     if (GetSettingRequest.is(message)) {
       this.service.getBrightness();
     } else if (SetSettingRequest.is<number>(message, 'number')) {
       this.service.setBrightness(message.value);
     } else {
-      // TODO: emit error message
+      socket.emit(Events.ERROR, new InvalidRequestMessage(Events.BRIGHTNESS, message));
     }
   }
 
-  public handleRoomlight(message: any): void {
+  /**
+   * Handles an incoming message on `Events.ROOMLIGHT`.
+   * @param socket the active socket that the message was sent through
+   * @param message the incoming message
+   */
+  public handleRoomlight(socket: SocketIO.Socket, message: any): void {
     if (GetSettingRequest.is(message)) {
       this.service.getRoomlight();
     } else if (SetSettingRequest.is<number>(message, 'number')) {
       this.service.setRoomlight(message.value);
     } else {
-      // TODO: emit error message
+      socket.emit(Events.ERROR, new InvalidRequestMessage(Events.ROOMLIGHT, message));
     }
   }
 
-  public handleFlux(message: any): void {
+  /**
+   * Handles an incoming message on `Events.FLUX`.
+   * @param socket the active socket that the message was sent through
+   * @param message the incoming message
+   */
+  public handleFlux(socket: SocketIO.Socket, message: any): void {
     if (GetSettingRequest.is(message)) {
       this.service.getFlux();
     } else if (SetSettingRequest.is<number>(message, 'number')) {
       this.service.setFlux(message.value);
     } else {
-      // TODO: emit error message
+      socket.emit(Events.ERROR, new InvalidRequestMessage(Events.FLUX, message));
     }
   }
 }
