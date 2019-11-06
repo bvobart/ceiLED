@@ -1,3 +1,4 @@
+/* tslint:disable:max-classes-per-file */
 import { Events } from '../APIServer';
 
 export interface ErrorMessage {
@@ -5,12 +6,16 @@ export interface ErrorMessage {
 }
 
 export class InvalidRequestMessage implements ErrorMessage {
+  public message = 'Invalid request';
   public event: Events;
   public request: any;
-  public message = 'Invalid request';
 
   constructor(event: Events, request: any) {
     this.event = event;
     this.request = request;
   }
+}
+
+export class UnauthorisedMessage implements ErrorMessage {
+  public message = 'You are not authorised to do that';
 }

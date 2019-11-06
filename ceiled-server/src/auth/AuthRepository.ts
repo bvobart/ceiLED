@@ -1,29 +1,26 @@
-import { Db, ObjectId } from 'mongodb';
-import { db } from '../server';
-
-const collectionName: string = 'authorisedTokens';
+import { Collection, ObjectId } from 'mongodb';
 
 export interface Auth {
-  id: ObjectId;
+  id?: ObjectId;
   name: string;
   token: string;
 }
 
 export class AuthRepository {
-  private db: Db;
+  private collection: Collection<Auth>;
 
-  constructor(dbParam?: Db) {
-    this.db = dbParam || db;
+  constructor(collection: Collection<Auth>) {
+    this.collection = collection;
   }
 
   public findByToken(token: string): Promise<Auth> {
-    return this.db.collection(collectionName).findOne({ token });
+    return this.collection.findOne({ token });
   }
 
   public create(token: string, name: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
-        const res = await this.db.collection(collectionName).insertOne({ token, name });
+        const res = await this.collection.insertOne({ token, name });
         return res.result.ok ? resolve() : reject('Auth token was not inserted for some reason');
       } catch (error) {
         return reject(error);

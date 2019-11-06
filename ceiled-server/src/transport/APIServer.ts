@@ -1,8 +1,10 @@
 import { readFileSync } from 'fs';
 import { createServer } from 'https';
 import * as SocketIO from 'socket.io';
+
+import AuthRepository from '../auth/AuthRepository';
 import { Service } from '../service/Service';
-import { InvalidRequestMessage } from './messages/errors';
+import { InvalidRequestMessage, UnauthorisedMessage } from './messages/errors';
 
 export enum Events {
   CONNECT = 'connect',
@@ -18,13 +20,15 @@ export enum Events {
 export class APIServer {
   private server: SocketIO.Server;
   private service: Service;
+  private auth: AuthRepository;
 
   /**
    * Creates an APIServer object with the given service layer.
    * @param service the service layer
    */
-  constructor(service: Service) {
+  constructor(service: Service, authRepo: AuthRepository) {
     this.service = service;
+    this.auth = authRepo;
   }
 
   /**
@@ -63,6 +67,25 @@ export class APIServer {
     });
   }
 
+  public async authorised(
+    socket: SocketIO.Socket,
+    message: any,
+    handler: (socket: SocketIO.Socket, message: any) => Promise<void>,
+  ): Promise<void> {
+    if (!AuthorisedRequest.is(message)) {
+      socket.emit(Events.ERROR, new UnauthorisedMessage());
+      return;
+    }
+
+    const auth = await this.auth.findByToken(message.authToken);
+    if (!auth) {
+      socket.emit(Events.ERROR, new UnauthorisedMessage());
+      return;
+    }
+
+    return handler(socket, message);
+  }
+
   /**
    * Handles a newly established socket connection.
    * @param socket the newly connected socket
@@ -71,9 +94,9 @@ export class APIServer {
     console.log('--> Client connected.');
 
     socket.on(Events.DISCONNECT, this.handleDisconnect);
-    socket.on(Events.BRIGHTNESS, (m: any) => this.handleBrightness(socket, m));
-    socket.on(Events.ROOMLIGHT, (m: any) => this.handleRoomlight(socket, m));
-    socket.on(Events.FLUX, (m: any) => this.handleFlux(socket, m));
+    socket.on(Events.BRIGHTNESS, (m: any) => this.authorised(socket, m, this.handleBrightness));
+    socket.on(Events.ROOMLIGHT, (m: any) => this.authorised(socket, m, this.handleRoomlight));
+    socket.on(Events.FLUX, (m: any) => this.authorised(socket, m, this.handleFlux));
     // TODO: add handler for CeiLED messages.
   }
 
@@ -90,11 +113,12 @@ export class APIServer {
    * @param socket the active socket that the message was sent through
    * @param message the incoming message
    */
-  public handleBrightness(socket: SocketIO.Socket, message: any): void {
+  public async handleBrightness(socket: SocketIO.Socket, message: any): Promise<void> {
     if (GetSettingRequest.is(message)) {
-      this.service.getBrightness();
+      const brightness = await this.service.getBrightness();
+      socket.emit(Events.BRIGHTNESS, brightness);
     } else if (SetSettingRequest.is<number>(message, 'number')) {
-      this.service.setBrightness(message.value);
+      await this.service.setBrightness(message.value);
     } else {
       socket.emit(Events.ERROR, new InvalidRequestMessage(Events.BRIGHTNESS, message));
     }
@@ -105,11 +129,12 @@ export class APIServer {
    * @param socket the active socket that the message was sent through
    * @param message the incoming message
    */
-  public handleRoomlight(socket: SocketIO.Socket, message: any): void {
+  public async handleRoomlight(socket: SocketIO.Socket, message: any): Promise<void> {
     if (GetSettingRequest.is(message)) {
-      this.service.getRoomlight();
+      const roomlight = await this.service.getRoomlight();
+      socket.emit(Events.ROOMLIGHT, roomlight);
     } else if (SetSettingRequest.is<number>(message, 'number')) {
-      this.service.setRoomlight(message.value);
+      await this.service.setRoomlight(message.value);
     } else {
       socket.emit(Events.ERROR, new InvalidRequestMessage(Events.ROOMLIGHT, message));
     }
@@ -120,11 +145,12 @@ export class APIServer {
    * @param socket the active socket that the message was sent through
    * @param message the incoming message
    */
-  public handleFlux(socket: SocketIO.Socket, message: any): void {
+  public async handleFlux(socket: SocketIO.Socket, message: any): Promise<void> {
     if (GetSettingRequest.is(message)) {
-      this.service.getFlux();
+      const flux = await this.service.getFlux();
+      socket.emit(Events.FLUX, flux);
     } else if (SetSettingRequest.is<number>(message, 'number')) {
-      this.service.setFlux(message.value);
+      await this.service.setFlux(message.value);
     } else {
       socket.emit(Events.ERROR, new InvalidRequestMessage(Events.FLUX, message));
     }

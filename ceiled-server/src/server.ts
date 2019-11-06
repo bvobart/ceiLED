@@ -3,15 +3,13 @@ Bluebird.config({ cancellation: true });
 
 import { Db, MongoClient } from 'mongodb';
 
+import AuthRepository from './auth/AuthRepository';
 import Color from './common/Color';
 import { CeiledDriver } from './hardware/CeiledDriver';
 import SolidPattern from './patterns/SolidPattern';
 import { CeiledService } from './service/CeiledService';
 import { Service } from './service/Service';
 import { APIServer } from './transport/APIServer';
-
-// Controller DB. Used for authorisation tokens.
-export let db: Db;
 
 /**
  * Launches the CeiLED Controller server
@@ -38,13 +36,15 @@ const launch = async (): Promise<void> => {
   const dbName: string = process.env.DB_NAME || 'ceiled';
   const dbUsername: string = process.env.DB_USERNAME || '';
   const dbPassword: string = process.env.DB_PASSWORD || '';
-  db = await initDB(dbHost, dbAuth, dbName, dbUsername, dbPassword);
+  const authCollection: string = 'authorisedTokens';
+  const db = await initDB(dbHost, dbAuth, dbName, dbUsername, dbPassword);
+  const authRepo = new AuthRepository(db.collection(authCollection));
 
   // create service layer
   const service: Service = new CeiledService(ceiledDriver);
 
   // start API server
-  const server: APIServer = new APIServer(service);
+  const server: APIServer = new APIServer(service, authRepo);
   if (insecure) {
     server.listen(port);
   } else {
