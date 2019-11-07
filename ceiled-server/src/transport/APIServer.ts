@@ -69,6 +69,7 @@ export class APIServer {
 
   public async authorised(
     socket: SocketIO.Socket,
+    event: Events,
     message: any,
     handler: (socket: SocketIO.Socket, message: any) => Promise<void>,
   ): Promise<void> {
@@ -83,6 +84,7 @@ export class APIServer {
       return;
     }
 
+    console.log(`--> Received new message on '${event}' from ${auth.name}`);
     return handler(socket, message);
   }
 
@@ -94,9 +96,13 @@ export class APIServer {
     console.log('--> Client connected.');
 
     socket.on(Events.DISCONNECT, this.handleDisconnect);
-    socket.on(Events.BRIGHTNESS, (m: any) => this.authorised(socket, m, this.handleBrightness));
-    socket.on(Events.ROOMLIGHT, (m: any) => this.authorised(socket, m, this.handleRoomlight));
-    socket.on(Events.FLUX, (m: any) => this.authorised(socket, m, this.handleFlux));
+    socket.on(Events.BRIGHTNESS, (m: any) =>
+      this.authorised(socket, Events.BRIGHTNESS, m, this.handleBrightness),
+    );
+    socket.on(Events.ROOMLIGHT, (m: any) =>
+      this.authorised(socket, Events.ROOMLIGHT, m, this.handleRoomlight),
+    );
+    socket.on(Events.FLUX, (m: any) => this.authorised(socket, Events.FLUX, m, this.handleFlux));
     // TODO: add handler for CeiLED messages.
   }
 

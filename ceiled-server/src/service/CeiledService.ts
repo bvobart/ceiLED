@@ -2,6 +2,10 @@ import { currentFluxLevel, millisUntilNextFluxChange } from '../common/flux';
 import { Driver } from '../hardware/Driver';
 import { Service } from './Service';
 
+/**
+ * Defines and implements all functionalities that can be called on ceiled-server thrugh the API.
+ * TODO: reapply any active solid patterns upon changing brightness, roomlight or flux. Not necessary for fades.
+ */
 export class CeiledService implements Service {
   private driver: Driver;
 
