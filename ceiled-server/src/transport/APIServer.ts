@@ -4,6 +4,12 @@ import * as SocketIO from 'socket.io';
 
 import AuthRepository from '../auth/AuthRepository';
 import { Service } from '../service/Service';
+import {
+  GetPatternRequest,
+  OffRequest,
+  SetMultiplePatternsRequest,
+  SetPatternRequest,
+} from './messages/ceiled';
 import { InvalidRequestMessage, UnauthorisedMessage } from './messages/errors';
 
 export enum Events {
@@ -67,6 +73,14 @@ export class APIServer {
     });
   }
 
+  /**
+   * Ensures that a request message coming in on the specified event is authorised
+   * before calling the handler.
+   * @param event the event the messages was received on
+   * @param socket the socket connection the message was received from
+   * @param message the message that was received
+   * @param handler the handler function that should handle messages for that event.
+   */
   public async authorised(
     event: Events,
     socket: SocketIO.Socket,
@@ -96,6 +110,7 @@ export class APIServer {
     console.log('--> Client connected.');
 
     socket.on(Events.DISCONNECT, this.handleDisconnect);
+
     socket.on(Events.BRIGHTNESS, (m: any) =>
       this.authorised(Events.BRIGHTNESS, socket, m, this.handleBrightness),
     );
@@ -165,6 +180,17 @@ export class APIServer {
   }
 
   public async handleCeiled(socket: SocketIO.Socket, message: any): Promise<void> {
-    // TODO: implement transport layer for ceiled commands
+    if (GetPatternRequest.is(message)) {
+      const pattern = await this.service.getPattern(message.channel);
+      socket.emit(Events.CEILED, pattern);
+    } else if (OffRequest.is(message)) {
+      await this.service.off();
+    } else if (SetPatternRequest.is(message)) {
+      await this.service.setPattern(message.channel, message.pattern);
+    } else if (SetMultiplePatternsRequest.is(message)) {
+      await this.service.setMultiplePatterns(message.patterns);
+    } else {
+      socket.emit(Events.ERROR, new InvalidRequestMessage(Events.CEILED, message));
+    }
   }
 }

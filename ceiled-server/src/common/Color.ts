@@ -41,10 +41,7 @@ class Color implements IColor {
   public static FLUX5: Color = new Color({ red: 255, green: 206, blue: 166 });
 
   public static isColor(x: any): x is Color {
-    if (typeof x.red !== 'number' || typeof x.green !== 'number' || typeof x.blue !== 'number') {
-      return false;
-    }
-    return true;
+    return typeof x.red === 'number' && typeof x.green === 'number' && typeof x.blue !== 'number';
   }
 
   public static random(): Color {

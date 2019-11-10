@@ -1,3 +1,5 @@
+import Pattern from '../patterns/Pattern';
+
 export interface Service {
   getBrightness(): Promise<number>;
   setBrightness(brightness: number): Promise<void>;
@@ -8,5 +10,8 @@ export interface Service {
   getFlux(): Promise<number>;
   setFlux(flux: number): Promise<void>;
 
-  // TODO: setting CeiLED patterns etc.
+  off(): Promise<void>;
+  getPattern(channel: number): Promise<Pattern>;
+  setPattern(channel: number | 'all', pattern: Pattern): Promise<void>;
+  setMultiplePatterns(patterns: Map<number, Pattern>): Promise<void>;
 }

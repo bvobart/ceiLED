@@ -1,5 +1,6 @@
 import { currentFluxLevel, millisUntilNextFluxChange } from '../common/flux';
 import { Driver } from '../hardware/Driver';
+import Pattern from '../patterns/Pattern';
 import { Service } from './Service';
 
 /**
@@ -13,6 +14,7 @@ export class CeiledService implements Service {
   private roomlight: number;
   private flux: number;
   private autoFluxTimeout: NodeJS.Timeout;
+  private currentPatterns: Map<number, Pattern>;
 
   constructor(driver: Driver) {
     this.driver = driver;
@@ -72,14 +74,39 @@ export class CeiledService implements Service {
     }
   }
 
-  // TODO: setting CeiLED patterns and such
+  public off(): Promise<void> {
+    return this.driver.off();
+  }
 
+  public getPattern(channel: number): Promise<Pattern> {
+    return Promise.resolve(this.currentPatterns.get(channel));
+  }
+
+  public setPattern(channel: number | 'all', pattern: Pattern): Promise<void> {
+    return pattern.show(channel, this.driver);
+  }
+
+  public async setMultiplePatterns(patterns: Map<number, Pattern>): Promise<void> {
+    const applying = new Array<Promise<void>>();
+    for (const [channel, pattern] of patterns) {
+      applying.push(pattern.show(channel, this.driver));
+    }
+
+    await Promise.all(applying);
+  }
+
+  /**
+   * Initialises the brightness, roomlight and flux setting values by retrieving them from the driver.
+   */
   private async initSettings() {
     await this.driver.getBrightness();
     await this.driver.getRoomlight();
     await this.driver.getFlux();
   }
 
+  /**
+   * Enables automatic flux setting. Will keep calling itself until `clearAutoFluxTimer` is called.
+   */
   private autoUpdateFlux(): Promise<void> {
     this.clearAutoFluxTimer();
     const millis = millisUntilNextFluxChange(new Date());
@@ -90,6 +117,9 @@ export class CeiledService implements Service {
     return this.driver.setFlux(newFlux);
   }
 
+  /**
+   * Disables automatic flux updates.
+   */
   private clearAutoFluxTimer(): void {
     if (this.autoFluxTimeout) {
       clearTimeout(this.autoFluxTimeout);
