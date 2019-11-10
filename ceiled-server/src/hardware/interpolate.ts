@@ -1,4 +1,7 @@
-import { InterpolationType } from '../patterns/options/FadePatternOptions';
+export enum InterpolationType {
+  LINEAR = 'linear',
+  SIGMOID = 'sigmoid',
+}
 
 /**
  * Contains multiple interpolation functions, namely the Linear and Sigmoid functions.

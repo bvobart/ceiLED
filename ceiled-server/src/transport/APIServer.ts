@@ -68,8 +68,8 @@ export class APIServer {
   }
 
   public async authorised(
-    socket: SocketIO.Socket,
     event: Events,
+    socket: SocketIO.Socket,
     message: any,
     handler: (socket: SocketIO.Socket, message: any) => Promise<void>,
   ): Promise<void> {
@@ -97,13 +97,15 @@ export class APIServer {
 
     socket.on(Events.DISCONNECT, this.handleDisconnect);
     socket.on(Events.BRIGHTNESS, (m: any) =>
-      this.authorised(socket, Events.BRIGHTNESS, m, this.handleBrightness),
+      this.authorised(Events.BRIGHTNESS, socket, m, this.handleBrightness),
     );
     socket.on(Events.ROOMLIGHT, (m: any) =>
-      this.authorised(socket, Events.ROOMLIGHT, m, this.handleRoomlight),
+      this.authorised(Events.ROOMLIGHT, socket, m, this.handleRoomlight),
     );
-    socket.on(Events.FLUX, (m: any) => this.authorised(socket, Events.FLUX, m, this.handleFlux));
-    // TODO: add handler for CeiLED messages.
+    socket.on(Events.FLUX, (m: any) => this.authorised(Events.FLUX, socket, m, this.handleFlux));
+    socket.on(Events.CEILED, (m: any) =>
+      this.authorised(Events.CEILED, socket, m, this.handleCeiled),
+    );
   }
 
   /**
@@ -160,5 +162,9 @@ export class APIServer {
     } else {
       socket.emit(Events.ERROR, new InvalidRequestMessage(Events.FLUX, message));
     }
+  }
+
+  public async handleCeiled(socket: SocketIO.Socket, message: any): Promise<void> {
+    // TODO: implement transport layer for ceiled commands
   }
 }

@@ -1,7 +1,7 @@
 import { createConnection, Socket } from 'net';
 import Color from '../common/Color';
-import { InterpolationType } from '../patterns/options/FadePatternOptions';
 import { Driver } from './Driver';
+import { InterpolationType } from './interpolate';
 
 const CMD_OFF = 'set roomlight 0\nset all solid 0 0 0\n';
 

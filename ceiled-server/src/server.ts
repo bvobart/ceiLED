@@ -4,9 +4,7 @@ Bluebird.config({ cancellation: true });
 import { Db, MongoClient } from 'mongodb';
 
 import AuthRepository from './auth/AuthRepository';
-import Color from './common/Color';
 import { CeiledDriver } from './hardware/CeiledDriver';
-import SolidPattern from './patterns/SolidPattern';
 import { CeiledService } from './service/CeiledService';
 import { Service } from './service/Service';
 import { APIServer } from './transport/APIServer';
@@ -23,13 +21,6 @@ const launch = async (): Promise<void> => {
   const socketFile: string =
     __dirname + '/../' + (process.env.CEILED_SOCKET || '../ceiled-driver/ceiled.sock');
 
-  // initialise driver and show some colours on our LEDs :P
-  const ceiledDriver: CeiledDriver = new CeiledDriver(socketFile, 3);
-  await ceiledDriver.connect();
-  const colors: Color[] = [Color.random(), Color.random(), Color.random()];
-  const pattern: SolidPattern = new SolidPattern(colors);
-  pattern.show(ceiledDriver);
-
   // and some DB settings too, then initialise DB for authorisation requests.
   const dbHost: string = process.env.DB_HOST || 'localhost:27017';
   const dbAuth: string = process.env.DB_AUTH || 'admin';
@@ -37,11 +28,17 @@ const launch = async (): Promise<void> => {
   const dbUsername: string = process.env.DB_USERNAME || '';
   const dbPassword: string = process.env.DB_PASSWORD || '';
   const authCollection: string = 'authorisedTokens';
-  const db = await initDB(dbHost, dbAuth, dbName, dbUsername, dbPassword);
-  const authRepo = new AuthRepository(db.collection(authCollection));
+
+  // initialise driver
+  const ceiledDriver: CeiledDriver = new CeiledDriver(socketFile, 3);
+  await ceiledDriver.connect();
 
   // create service layer
   const service: Service = new CeiledService(ceiledDriver);
+
+  // initialise authorisation repository
+  const db = await initDB(dbHost, dbAuth, dbName, dbUsername, dbPassword);
+  const authRepo = new AuthRepository(db.collection(authCollection));
 
   // start API server
   const server: APIServer = new APIServer(service, authRepo);
