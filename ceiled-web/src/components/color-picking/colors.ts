@@ -13,6 +13,10 @@ export class HSVColor {
     this.v = v;
   }
 
+  equals(other: HSVColor): boolean {
+    return this.toRGB().equals(other.toRGB());
+  }
+
   toCSS(): string {
     return this.toRGB().toCSS();
   }
@@ -61,6 +65,10 @@ export class RGBColor {
     this.r = r;
     this.g = g;
     this.b = b;
+  }
+
+  equals(other: RGBColor): boolean {
+    return this.r === other.r && this.g === other.g && this.b === other.b;
   }
 
   toCSS(): string {

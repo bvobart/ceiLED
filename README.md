@@ -29,7 +29,7 @@ See the individual ReadMe's. For a quickstart, open three terminals and run:
 - `yarn install`
 - `yarn start`
 
-### Quick start for production
+## Quick start for production
 
 To get this system running in production, you'll need:
 
@@ -37,7 +37,7 @@ To get this system running in production, you'll need:
 - Docker Compose
 - Access to a MongoDB database
 
-Then create a `.env` file in this folder, and fill in any necessary environment variables. Here's an example:
+Then create a `.env` file, place it next to the `docker-compose.yml` file in this repository and fill in any necessary environment variables. Here's an example:
 ```
 INSECURE="true"
 DB_HOST=192.168.0.123
@@ -51,6 +51,6 @@ or replace `INSECURE="true"` with `HTTPS_FILES=https` in order to specify that t
 
 - `docker compose up --build -d`
 
-### Install scripts
+## Install scripts
 
 I'm working on some installation scripts to make it much easier for others to start using the CeiLED suite and keep it up to date. I will update this ReadMe once they are in this repository.

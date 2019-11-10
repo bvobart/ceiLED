@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core';
-import { HSVColor, RGBColor } from './colors';
+import { HSVColor } from './colors';
 import Hue from './HueSlider';
 import Saturation from './Saturation';
+import Tile from './Tile';
 
 interface ColorPickerProps {
   className: string
-  onChange?: (color: RGBColor) => void
+  hsv: HSVColor
+  onChange: (color: HSVColor) => void
+  preview?: boolean
 }
 
 const useStyles = makeStyles({
@@ -24,15 +27,15 @@ const useStyles = makeStyles({
 
 const ColorPicker = (props: ColorPickerProps) => {
   const classes = useStyles();
-  const [hsv, setHSV] = useState<HSVColor>(new HSVColor({ h: 0, s: 0.5, v: 1 }));
-  
-  // TODO: set initial HSV value from props
-  // TODO: implement calling onChange when hsv changes.
+  const [hsv, setHSV] = useState<HSVColor>(props.hsv);
+  useEffect(() => {
+    if (!hsv.equals(props.hsv)) props.onChange(hsv)
+  }, [hsv]);
 
   return (
     <div className={props.className}>
       <Hue className={classes.hue} hsv={hsv} onChange={setHSV} />
-      <div className={classes.preview} style={{ background: hsv.toCSS() }}/>
+      {props.preview && <Tile className={classes.preview} hsv={hsv} />}
       <Saturation className={classes.saturation} hsv={hsv} onChange={setHSV} />
     </div>
   )

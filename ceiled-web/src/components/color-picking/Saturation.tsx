@@ -20,12 +20,11 @@ const Saturation = (props: SaturationProps) => {
       const x = mouseX < 0 ? 0 : mouseX > width ? width : mouseX;
       const y = mouseY < 0 ? 0 : mouseY > height ? height : mouseY;
       
-      const newHSV = new HSVColor({ 
+      props.onChange(new HSVColor({ 
         h: props.hsv.h, 
         s: x / width, 
         v: -y / height + 1,
-      });
-      props.onChange(newHSV);
+      }));
     }
   }
 
@@ -58,11 +57,15 @@ const Saturation = (props: SaturationProps) => {
       <div className={props.className} style={{ background: 'linear-gradient(to right, #fff, rgba(255, 255, 255, 0))'}}>
         <div 
           className={props.className} 
-          style={{ background: 'linear-gradient(to top, #000, rgba(0, 0, 0, 0))', position: 'relative' }}
           ref={backgroundRef}
           onClick={onClick}
           onMouseDown={onMouseDown}
           onTouchStart={onTouchStart}
+          style={{ 
+            background: 'linear-gradient(to top, #000, rgba(0, 0, 0, 0))', 
+            position: 'relative',
+            touchAction: 'none', 
+          }}
         >
           <div 
             onMouseDown={onMouseDown}
@@ -76,7 +79,8 @@ const Saturation = (props: SaturationProps) => {
               position: 'absolute',
               top: `${-100 * hsv.v + 100}%`,
               left: `${100 * hsv.s}%`,
-              transform: 'translate(-4px, -4px)',
+              transform: 'translate(-6px, -6px)',
+              touchAction: 'none',
             }}
           />
         </div>

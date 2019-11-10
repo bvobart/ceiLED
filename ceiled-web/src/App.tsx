@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import GlobalControls from './controls/GlobalControls';
 import MoodControls from './controls/MoodControls';
 import SolidControls from './controls/SolidControls';
+import AnimationControls from './controls/AnimationControls';
 
 const useStyles = makeStyles({
   container: {
@@ -25,11 +26,12 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Container className={classes.container} maxWidth="md">
+      <Container className={classes.container} maxWidth='md'>
         <Header />
         <GlobalControls />
         <MoodControls />
         <SolidControls />
+        <AnimationControls />
         <Footer />
       </Container>
     </ThemeProvider>
