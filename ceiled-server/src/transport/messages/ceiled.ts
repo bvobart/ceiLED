@@ -1,4 +1,5 @@
 import Pattern from '../../patterns/Pattern';
+import { AuthorisedRequest } from './common';
 
 /* tslint:disable:max-classes-per-file */
 

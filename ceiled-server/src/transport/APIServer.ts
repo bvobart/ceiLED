@@ -10,13 +10,18 @@ import {
   SetMultiplePatternsRequest,
   SetPatternRequest,
 } from './messages/ceiled';
-import { InvalidRequestMessage, UnauthorisedMessage } from './messages/errors';
+import { AuthorisedRequest, GetSettingRequest, SetSettingRequest } from './messages/common';
+import {
+  InternalErrorMessage,
+  InvalidRequestMessage,
+  UnauthorisedMessage,
+} from './messages/errors';
 
 export enum Events {
   CONNECT = 'connect',
   DISCONNECT = 'disconnect',
   SERVER = 'server',
-  ERROR = 'error',
+  ERRORS = 'errors',
   BRIGHTNESS = 'brightness',
   ROOMLIGHT = 'roomlight',
   FLUX = 'flux',
@@ -58,7 +63,7 @@ export class APIServer {
       this.server = SocketIO(port);
     }
 
-    this.server.on(Events.CONNECT, this.handleConnect);
+    this.server.on(Events.CONNECT, this.handleConnect.bind(this));
   }
 
   /**
@@ -81,25 +86,24 @@ export class APIServer {
    * @param message the message that was received
    * @param handler the handler function that should handle messages for that event.
    */
-  public async authorised(
-    event: Events,
-    socket: SocketIO.Socket,
-    message: any,
-    handler: (socket: SocketIO.Socket, message: any) => Promise<void>,
-  ): Promise<void> {
-    if (!AuthorisedRequest.is(message)) {
-      socket.emit(Events.ERROR, new UnauthorisedMessage());
-      return;
-    }
+  public authorised(
+    handler: (event: Events, socket: SocketIO.Socket, message: any) => Promise<void>,
+  ): (event: Events, socket: SocketIO.Socket, message: any) => Promise<void> {
+    return async (event: Events, socket: SocketIO.Socket, message: any): Promise<void> => {
+      if (!AuthorisedRequest.is(message)) {
+        socket.emit(Events.ERRORS, new UnauthorisedMessage());
+        return;
+      }
 
-    const auth = await this.auth.findByToken(message.authToken);
-    if (!auth) {
-      socket.emit(Events.ERROR, new UnauthorisedMessage());
-      return;
-    }
+      const auth = await this.auth.findByToken(message.authToken);
+      if (!auth) {
+        socket.emit(Events.ERRORS, new UnauthorisedMessage());
+        return;
+      }
 
-    console.log(`--> Received new message on '${event}' from ${auth.name}`);
-    return handler(socket, message);
+      console.log(`--> Received new message on '${event}' from ${auth.name}`);
+      return handler(event, socket, message);
+    };
   }
 
   /**
@@ -109,17 +113,19 @@ export class APIServer {
   public handleConnect(socket: SocketIO.Socket) {
     console.log('--> Client connected.');
 
-    socket.on(Events.DISCONNECT, this.handleDisconnect);
+    socket.on(Events.DISCONNECT, this.handleDisconnect.bind(this));
 
     socket.on(Events.BRIGHTNESS, (m: any) =>
-      this.authorised(Events.BRIGHTNESS, socket, m, this.handleBrightness),
+      this.authorised(handleError(this.handleBrightness.bind(this)))(Events.BRIGHTNESS, socket, m),
     );
     socket.on(Events.ROOMLIGHT, (m: any) =>
-      this.authorised(Events.ROOMLIGHT, socket, m, this.handleRoomlight),
+      this.authorised(handleError(this.handleRoomlight.bind(this)))(Events.ROOMLIGHT, socket, m),
     );
-    socket.on(Events.FLUX, (m: any) => this.authorised(Events.FLUX, socket, m, this.handleFlux));
+    socket.on(Events.FLUX, (m: any) =>
+      this.authorised(handleError(this.handleFlux.bind(this)))(Events.FLUX, socket, m),
+    );
     socket.on(Events.CEILED, (m: any) =>
-      this.authorised(Events.CEILED, socket, m, this.handleCeiled),
+      this.authorised(handleError(this.handleCeiled.bind(this)))(Events.CEILED, socket, m),
     );
   }
 
@@ -143,7 +149,7 @@ export class APIServer {
     } else if (SetSettingRequest.is<number>(message, 'number')) {
       await this.service.setBrightness(message.value);
     } else {
-      socket.emit(Events.ERROR, new InvalidRequestMessage(Events.BRIGHTNESS, message));
+      socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.BRIGHTNESS, message));
     }
   }
 
@@ -159,7 +165,7 @@ export class APIServer {
     } else if (SetSettingRequest.is<number>(message, 'number')) {
       await this.service.setRoomlight(message.value);
     } else {
-      socket.emit(Events.ERROR, new InvalidRequestMessage(Events.ROOMLIGHT, message));
+      socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.ROOMLIGHT, message));
     }
   }
 
@@ -175,7 +181,7 @@ export class APIServer {
     } else if (SetSettingRequest.is<number>(message, 'number')) {
       await this.service.setFlux(message.value);
     } else {
-      socket.emit(Events.ERROR, new InvalidRequestMessage(Events.FLUX, message));
+      socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.FLUX, message));
     }
   }
 
@@ -190,7 +196,22 @@ export class APIServer {
     } else if (SetMultiplePatternsRequest.is(message)) {
       await this.service.setMultiplePatterns(message.patterns);
     } else {
-      socket.emit(Events.ERROR, new InvalidRequestMessage(Events.CEILED, message));
+      socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.CEILED, message));
     }
   }
 }
+
+const handleError = (
+  handler: (socket: SocketIO.Socket, message: any) => Promise<void>,
+): ((event: Events, socket: SocketIO.Socket, message: any) => Promise<void>) => {
+  return async (event: Events, socket: SocketIO.Socket, message: any): Promise<void> => {
+    try {
+      await handler(socket, message);
+    } catch (error) {
+      console.error('!---------------------------!');
+      console.error('--> An internal error occurred on', event, ':', error);
+      console.error('!---------------------------!');
+      socket.emit(Events.ERRORS, new InternalErrorMessage(event, message, error));
+    }
+  };
+};

@@ -65,7 +65,7 @@ const launch = async (): Promise<void> => {
   process.on('SIGTERM', onExit);
 
   console.log('.----------------------------');
-  console.log('| CeiLED Controller online ');
+  console.log('| CeiLED Server online ');
   console.log('| ws' + (insecure ? '' : 's') + '://localhost:' + port);
   if (insecure) console.log('| API is being hosted over an insecure WebSocket');
   console.log("'----------------------------\n");

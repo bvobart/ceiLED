@@ -3,7 +3,7 @@ import Color from '../common/Color';
 import { Driver } from './Driver';
 import { InterpolationType } from './interpolate';
 
-const CMD_OFF = 'set roomlight 0\nset all solid 0 0 0\n';
+const CMD_OFF = 'set roomlight 0\nset all solid 0 0 0';
 
 export class CeiledDriver implements Driver {
   public channels: number;
