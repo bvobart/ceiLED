@@ -4,10 +4,12 @@ import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { deepPurple } from '@material-ui/core/colors';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ErrorDialog from './components/ErrorDialog';
 import GlobalControls from './controls/GlobalControls';
 import MoodControls from './controls/MoodControls';
 import SolidControls from './controls/SolidControls';
 import AnimationControls from './controls/AnimationControls';
+import { CeiledProvider } from './hooks/context/CeiledContext';
 
 const useStyles = makeStyles({
   container: {
@@ -26,14 +28,17 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Container className={classes.container} maxWidth='md'>
-        <Header />
-        <GlobalControls />
-        <MoodControls />
-        <SolidControls />
-        <AnimationControls />
-        <Footer />
-      </Container>
+      <CeiledProvider>
+        <Container className={classes.container} maxWidth='md'>
+          <Header />
+          <ErrorDialog />
+          <GlobalControls />
+          <MoodControls />
+          <SolidControls />
+          <AnimationControls />
+          <Footer />
+        </Container>
+      </CeiledProvider>
     </ThemeProvider>
   );
 }

@@ -28,9 +28,10 @@ const useStyles = makeStyles({
 const ColorPicker = (props: ColorPickerProps) => {
   const classes = useStyles();
   const [hsv, setHSV] = useState<HSVColor>(props.hsv);
+  const { hsv: hsvProp, onChange } = props;
   useEffect(() => {
-    if (!hsv.equals(props.hsv)) props.onChange(hsv)
-  }, [hsv]);
+    if (!hsv.equals(hsvProp)) onChange(hsv)
+  }, [hsv, onChange, hsvProp]);
 
   return (
     <div className={props.className}>

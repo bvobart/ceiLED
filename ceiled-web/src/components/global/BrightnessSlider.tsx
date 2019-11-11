@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Grid, Typography, Slider } from '@material-ui/core';
+import useBrightness from '../../hooks/useBrightness';
 
 interface BrightnessSliderProps {
   className?: string
 }
 
 const BrightnessSlider = (props: BrightnessSliderProps) => {
-  const [brightness, setBrightness] = useState(100);
-  // TODO: change to useCeiled or so
+  const [brightness, setBrightness] = useBrightness();
 
   return (
     <Grid container item className={props.className} alignItems='center' justify='space-between'>

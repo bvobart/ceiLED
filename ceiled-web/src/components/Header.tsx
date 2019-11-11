@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, makeStyles, Typography, IconButton, Grid } from '@material-ui/core';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import { red, green } from '@material-ui/core/colors';
+
+import { CeiledStatus } from '../api';
+import useCeiled from '../hooks/useCeiled';
 
 const useStyles = makeStyles({
   card: {
@@ -24,9 +27,7 @@ const useStyles = makeStyles({
 
 const Header = () => {
   const classes = useStyles();
-  const [connected, setConnected] = useState(false);
-
-  // TODO: add CeiLED functionality
+  const [status, connect, off] = useCeiled();
 
   return (
     <Card square className={classes.card}>
@@ -36,13 +37,13 @@ const Header = () => {
           <Typography variant='subtitle1'>Controlling LEDs on a ceiling near you</Typography>
         </Grid>
         <IconButton
-          color={!connected ? 'primary' : 'secondary'}
+          color={status !== CeiledStatus.CONNECTED ? 'primary' : 'secondary'}
           classes={{
             colorPrimary: classes.powerButtonOff,
             colorSecondary: classes.powerButtonOn,
           }}
-          onClick={() => setConnected(!connected)}
-          // TODO: add onDoubleClick to turn off
+          onClick={() => connect('http://localhost:6565')}
+          onDoubleClick={() => off()}
         >
           <PowerSettingsNewIcon className={classes.powerIcon} />
         </IconButton>
