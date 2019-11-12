@@ -22,7 +22,7 @@ export class CeiledService implements Service {
   }
 
   public async getBrightness(): Promise<number> {
-    const brightness = (await this.driver.getBrightness()) / 2.55;
+    const brightness = Math.round((await this.driver.getBrightness()) / 2.55);
     this.brightness = brightness;
     return brightness;
   }
@@ -37,7 +37,7 @@ export class CeiledService implements Service {
   }
 
   public async getRoomlight(): Promise<number> {
-    const roomlight = (await this.driver.getRoomlight()) / 2.55;
+    const roomlight = Math.round((await this.driver.getRoomlight()) / 2.55);
     this.roomlight = roomlight;
     return roomlight;
   }
@@ -64,11 +64,11 @@ export class CeiledService implements Service {
     const newFlux = inRange(flux, -1, 5);
 
     if (this.flux !== newFlux) {
+      this.flux = newFlux;
       if (newFlux === -1) {
         return this.autoUpdateFlux();
       } else {
         this.clearAutoFluxTimer();
-        this.flux = newFlux;
         return this.driver.setFlux(newFlux);
       }
     }
@@ -113,7 +113,6 @@ export class CeiledService implements Service {
     this.autoFluxTimeout = setTimeout(this.autoUpdateFlux, millis);
 
     const newFlux = currentFluxLevel(new Date());
-    this.flux = newFlux;
     return this.driver.setFlux(newFlux);
   }
 

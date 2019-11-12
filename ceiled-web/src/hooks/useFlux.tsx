@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { Events } from "../api";
-import { SetSettingRequest } from '../api/requests';
+import { SetSettingRequest, GetSettingRequest } from '../api/requests';
 import useAuthToken from "./useAuthToken";
 import useCeiledSocket from './useCeiledSocket';
 
@@ -11,9 +11,13 @@ const useFlux = (): [number, (newFlux: number) => void] => {
 
   useEffect(() => {
     if (socket) {
+      // if a new socket connection is made, register event listener
       socket.on(Events.FLUX, (newFlux: number) => setFlux(newFlux));
+      // and ask for latest flux value
+      const request: GetSettingRequest = { authToken, action: 'get' };
+      socket.emit(Events.FLUX, request);
     }
-  }, [socket]);
+  }, [socket, authToken]);
 
   const updateFlux = useCallback((newFlux: number) => {
     if (socket) {

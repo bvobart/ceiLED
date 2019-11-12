@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { Events } from "../api";
-import { SetSettingRequest } from '../api/requests';
+import { SetSettingRequest, GetSettingRequest } from '../api/requests';
 import useAuthToken from "./useAuthToken";
 import useCeiledSocket from './useCeiledSocket';
 
@@ -11,9 +11,13 @@ const useBrightness = (): [number, (newBrightness: number) => void] => {
 
   useEffect(() => {
     if (socket) {
+      // if a new socket connection is made, register event listener
       socket.on(Events.BRIGHTNESS, (newBrightness: number) => setBrightness(newBrightness));
+      // and ask for latest brightness value
+      const request: GetSettingRequest = { authToken, action: 'get' };
+      socket.emit(Events.BRIGHTNESS, request);
     }
-  }, [socket]);
+  }, [socket, authToken]);
 
   const updateBrightness = useCallback((newBrightness: number) => {
     if (socket) {

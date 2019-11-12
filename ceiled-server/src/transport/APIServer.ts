@@ -111,7 +111,7 @@ export class APIServer {
    * @param socket the newly connected socket
    */
   public handleConnect(socket: SocketIO.Socket) {
-    console.log('--> Client connected.');
+    console.log('-> Client connected.');
 
     socket.on(Events.DISCONNECT, this.handleDisconnect.bind(this));
 
@@ -134,7 +134,7 @@ export class APIServer {
    * @param socket the newly connected socket
    */
   public handleDisconnect(): void {
-    console.log('--> Client disconnected.');
+    console.log('-> Client disconnected.');
   }
 
   /**
