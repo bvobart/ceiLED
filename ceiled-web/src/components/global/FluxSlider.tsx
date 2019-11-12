@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Grid, Typography, Slider } from '@material-ui/core';
+import useFlux from '../../hooks/useFlux';
 
 interface FluxSliderProps {
   className?: string
 }
 
 const FluxSlider = (props: FluxSliderProps) => {
-  const [flux, setFlux] = useState(-1);
-  // TODO: change to useCeiled or so
+  const [flux, setFlux] = useFlux();
 
   return (
     <Grid container item className={props.className} alignItems='center' justify='space-between'>
@@ -22,7 +22,7 @@ const FluxSlider = (props: FluxSliderProps) => {
       <Grid item xs={12} sm={9}>
         <Slider
           value={flux}
-          onChange={(_, newFlux) => setFlux(newFlux as number)}
+          onChange={(_, newFlux) => newFlux !== flux && setFlux(newFlux as number)}
           min={-1}
           max={5}
           step={1}

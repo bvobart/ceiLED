@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Grid, Typography, Slider } from '@material-ui/core';
+import useRoomlight from '../../hooks/useRoomlight';
 
 interface RoomlightSliderProps {
   className?: string
 }
 
 const RoomlightSlider = (props: RoomlightSliderProps) => {
-  const [roomlight, setRoomlight] = useState(0);
-  // TODO: change to useCeiled or so
+  const [roomlight, setRoomlight] = useRoomlight();
 
   return (
     <Grid container item className={props.className} alignItems='center' justify='space-between'>

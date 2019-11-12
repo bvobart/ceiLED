@@ -10,6 +10,9 @@ export enum Events {
   CONNECT_TIMEOUT = 'connect_timeout',
   RECONNECT_FAILED = 'reconnect_failed',
   DISCONNECT = 'disconnect',
-  BRIGHTNESS = 'brightness',
   ERRORS = 'errors',
+  BRIGHTNESS = 'brightness',
+  ROOMLIGHT = 'roomlight',
+  FLUX = 'flux',
+  CEILED = 'ceiled',
 }
