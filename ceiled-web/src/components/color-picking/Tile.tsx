@@ -7,7 +7,8 @@ export interface TileProps {
 }
 
 const Tile: FunctionComponent<TileProps> = (props) => {
-  return <div className={props.className} style={{ background: props.hsv.toCSS() }}>{props.children}</div>
+  const background = props.hsv ? props.hsv.toCSS() : 'rgba(0, 0, 0, 0)';
+  return <div className={props.className} style={{ background }}>{props.children}</div>
 }
 
 export default Tile;

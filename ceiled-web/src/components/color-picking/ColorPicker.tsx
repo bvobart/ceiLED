@@ -20,7 +20,7 @@ const useStyles = makeStyles({
     height: '196px',
   },
   hue: {
-    height: '24px',
+    height: '30px',
     marginBottom: '8px',
   },
 });

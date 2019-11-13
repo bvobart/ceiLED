@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
-import { List, ListItem, Button, Typography, Divider } from '@material-ui/core';
-import { HSVColor } from '../color-picking/colors';
-import Tile from '../color-picking/Tile';
+import React, { useState, FunctionComponent } from 'react';
+import { List, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { HSVColor } from '../color-picking/colors';
 import ColorPicker from '../color-picking/ColorPicker';
+import { Animation } from '.';
+import DraggableTile from './DraggableTile';
 
-interface ChannelAnimatorProps {
+export interface AnimationListProps {
   className?: string;
-  channel: number;
+  channel?: number;
+  animation: Animation;
+  onChange: (anim: Animation) => void;
 }
 
 const useStyles = makeStyles({
@@ -21,38 +24,44 @@ const useStyles = makeStyles({
   },
   picker: {
     minHeight: '276px',
-    marginTop: '4px',
+    marginTop: '8px',
   },
   tile: {
     minHeight: '48px',
     width: '100%',
   }
-})
+});
 
-const ChannelAnimator = (props: ChannelAnimatorProps) => {
+const AnimationList: FunctionComponent<AnimationListProps> = (props) => {
   const classes = useStyles();
-  const [colors, setColors] = useState<HSVColor[]>([]);
   const [adding, setAdding] = useState<boolean>(false);
-  
+
   // TODO: make it possible to set transitions between colours
-  // TODO: allow tiles to be edited / removed / dragged and dropped
-  const colorTiles = colors.map((color, index) => {
-    return <ListItem dense disableGutters key={index}><Tile className={classes.tile} hsv={color} /></ListItem>
-  });
+  // TODO: allow tiles to be edited / removed
+  // TODO: refactor this code so it is actually readable again
 
   const onAddConfirm = (color: HSVColor) => {
-    setColors([...colors, color]);
+    props.onChange([...props.animation, color]);
     setAdding(false);
   };
 
   return (
-    <div className={props.className}>
-      <Typography gutterBottom className={classes.label} align='center' variant='subtitle1'>Channel {props.channel + 1}</Typography>
-      <Divider />
+    <div className={props.className} key={`animation-list-${props.channel}`}>
       <List disablePadding>
-        {colorTiles}
+        {
+          props.animation.map((color: HSVColor, index) => (
+            <DraggableTile 
+              key={`li-${props.channel}-${index}`} 
+              index={((props.channel || 0) + 1) * 1000 + index}
+              hsv={color}
+              className={classes.tile}
+            />
+          ))
+        }
+        {props.children}
       </List>
-      { adding 
+      { 
+        adding 
         ? <AddColor onConfirm={onAddConfirm} />
         : <Button className={classes.button} variant='outlined' onClick={() => setAdding(true)}>Add</Button>
       }
@@ -70,11 +79,13 @@ const AddColor = (props: AddColorProps) => {
   const [selectedColor, setSelectedColor] = useState<HSVColor>(defaultColor);
   
   return (<>
-    <Button className={classes.button} variant='outlined' onClick={() => props.onConfirm(selectedColor)}>
+    <Button className={classes.button} variant='outlined' onClick={() => props.onConfirm(selectedColor)}
+      style={{ background: selectedColor.toCSS() }}
+    >
       Confirm
     </Button>
     <ColorPicker className={classes.picker} hsv={selectedColor} onChange={setSelectedColor} />
   </>)
 }
 
-export default ChannelAnimator;
+export default AnimationList;

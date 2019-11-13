@@ -51,6 +51,10 @@ export class HSVColor {
       b: Math.round(b * 255),
     });
   }
+
+  static random(): HSVColor {
+    return new HSVColor({ h: Math.random(), s: Math.random(), v: Math.random() });
+  }
 }
 
 /**

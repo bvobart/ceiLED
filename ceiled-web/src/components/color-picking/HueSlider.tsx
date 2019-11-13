@@ -19,8 +19,8 @@ const useStyles = makeStyles({
   },
   thumb: {
     height: '100%',
-    width: '4px',
-    margin: '-11px -2px -11px -2px',
+    width: '6px',
+    margin: '-7.5px -3px -7.5px -3px',
   }
 });
 
@@ -33,7 +33,7 @@ const HueSlider = (props: HueProps) => {
   }
 
   return (
-    <div className={props.className} style={{ background: hueGradient }}>
+    <div className={props.className} style={{ background: hueGradient, borderRadius: '4px' }}>
       <Slider
         classes={{ rail: classes.rail, track: classes.track, thumb: classes.thumb }}
         value={props.hsv.h * 360}
