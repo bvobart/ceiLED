@@ -59,7 +59,7 @@ const AnimationComposer = () => {
       <Grid className={classes.content} container spacing={1}>
         {range(numChannels).map((channel) => (
           <Grid item key={channel} xs={4}>
-            <Typography gutterBottom className={classes.label} align='center' variant='subtitle1'>Channel {channel}</Typography>
+            <Typography gutterBottom className={classes.label} align='center' variant='subtitle1'>Channel {channel + 1}</Typography>
             <Divider />
             <DroppableAnimationList
               animation={animations[channel]}
