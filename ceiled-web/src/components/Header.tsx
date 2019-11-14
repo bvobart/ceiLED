@@ -4,6 +4,7 @@ import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import { red, green } from '@material-ui/core/colors';
 
 import { CeiledStatus } from '../api';
+import config from '../config';
 import useCeiled from '../hooks/useCeiled';
 
 const useStyles = makeStyles({
@@ -42,7 +43,7 @@ const Header = () => {
             colorPrimary: classes.powerButtonOff,
             colorSecondary: classes.powerButtonOn,
           }}
-          onClick={() => connect('http://localhost:6565')}
+          onClick={() => connect(config.serverAddress)}
           onDoubleClick={() => off()}
         >
           <PowerSettingsNewIcon className={classes.powerIcon} />
