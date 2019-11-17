@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { makeStyles, Grid, Typography, Divider } from '@material-ui/core';
 import { Animation } from '.';
-import { replace, swap, range, remove, insert } from './utils';
+import { replace, reorder, range, remove, insert } from './utils';
 import DroppableAnimationList from './DroppableAnimationList';
 
 const numChannels = 3;
@@ -38,7 +38,7 @@ const AnimationComposer = () => {
       const sourceIndex = result.source.index - (channel + 1) * 1000;
       const destIndex = result.destination.index - (channel + 1) * 1000;
       // swap the elements' places in the animation list
-      const animation = swap(animations[channel], sourceIndex, destIndex);
+      const animation = reorder(animations[channel], sourceIndex, destIndex);
       setAnimations(replace(animations, channel, animation));
     } else {
       // otherwise element was dragged and dropped into another column

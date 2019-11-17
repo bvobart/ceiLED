@@ -5,13 +5,13 @@
 export const range = (n: number): number[] => Array.from({ length: n }, (_, key) => key);
 
 /**
- * Swaps the elements at the `source` and `destination` positions with each other in the given list.
- * Returns a new list whose only difference is that the aforementioned items have swapped positions.
+ * Removes the element at the `source` index and inserts it at the `destination` index.
+ * Returns a new list.
  * @param list the source list
  * @param source the index of the first element
  * @param destination the index of the second element
  */
-export const swap = <T>(list: Array<T>, source: number, destination: number): Array<T> => {
+export const reorder = <T>(list: Array<T>, source: number, destination: number): Array<T> => {
   const result = [...list];
   const [removed] = result.splice(source, 1);
   result.splice(destination, 0, removed);
