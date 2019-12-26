@@ -3,12 +3,14 @@ import { createServer } from 'https';
 import * as SocketIO from 'socket.io';
 
 import AuthRepository from '../auth/AuthRepository';
+import { Animation } from '../patterns/Animation';
 import { Service } from '../service/Service';
 import {
   GetPatternRequest,
   OffRequest,
-  SetMultiplePatternsRequest,
+  SetAnimationsRequest,
   SetPatternRequest,
+  SetPatternsRequest,
 } from './messages/ceiled';
 import { AuthorisedRequest, GetSettingRequest, SetSettingRequest } from './messages/common';
 import {
@@ -185,6 +187,12 @@ export class APIServer {
     }
   }
 
+  /**
+   * Handles an incoming message on `Events.CEILED`.
+   * A switch case might be useful here, but then we lose TypeScript's automatic type-casting.
+   * @param socket the active socket that the message was sent through
+   * @param message the incoming message
+   */
   public async handleCeiled(socket: SocketIO.Socket, message: any): Promise<void> {
     if (GetPatternRequest.is(message)) {
       const pattern = await this.service.getPattern(message.channel);
@@ -193,8 +201,14 @@ export class APIServer {
       await this.service.off();
     } else if (SetPatternRequest.is(message)) {
       await this.service.setPattern(message.channel, message.pattern);
-    } else if (SetMultiplePatternsRequest.is(message)) {
-      await this.service.setMultiplePatterns(message.patterns);
+    } else if (SetPatternsRequest.is(message)) {
+      await this.service.setPatterns(message.patterns);
+    } else if (SetAnimationsRequest.is(message)) {
+      const animations = new Map<number, Animation>();
+      for (const [channel, patterns] of message.animations) {
+        animations.set(channel, new Animation(patterns));
+      }
+      await this.service.setAnimations(animations);
     } else {
       socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.CEILED, message));
     }

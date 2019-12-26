@@ -55,6 +55,11 @@ export class HSVColor {
   static random(): HSVColor {
     return new HSVColor({ h: Math.random(), s: Math.random(), v: Math.random() });
   }
+
+  static is(c: any): c is HSVColor {
+    return c && typeof c.h === 'number' && typeof c.s === 'number' && typeof c.v === 'number'
+             && c.h > 0 && c.h <= 1 && c.s > 0 && c.s <= 1 && c.v > 0 && c.v <= 1;
+  }
 }
 
 /**
@@ -80,4 +85,17 @@ export class RGBColor {
   }
 
   // TODO: implement toHSV() ?
+
+  static is(c: any): c is RGBColor {
+    return c && typeof c.h === 'number' && typeof c.s === 'number' && typeof c.v === 'number'
+             && c.h > 0 && c.h <= 255 && c.s > 0 && c.s <= 255 && c.v > 0 && c.v <= 255;
+  }
+}
+
+export const isHSVList = (x: any): x is HSVColor[] => {
+  return Array.isArray(x) && !x.find(c => !HSVColor.is(c));
+}
+
+export const isRGBList = (x: any): x is RGBColor[] => {
+  return Array.isArray(x) && !x.find(c => !RGBColor.is(c));
 }

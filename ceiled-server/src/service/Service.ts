@@ -1,4 +1,5 @@
-import Pattern from '../patterns/Pattern';
+import { Animation } from '../patterns/Animation';
+import { Pattern } from '../patterns/Pattern';
 
 export interface Service {
   getBrightness(): Promise<number>;
@@ -13,5 +14,6 @@ export interface Service {
   off(): Promise<void>;
   getPattern(channel: number): Promise<Pattern>;
   setPattern(channel: number | 'all', pattern: Pattern): Promise<void>;
-  setMultiplePatterns(patterns: Map<number, Pattern>): Promise<void>;
+  setPatterns(patterns: Map<number, Pattern>): Promise<void>;
+  setAnimations(animations: Map<number, Animation>): Promise<void>;
 }

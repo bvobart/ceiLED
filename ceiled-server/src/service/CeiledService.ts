@@ -1,6 +1,8 @@
 import { currentFluxLevel, millisUntilNextFluxChange } from '../common/flux';
 import { Driver } from '../hardware/Driver';
-import Pattern from '../patterns/Pattern';
+import { Animation } from '../patterns/Animation';
+import { Pattern } from '../patterns/Pattern';
+import { AnimationEngine } from './AnimationEngine';
 import { Service } from './Service';
 
 /**
@@ -15,6 +17,7 @@ export class CeiledService implements Service {
   private flux: number;
   private autoFluxTimeout: NodeJS.Timeout;
   private currentPatterns: Map<number, Pattern>;
+  private animationEngine: AnimationEngine;
 
   constructor(driver: Driver) {
     this.driver = driver;
@@ -82,17 +85,33 @@ export class CeiledService implements Service {
     return Promise.resolve(this.currentPatterns.get(channel));
   }
 
-  public setPattern(channel: number | 'all', pattern: Pattern): Promise<void> {
-    return pattern.show(channel, this.driver);
+  public async setPattern(channel: number | 'all', pattern: Pattern): Promise<void> {
+    await pattern.show(channel, this.driver, this.animationEngine.speed);
+    if (channel === 'all') {
+      for (const c of range(this.driver.channels)) this.currentPatterns.set(c, pattern);
+    } else {
+      this.currentPatterns.set(channel, pattern);
+    }
   }
 
-  public async setMultiplePatterns(patterns: Map<number, Pattern>): Promise<void> {
+  public async setPatterns(patterns: Map<number, Pattern>): Promise<void> {
     const applying = new Array<Promise<void>>();
     for (const [channel, pattern] of patterns) {
-      applying.push(pattern.show(channel, this.driver));
+      applying.push(pattern.show(channel, this.driver, this.animationEngine.speed));
+      this.currentPatterns.set(channel, pattern);
     }
 
     await Promise.all(applying);
+  }
+
+  public async setAnimations(animations: Map<number, Animation>): Promise<void> {
+    for (const [channel, animation] of animations) {
+      if (channel >= this.driver.channels) throw new Error(`invalid channel ${channel}`);
+      if (animation.patterns.length < 1)
+        throw new Error(`animation for channel ${channel} contains no patterns`);
+    }
+
+    this.animationEngine.play(animations);
   }
 
   /**
@@ -136,3 +155,9 @@ export class CeiledService implements Service {
 const inRange = (value: number, min: number, max: number): number => {
   return value < min ? min : value > max ? max : value;
 };
+
+/**
+ * Creates an array containing all elements from 0 up to (but not including) `n`
+ * @param n the capacity of the resulting array.
+ */
+const range = (n: number): number[] => Array.from({ length: n }, (_, key) => key);

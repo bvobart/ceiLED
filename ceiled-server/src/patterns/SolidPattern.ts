@@ -1,10 +1,16 @@
 import Color from '../common/Color';
 import { Driver } from '../hardware/Driver';
-import Pattern from './Pattern';
+import { Pattern, PatternType } from './Pattern';
 
 export class SolidPattern implements Pattern {
-  public variant: 'solid' = 'solid';
+  public type: PatternType = PatternType.SOLID;
+  public length: number;
   public color: Color;
+
+  constructor(length: number, color: Color) {
+    this.length = length;
+    this.color = color;
+  }
 
   public show(channel: number | 'all', driver: Driver): Promise<void> {
     const colors = new Map<number, Color>();
