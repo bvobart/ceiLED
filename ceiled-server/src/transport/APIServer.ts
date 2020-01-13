@@ -11,7 +11,8 @@ import {
   SetAnimationsRequest,
   SetPatternRequest,
   SetPatternsRequest,
-} from './messages/ceiled';
+} from './messages/ceiled-requests';
+import { AnimationsResponse, PatternResponse, PatternsResponse } from './messages/ceiled-responses';
 import { AuthorisedRequest, GetSettingRequest, SetSettingRequest } from './messages/common';
 import {
   InternalErrorMessage,
@@ -194,21 +195,43 @@ export class APIServer {
    * @param message the incoming message
    */
   public async handleCeiled(socket: SocketIO.Socket, message: any): Promise<void> {
+    // get pattern(s)
     if (GetPatternRequest.is(message)) {
-      const pattern = await this.service.getPattern(message.channel);
-      socket.emit(Events.CEILED, pattern);
+      if (message.channel === 'all') {
+        const patterns = await this.service.getPatterns();
+        const res: PatternsResponse = { patterns };
+        socket.emit(Events.CEILED, res);
+      } else {
+        const pattern = await this.service.getPattern(message.channel);
+        const res: PatternResponse = { channel: message.channel, pattern };
+        socket.emit(Events.CEILED, res);
+      }
+
+      // turn off
     } else if (OffRequest.is(message)) {
       await this.service.off();
+
+      // set pattern
     } else if (SetPatternRequest.is(message)) {
       await this.service.setPattern(message.channel, message.pattern);
+      const res: PatternResponse = { channel: message.channel, pattern: message.pattern };
+      socket.broadcast.emit(Events.CEILED, res);
+
+      // set patterns
     } else if (SetPatternsRequest.is(message)) {
       await this.service.setPatterns(message.patterns);
+      const res: PatternsResponse = { patterns: message.patterns };
+      socket.broadcast.emit(Events.CEILED, res);
+
+      // set animations
     } else if (SetAnimationsRequest.is(message)) {
       const animations = new Map<number, Animation>();
       for (const [channel, patterns] of message.animations) {
         animations.set(channel, new Animation(patterns));
       }
       await this.service.setAnimations(animations);
+      const res: AnimationsResponse = { animations: message.animations };
+      socket.broadcast.emit(Events.CEILED, res);
     } else {
       socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.CEILED, message));
     }

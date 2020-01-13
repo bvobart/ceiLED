@@ -14,12 +14,12 @@ export class OffRequest implements AuthorisedRequest {
 
 export class GetPatternRequest implements AuthorisedRequest {
   public static is(x: any): x is GetPatternRequest {
-    return typeof x.channel === 'number' && AuthorisedRequest.is(x);
+    return (x.channel === 'all' || typeof x.channel === 'number') && AuthorisedRequest.is(x);
   }
 
   public authToken: string;
   public action: 'get';
-  public channel: number;
+  public channel: number | 'all';
 }
 
 export class SetPatternRequest implements AuthorisedRequest {

@@ -85,6 +85,10 @@ export class CeiledService implements Service {
     return Promise.resolve(this.currentPatterns.get(channel));
   }
 
+  public getPatterns(): Promise<Map<number, Pattern>> {
+    return Promise.resolve(this.currentPatterns);
+  }
+
   public async setPattern(channel: number | 'all', pattern: Pattern): Promise<void> {
     await pattern.show(channel, this.driver, this.animationEngine.speed);
     if (channel === 'all') {

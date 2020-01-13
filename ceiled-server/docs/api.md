@@ -104,7 +104,7 @@ This event is the 'main' API as this is the event on which the requests are sent
 
 ```typescript
 {
-  channel: number,
+  channel: number | 'all',
   pattern: Pattern,
 }
 ```

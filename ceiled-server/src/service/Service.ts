@@ -13,6 +13,7 @@ export interface Service {
 
   off(): Promise<void>;
   getPattern(channel: number): Promise<Pattern>;
+  getPatterns(): Promise<Map<number, Pattern>>;
   setPattern(channel: number | 'all', pattern: Pattern): Promise<void>;
   setPatterns(patterns: Map<number, Pattern>): Promise<void>;
   setAnimations(animations: Map<number, Animation>): Promise<void>;
