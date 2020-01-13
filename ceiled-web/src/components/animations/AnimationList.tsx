@@ -64,6 +64,7 @@ const AnimationList: FunctionComponent<AnimationListProps> = (props) => {
             if (pattern instanceof FadeSigmoid) {
               return <FadeSigmoidTile className={classes.fadeTile} pattern={pattern} height={`${48 * pattern.length}px`} />
             }
+            return <div className={classes.solidTile}>NONE</div>
           }).map((elem, index) => {
             const key = `li-${props.channel}-${index}`;
             const draggableIndex = ((props.channel || 0) + 1) * 1000 + index;  
