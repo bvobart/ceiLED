@@ -1,13 +1,12 @@
-import useCeiledSocket from './useCeiledSocket';
-import useAuthToken from './useAuthToken';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Events } from '../api';
-import { Pattern, PatternType, Solid, FadeLinear, FadeSigmoid, Animation } from '../components/animations';
-import { HSVColor, RGBColor, isRGBList } from '../components/color-picking/colors';
 import { GetPatternRequest, SetPatternRequest, SetPatternsRequest, SetAnimationsRequest } from '../api/requests';
+import { Animation, Pattern } from '../components/animations';
+import useAuthToken from './useAuthToken';
+import useCeiledSocket from './context/useCeiledSocket';
+import useCeiledState from './useCeiledState';
 
-const defaultPattern = new Solid(HSVColor.random(), 1);
-
+// TODO: possibly make all CeiledAPI method return some form of error object?
 interface CeiledAPI {
   getPattern(channel: number | 'all'): void;
   setPattern(channel: number | 'all', pattern: Pattern): void;
@@ -15,10 +14,8 @@ interface CeiledAPI {
   setAnimations(animations: Map<number, Animation>): void;
 }
 
-const useCeiledAPI = (): [Pattern, CeiledAPI] => {
-  // TODO: change this to be a map of patterns. But is it possible to JSON.parse and decode easily?
-  const lastActivePattern = decodePattern(JSON.parse(localStorage.getItem('lastActivePattern') || '{}'));
-  const [pattern, setPattern] = useState(lastActivePattern || defaultPattern);
+const useCeiledAPI = (): [Map<number, Pattern | Animation>, CeiledAPI] => {
+  const [state, setState] = useCeiledState();
   const [socket] = useCeiledSocket();
   const authToken = useAuthToken();
 
@@ -31,58 +28,47 @@ const useCeiledAPI = (): [Pattern, CeiledAPI] => {
   
   // SET pattern
   const updatePattern = useCallback((channel: number | 'all', pattern: Pattern) => {
+    if (channel === 'all') {
+      const newState = new Map();
+      for (const [channel] of state) newState.set(channel, pattern);
+      setState(newState);
+    } else {
+      const newState = new Map(state.entries());
+      setState(newState.set(channel, pattern));
+    }
+
     if (!socket) return;
     const request: SetPatternRequest = { authToken, action: 'set', channel, pattern };
     socket.emit(Events.CEILED, request);
-  }, [socket, authToken]);
+  }, [socket, authToken, setState]);
   
   // SET patterns
   const setPatterns = useCallback((patterns: Map<number, Pattern>) => {
+    setState(patterns);
+
     if (!socket) return;
     const request: SetPatternsRequest = { authToken, action: 'set', patterns };
     socket.emit(Events.CEILED, request);
-  }, [socket, authToken]);
+  }, [socket, authToken, setState]);
   
   // SET animations
   const setAnimations = useCallback((animations: Map<number, Animation>) => {
+    setState(animations);
+
     if (!socket) return;
     const request: SetAnimationsRequest = { authToken, action: 'set', animations };
     socket.emit(Events.CEILED, request);
-  }, [socket, authToken]);
+  }, [socket, authToken, setState]);
   
-  // react to incoming messages about newly set patterns
+  // on newly established socket connection
   useEffect(() => {
     if (socket) {
-      // TODO: fix / properly implement this
-      // if a new socket connection is made, register event listener
-      // socket.on(Events.CEILED, (newPattern: Pattern) => setPattern(newPattern));
-      // socket.on(Events.CEILED, (patterns: Map<number, Pattern>) => type check and update current patterns)
-      // and ask for latest pattern value
-      // getPattern('all');
+      // ask for latest pattern value
+      getPattern('all');
     }
-  }, [socket, authToken]);
+  }, [socket, getPattern]);
   
-  return [pattern, { getPattern, setPattern: updatePattern, setPatterns, setAnimations }];
-}
-
-const decodePattern = (p: any): Pattern | undefined => {
-  if (!Object.values(PatternType).includes(p.type) || typeof p.length !== 'number') {
-    return undefined;
-  }
-
-  if (p.type === PatternType.SOLID && RGBColor.is(p.color)) {
-    return new Solid(p.color, p.length);
-  }
-
-  if (p.type === PatternType.FADE_LINEAR && isRGBList(p.colors)) {
-    return new FadeLinear(p.colors, p.length);
-  }
-
-  if (p.type === PatternType.FADE_SIGMOID && isRGBList(p.colors)) {
-    return new FadeSigmoid(p.colors, p.length);
-  }
-
-  return undefined;
+  return [state, { getPattern, setPattern: updatePattern, setPatterns, setAnimations }];
 }
 
 export default useCeiledAPI;

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import socketIO from 'socket.io-client';
 import { CeiledStatus, Events } from '../api';
 import useAuthToken from './useAuthToken';
-import useCeiledSocket from './useCeiledSocket';
+import useCeiledSocket from './context/useCeiledSocket';
 
 const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => Promise<void>] => {
   const [socket, setSocket] = useCeiledSocket();
@@ -36,7 +36,6 @@ const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => P
       setSocket(null);
     });
 
-    // TODO: set some listeners
     setSocket(newSocket);
     setStatus(CeiledStatus.CONNECTING);
     return Promise.resolve();
@@ -47,7 +46,7 @@ const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => P
       return Promise.reject('ceiled is not connected');
     }
 
-    socket.emit('ceiled', { action: 'off', authToken });
+    socket.emit(Events.CEILED, { action: 'off', authToken });
     socket.close();
     return Promise.resolve();
   }, [socket, status, authToken]);

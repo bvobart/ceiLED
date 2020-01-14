@@ -20,7 +20,8 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
-    "allowJs": true
+    "allowJs": true,
+    "downlevelIteration": true,
   },
   "include": [
     "src"

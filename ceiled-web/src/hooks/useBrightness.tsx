@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Events } from "../api";
 import { SetSettingRequest, GetSettingRequest } from '../api/requests';
 import useAuthToken from "./useAuthToken";
-import useCeiledSocket from './useCeiledSocket';
+import useCeiledSocket from './context/useCeiledSocket';
 
 const useBrightness = (): [number, (newBrightness: number) => void] => {
   const [brightness, setBrightness] = useState(100);

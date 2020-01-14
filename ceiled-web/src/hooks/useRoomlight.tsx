@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Events } from "../api";
 import { SetSettingRequest, GetSettingRequest } from '../api/requests';
 import useAuthToken from "./useAuthToken";
-import useCeiledSocket from './useCeiledSocket';
+import useCeiledSocket from './context/useCeiledSocket';
 
 const useRoomlight = (): [number, (newRoomlight: number) => void] => {
   const [roomlight, setRoomlight] = useState(0);
