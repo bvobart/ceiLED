@@ -6,7 +6,7 @@ pub const RED: Color = Color { red: 255, green: 0, blue: 0 };
 pub const GREEN: Color = Color { red: 0, green: 255, blue: 0 };
 pub const BLUE: Color = Color { red: 0, green: 0, blue: 255 };
 
-pub const ROOMLIGHT: Color = Color { red: 255, green: 132, blue: 24 };
+pub const ROOMLIGHT: Color = Color { red: 255, green: 142, blue: 64 };
 pub const FLUX1: Color = Color { red: 255, green: 246, blue: 237 };
 pub const FLUX2: Color = Color { red: 255, green: 237, blue: 222 };
 pub const FLUX3: Color = Color { red: 255, green: 228, blue: 206 };
@@ -39,6 +39,26 @@ impl Color {
   }
 
   /**
+   * Calculates the colour between this colour and another colour, where `factor` is the
+   * point in the blend (number between 0 and 1) between this colour and the other colour.
+   */
+  pub fn blend(&self, color: &Color, factor: f64) -> Self {
+    let fracSelfRed = self.red as f64 / 255.0;
+    let fracSelfGreen = self.green as f64 / 255.0;
+    let fracSelfBlue = self.blue as f64 / 255.0;
+
+    let fracColorRed = color.red as f64 / 255.0;
+    let fracColorGreen = color.green as f64 / 255.0;
+    let fracColorBlue = color.blue as f64 / 255.0;
+
+    let red = ((1.0 - factor) * fracSelfRed * fracSelfRed + factor * fracColorRed * fracColorRed).sqrt() * 255.0;
+    let green = ((1.0 - factor) * fracSelfGreen * fracSelfGreen + factor * fracColorGreen * fracColorGreen).sqrt() * 255.0;
+    let blue = ((1.0 - factor) * fracSelfBlue * fracSelfBlue + factor * fracColorBlue * fracColorBlue).sqrt() * 255.0;
+
+    Color { red: red.round() as u8, green: green.round() as u8, blue: blue.round() as u8 }
+  }
+
+  /**
    * Applies brightness correction to a color.
    */
   pub fn withBrightness(&self, brightness: u8) -> Self {
@@ -53,19 +73,13 @@ impl Color {
   }
 
   /**
-   * Applies roomlight correction to a color.
-   * TODO: apply using screen blending method?
-   * i.e. f(a, b) = 1 - (1 - a)(1 - b)
+   * Applies roomlight correction to a color. Does so by blending self with the roomlight colour.
+   * Thus, this means that there will always be a little bit of roomlight showing through,
+   * even if self is black.
    */
   pub fn withRoomlight(&self, roomlight: u8) -> Self {
-    if roomlight == 0 { return self.clone(); }
-    if roomlight == 255 { return ROOMLIGHT };
-    
-    let factor = roomlight as f32 / 255.0;
-    let red = max(self.red, (ROOMLIGHT.red as f32 * factor).round() as u8);
-    let green = max(self.green, (ROOMLIGHT.green as f32 * factor).round() as u8);
-    let blue = max(self.blue, (ROOMLIGHT.blue as f32 * factor).round() as u8);
-    Color { red, green, blue }
+    let factor = roomlight as f64 / 255.0;
+    self.blend(&ROOMLIGHT, factor)
   }
 
   /**

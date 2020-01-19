@@ -122,7 +122,7 @@ impl CeiledDriver for CeiledPca9685 {
     // flash red on each channel
     for i in 0..self.channels {
       self.setColor(i, colors::RED)?;
-      thread::sleep(Duration::from_millis(10));
+      thread::sleep(Duration::from_millis(50));
       self.setColor(i, colors::BLACK)?;
     }
     
@@ -130,6 +130,7 @@ impl CeiledDriver for CeiledPca9685 {
   }
 
   fn off(&mut self) -> Result<(), String> {
+    self.setRoomlight(0);
     for i in 0..self.channels {
       self.setColor(i, colors::BLACK)?;
     }
@@ -231,14 +232,22 @@ impl CeiledDriver for CeiledPca9685 {
               (from.green as f64 + interp.interpolate(greenDiffs[channel], i + 1, totalFrames).round()) as u8,
               (from.blue as f64 + interp.interpolate(blueDiffs[channel], i + 1, totalFrames).round()) as u8,
             );
+            
             let adjustedColor = adjustToHardware(baseColor.withRoomlight(rl).withFlux(f).withBrightness(b));
 
-            printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));
-            printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, RED), adjustedColor.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));    
-            printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, GREEN), 0), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));
-            printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, GREEN), adjustedColor.green as u16 * 16), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));    
-            printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
-            printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, BLUE), adjustedColor.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
+            let currentColor = &colors[*channel];
+            if baseColor.red != currentColor.red {
+              printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, RED), 0), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));
+              printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, RED), adjustedColor.red as u16 * 16), "failed to set duty cycle for red pin on channel ".to_owned() + &channel.to_string()));
+            }
+            if baseColor.green != currentColor.green {
+              printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, GREEN), 0), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));
+              printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, GREEN), adjustedColor.green as u16 * 16), "failed to set duty cycle for green pin on channel ".to_owned() + &channel.to_string()));    
+            }
+            if baseColor.blue != currentColor.blue {
+              printErr(checkErr(pwm.set_channel_on(toPwmChannel(*channel, BLUE), 0), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
+              printErr(checkErr(pwm.set_channel_off(toPwmChannel(*channel, BLUE), adjustedColor.blue as u16 * 16), "failed to set duty cycle for blue pin on channel ".to_owned() + &channel.to_string()));
+            }
 
             std::mem::replace(&mut colors[*channel], baseColor);
           }
