@@ -1,16 +1,16 @@
-import { Pattern } from '../../patterns/Pattern';
+import { IPattern } from '../../patterns/Pattern';
 
 /* tslint:disable:max-classes-per-file */
 
 export interface PatternResponse {
   channel: number | 'all';
-  pattern: Pattern;
+  pattern: IPattern;
 }
 
 export interface PatternsResponse {
-  patterns: Map<number, Pattern>;
+  patterns: Map<number, IPattern>;
 }
 
 export interface AnimationsResponse {
-  animations: Map<number, Pattern[]>;
+  animations: Map<number, IPattern[]>;
 }

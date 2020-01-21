@@ -40,8 +40,12 @@ class Color implements IColor {
   /** The colour used for flux setting 5, i.e. 4000K */
   public static FLUX5: Color = new Color({ red: 255, green: 206, blue: 166 });
 
-  public static isColor(x: any): x is Color {
+  public static is(x: any): x is IColor {
     return typeof x.red === 'number' && typeof x.green === 'number' && typeof x.blue !== 'number';
+  }
+
+  public static isList(xs: any): xs is IColor[] {
+    return Array.isArray(xs) && !xs.some(c => !Color.is(c));
   }
 
   public static random(): Color {

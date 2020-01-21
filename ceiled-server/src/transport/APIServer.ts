@@ -3,7 +3,8 @@ import { createServer } from 'https';
 import * as SocketIO from 'socket.io';
 
 import AuthRepository from '../auth/AuthRepository';
-import { Animation } from '../patterns/Animation';
+import { decodeAnimationMap } from '../patterns/Animation';
+import { decodePattern, decodePatternMap } from '../patterns/Pattern';
 import { Service } from '../service/Service';
 import {
   GetPatternRequest,
@@ -151,6 +152,7 @@ export class APIServer {
       socket.emit(Events.BRIGHTNESS, brightness);
     } else if (SetSettingRequest.is<number>(message, 'number')) {
       await this.service.setBrightness(message.value);
+      socket.broadcast.emit(Events.BRIGHTNESS, message.value);
     } else {
       socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.BRIGHTNESS, message));
     }
@@ -167,6 +169,7 @@ export class APIServer {
       socket.emit(Events.ROOMLIGHT, roomlight);
     } else if (SetSettingRequest.is<number>(message, 'number')) {
       await this.service.setRoomlight(message.value);
+      socket.broadcast.emit(Events.ROOMLIGHT, message.value);
     } else {
       socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.ROOMLIGHT, message));
     }
@@ -183,6 +186,7 @@ export class APIServer {
       socket.emit(Events.FLUX, flux);
     } else if (SetSettingRequest.is<number>(message, 'number')) {
       await this.service.setFlux(message.value);
+      socket.broadcast.emit(Events.FLUX, message.value);
     } else {
       socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.FLUX, message));
     }
@@ -197,10 +201,12 @@ export class APIServer {
   public async handleCeiled(socket: SocketIO.Socket, message: any): Promise<void> {
     // get pattern(s)
     if (GetPatternRequest.is(message)) {
+      // get all
       if (message.channel === 'all') {
         const patterns = await this.service.getPatterns();
         const res: PatternsResponse = { patterns };
         socket.emit(Events.CEILED, res);
+        // get one
       } else {
         const pattern = await this.service.getPattern(message.channel);
         const res: PatternResponse = { channel: message.channel, pattern };
@@ -213,25 +219,26 @@ export class APIServer {
 
       // set pattern
     } else if (SetPatternRequest.is(message)) {
-      await this.service.setPattern(message.channel, message.pattern);
-      const res: PatternResponse = { channel: message.channel, pattern: message.pattern };
+      const pattern = decodePattern(message.pattern);
+      await this.service.setPattern(message.channel, pattern);
+      const res: PatternResponse = { channel: message.channel, pattern };
       socket.broadcast.emit(Events.CEILED, res);
 
       // set patterns
     } else if (SetPatternsRequest.is(message)) {
-      await this.service.setPatterns(message.patterns);
-      const res: PatternsResponse = { patterns: message.patterns };
+      const patterns = decodePatternMap(message.patterns);
+      await this.service.setPatterns(patterns);
+      const res: PatternsResponse = { patterns };
       socket.broadcast.emit(Events.CEILED, res);
 
       // set animations
     } else if (SetAnimationsRequest.is(message)) {
-      const animations = new Map<number, Animation>();
-      for (const [channel, patterns] of message.animations) {
-        animations.set(channel, new Animation(patterns));
-      }
+      const animations = decodeAnimationMap(message.animations);
       await this.service.setAnimations(animations);
       const res: AnimationsResponse = { animations: message.animations };
       socket.broadcast.emit(Events.CEILED, res);
+
+      // invalid request
     } else {
       socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.CEILED, message));
     }

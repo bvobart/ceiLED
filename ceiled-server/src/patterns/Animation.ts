@@ -1,4 +1,4 @@
-import { Pattern } from './Pattern';
+import { decodePattern, IPattern, Pattern } from './Pattern';
 
 export class Animation implements IterableIterator<Pattern> {
   public patterns: Pattern[];
@@ -33,3 +33,15 @@ export class Animation implements IterableIterator<Pattern> {
     return this;
   }
 }
+
+export const decodeAnimation = (ps: IPattern[]): Animation => {
+  return new Animation(ps.map(decodePattern));
+};
+
+export const decodeAnimationMap = (anims: Map<number, IPattern[]>): Map<number, Animation> => {
+  const animations = new Map<number, Animation>();
+  for (const [channel, patterns] of anims) {
+    animations.set(channel, decodeAnimation(patterns));
+  }
+  return animations;
+};

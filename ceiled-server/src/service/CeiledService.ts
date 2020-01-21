@@ -1,7 +1,10 @@
+import Color from '../common/Color';
 import { currentFluxLevel, millisUntilNextFluxChange } from '../common/flux';
 import { Driver } from '../hardware/Driver';
 import { Animation } from '../patterns/Animation';
 import { Pattern } from '../patterns/Pattern';
+import { SolidPattern } from '../patterns/SolidPattern';
+import { inRange, range } from '../patterns/utils';
 import { AnimationEngine } from './AnimationEngine';
 import { Service } from './Service';
 
@@ -22,6 +25,11 @@ export class CeiledService implements Service {
   constructor(driver: Driver) {
     this.driver = driver;
     this.initSettings();
+    this.animationEngine = new AnimationEngine(driver);
+    this.currentPatterns = new Map();
+    for (const c of range(driver.channels)) {
+      this.currentPatterns.set(c, new SolidPattern(1, Color.random()));
+    }
   }
 
   public async getBrightness(): Promise<number> {
@@ -149,19 +157,3 @@ export class CeiledService implements Service {
     }
   }
 }
-
-/**
- * Ensures that a certain number value is within a certain range.
- * @param value the value
- * @param min minimum of the range
- * @param max maximum of the range.
- */
-const inRange = (value: number, min: number, max: number): number => {
-  return value < min ? min : value > max ? max : value;
-};
-
-/**
- * Creates an array containing all elements from 0 up to (but not including) `n`
- * @param n the capacity of the resulting array.
- */
-const range = (n: number): number[] => Array.from({ length: n }, (_, key) => key);

@@ -3,30 +3,36 @@ import { Driver } from '../hardware/Driver';
 import { Pattern, PatternType } from './Pattern';
 import { range } from './utils';
 
-export class SolidPattern implements Pattern {
-  public type: PatternType.SOLID = PatternType.SOLID;
+export class FadePattern implements Pattern {
+  public type: PatternType.FADE_LINEAR | PatternType.FADE_SIGMOID;
   public length: number;
-  public color: Color;
+  public colors: Color[];
 
-  constructor(length: number, color: Color) {
+  constructor(
+    type: PatternType.FADE_LINEAR | PatternType.FADE_SIGMOID,
+    length: number,
+    colors: Color[],
+  ) {
+    this.type = type;
     this.length = length;
-    this.color = color;
+    this.colors = colors;
   }
 
+  // TODO: properly implement fade patterns
   public show(channel: number | 'all', driver: Driver): Promise<void> {
     const colors = new Map<number, Color>();
     if (channel === 'all') {
       for (const i of range(driver.channels)) {
-        colors.set(i, this.color);
+        colors.set(i, this.colors[0]);
       }
     } else {
-      colors.set(channel, this.color);
+      colors.set(channel, this.colors[0]);
     }
 
     return driver.setColors(colors);
   }
 
   public stop(): void {
-    // there is no need to stop this pattern, since it is not continually set.
+    // TODO: implement this
   }
 }
