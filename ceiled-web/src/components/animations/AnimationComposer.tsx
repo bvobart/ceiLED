@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { makeStyles, Grid, Typography, Divider } from '@material-ui/core';
-import { Animation } from '.';
+import { Animation } from '../../api/patterns';
 import { replace, reorder, range, remove, insert } from './utils';
 import DroppableAnimationList from './DroppableAnimationList';
 

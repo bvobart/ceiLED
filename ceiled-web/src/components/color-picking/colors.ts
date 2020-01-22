@@ -1,13 +1,25 @@
+export interface IHSVColor {
+  h: number;
+  s: number;
+  v: number;
+}
+
+export interface IRGBColor {
+  red: number;
+  green: number;
+  blue: number;  
+}
+
 /**
  * HSVColor defines a colour by its Hue, Saturation and Value properties, go look that up on Wikipedia if you're unfamiliar.
  * The `h`, `s` and `v` values are assumed to be between 0 and 1.
  */
-export class HSVColor {
+export class HSVColor implements IHSVColor {
   h: number;
   s: number;
   v: number;
 
-  constructor({ h, s, v }: { h: number, s: number, v: number }) {
+  constructor({ h, s, v }: IHSVColor) {
     this.h = h;
     this.s = s;
     this.v = v;
@@ -46,9 +58,9 @@ export class HSVColor {
     }
 
     return new RGBColor({
-      r: Math.round(r * 255),
-      g: Math.round(g * 255),
-      b: Math.round(b * 255),
+      red: Math.round(r * 255),
+      green: Math.round(g * 255),
+      blue: Math.round(b * 255),
     });
   }
 
@@ -56,46 +68,71 @@ export class HSVColor {
     return new HSVColor({ h: Math.random(), s: Math.random(), v: Math.random() });
   }
 
-  static is(c: any): c is HSVColor {
+  static is(c: any): c is IHSVColor {
     return c && typeof c.h === 'number' && typeof c.s === 'number' && typeof c.v === 'number'
-             && c.h > 0 && c.h <= 1 && c.s > 0 && c.s <= 1 && c.v > 0 && c.v <= 1;
+             && c.h >= 0 && c.h <= 1 
+             && c.s >= 0 && c.s <= 1 
+             && c.v >= 0 && c.v <= 1;
   }
 }
 
 /**
  * RGBColor defines a colour by its red, green and blue components.
  */
-export class RGBColor {
-  r: number;
-  g: number;
-  b: number;
+export class RGBColor implements IRGBColor {
+  red: number;
+  green: number;
+  blue: number;
 
-  constructor({ r, g, b }: { r: number, g: number, b: number }) {
-    this.r = r;
-    this.g = g;
-    this.b = b;
+  constructor({ red, green, blue }: IRGBColor) {
+    this.red = red;
+    this.green = green;
+    this.blue = blue;
   }
 
   equals(other: RGBColor): boolean {
-    return this.r === other.r && this.g === other.g && this.b === other.b;
+    return this.red === other.red && this.green === other.green && this.blue === other.blue;
   }
 
   toCSS(): string {
-    return `rgb(${this.r}, ${this.g}, ${this.b})`
+    return `rgb(${this.red}, ${this.green}, ${this.blue})`
   }
 
-  // TODO: implement toHSV() ?
+  /**
+   * Converts an RGB colour to HSV.
+   * Code inspired by https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
+   */
+  toHSV(): HSVColor {
+    const max = Math.max(this.red, this.green, this.blue);
+    const min = Math.min(this.red, this.green, this.blue);
+    const d = max - min;
 
-  static is(c: any): c is RGBColor {
-    return c && typeof c.h === 'number' && typeof c.s === 'number' && typeof c.v === 'number'
-             && c.h > 0 && c.h <= 255 && c.s > 0 && c.s <= 255 && c.v > 0 && c.v <= 255;
+    let h = 0;
+    const s = (max === 0 ? 0 : d / max);
+    const v = max / 255;
+
+    switch (max) {
+        case min: h = 0; break;
+        case this.red: h = (this.green - this.blue) + d * (this.green < this.blue ? 6 : 0); h /= 6 * d; break;
+        case this.green: h = (this.blue - this.red) + d * 2; h /= 6 * d; break;
+        case this.blue: h = (this.red - this.green) + d * 4; h /= 6 * d; break;
+    }
+
+    return new HSVColor({ h: h, s: s, v: v });
+  }
+
+  static is(c: any): c is IRGBColor {
+    return c && typeof c.red === 'number' && typeof c.green === 'number' && typeof c.blue === 'number'
+             && c.red >= 0 && c.red <= 255 
+             && c.green >= 0 && c.green <= 255 
+             && c.blue >= 0 && c.blue <= 255;
   }
 }
 
-export const isHSVList = (x: any): x is HSVColor[] => {
+export const isHSVList = (x: any): x is IHSVColor[] => {
   return Array.isArray(x) && !x.find(c => !HSVColor.is(c));
 }
 
-export const isRGBList = (x: any): x is RGBColor[] => {
+export const isRGBList = (x: any): x is IRGBColor[] => {
   return Array.isArray(x) && !x.find(c => !RGBColor.is(c));
 }

@@ -1,18 +1,10 @@
 import { useEffect, useCallback } from 'react';
-import { Events } from '../api';
+import { Events, CeiledAPI } from '../api';
+import { Animation, Pattern } from '../api/patterns';
 import { GetPatternRequest, SetPatternRequest, SetPatternsRequest, SetAnimationsRequest } from '../api/requests';
-import { Animation, Pattern } from '../components/animations';
 import useAuthToken from './useAuthToken';
 import useCeiledSocket from './context/useCeiledSocket';
 import useCeiledState from './useCeiledState';
-
-// TODO: possibly make all CeiledAPI method return some form of error object?
-interface CeiledAPI {
-  getPattern(channel: number | 'all'): void;
-  setPattern(channel: number | 'all', pattern: Pattern): void;
-  setPatterns(patterns: Map<number, Pattern>): void;
-  setAnimations(animations: Map<number, Animation>): void;
-}
 
 const useCeiledAPI = (): [Map<number, Pattern | Animation>, CeiledAPI] => {
   const [state, setState] = useCeiledState();
@@ -40,7 +32,7 @@ const useCeiledAPI = (): [Map<number, Pattern | Animation>, CeiledAPI] => {
     if (!socket) return;
     const request: SetPatternRequest = { authToken, action: 'set', channel, pattern };
     socket.emit(Events.CEILED, request);
-  }, [socket, authToken, setState]);
+  }, [socket, authToken, state, setState]);
   
   // SET patterns
   const setPatterns = useCallback((patterns: Map<number, Pattern>) => {

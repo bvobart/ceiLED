@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Pattern, Solid, PatternType, FadeLinear } from '.';
-import { HSVColor } from '../color-picking/colors';
 import { Grid, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { Pattern, SolidPattern, PatternType, FadePattern } from '../../api/patterns';
+import { RGBColor } from '../color-picking/colors';
 import AddSolidPattern from './AddSolidPattern';
 
 const useStyles = makeStyles({
@@ -20,7 +20,7 @@ interface AddPatternProps {
 const AddPattern = (props: AddPatternProps) => {
   const classes = useStyles();
   const [selectedType, setSelectedType] = useState<PatternType | undefined>(undefined);
-  const defaultPattern = new Solid(new HSVColor({ h: 0, s: 1, v: 1 }), 1);
+  const defaultPattern = new SolidPattern(1, new RGBColor({ red: 255, green: 0, blue: 0 }));
   
   if (!selectedType) {
     // TODO: fix layout of this thing
@@ -44,8 +44,8 @@ const AddPattern = (props: AddPatternProps) => {
   }
 
   // TODO: implement AddFadePattern
-  if (selectedType === PatternType.FADE_LINEAR) {
-    const fade = new FadeLinear([new HSVColor({ h: 0, s: 1, v: 1 }), new HSVColor({ h: 0.25, s: 1, v: 1 }), new HSVColor({ h: 0.5, s: 1, v: 1})], 3);
+  if (selectedType === PatternType.FADE_LINEAR || selectedType === PatternType.FADE_SIGMOID) {
+    const fade = new FadePattern(selectedType, 3, [new RGBColor({ red: 255, green: 0, blue: 0 }), new RGBColor({ red: 255, green: 255, blue: 0 }), new RGBColor({ red: 0, green: 255, blue: 0 })]);
     return <Button className={classes.button} variant='outlined' onClick={() => props.onConfirm(fade)}>!Fade TODO!</Button>
   }
 

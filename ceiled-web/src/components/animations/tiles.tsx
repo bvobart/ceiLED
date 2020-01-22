@@ -1,37 +1,26 @@
 import React, { FunctionComponent } from 'react';
-import { Solid, FadeLinear, FadeSigmoid } from '.';
+import { FadePattern, SolidPattern } from '../../api/patterns';
 import Tile from '../color-picking/Tile';
 
 export interface SolidTileProps {
   className?: string;
-  pattern: Solid;
+  pattern: SolidPattern;
 } 
 
 export const SolidTile: FunctionComponent<SolidTileProps> = (props) => {
   const { className, pattern } = props;
-  return <Tile className={className} hsv={pattern.color}>{props.children}</Tile>
+  return <Tile className={className} hsv={pattern.color.toHSV()}>{props.children}</Tile>
 }
 
-export interface FadeLinearTileProps {
+export interface FadeTileProps {
   className?: string;
   height: string;
-  pattern: FadeLinear;
+  pattern: FadePattern;
 }
 
-export const FadeLinearTile: FunctionComponent<FadeLinearTileProps> = (props) => {
+export const FadeTile: FunctionComponent<FadeTileProps> = (props) => {
   const { className, pattern } = props;
   const background = pattern.toCSS();
-  return <div className={className} style={{ background, minHeight: props.height }}>{props.children}</div>
-}
-
-export interface FadeSigmoidTileProps {
-  className?: string;
-  height: string;
-  pattern: FadeSigmoid;
-}
-
-export const FadeSigmoidTile: FunctionComponent<FadeSigmoidTileProps> = (props) => {
-  const { className, pattern } = props;
-  const background = pattern.toCSS();
+  // TODO: show some distinction between linear and sigmoid, possibly also a switch to swap between the two
   return <div className={className} style={{ background, minHeight: props.height }}>{props.children}</div>
 }

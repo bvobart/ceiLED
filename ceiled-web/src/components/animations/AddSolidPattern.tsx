@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Solid } from '.';
 import { Button } from '@material-ui/core';
-import ColorPicker from '../color-picking/ColorPicker';
-import { HSVColor } from '../color-picking/colors';
 import { makeStyles } from '@material-ui/styles';
+import { SolidPattern } from '../../api/patterns';
+import ColorPicker from '../color-picking/ColorPicker';
+import { HSVColor, RGBColor } from '../color-picking/colors';
 
 const useStyles = makeStyles({
   button: {
@@ -18,16 +18,16 @@ const useStyles = makeStyles({
 });
 
 export interface AddSolidPatternProps {
-  onConfirm: (pattern: Solid) => void
+  onConfirm: (pattern: SolidPattern) => void
 }
 
 const AddSolidPattern = (props: AddSolidPatternProps) => {
   const classes = useStyles();
-  const defaultPattern = new Solid(new HSVColor({ h: 0, s: 1, v: 1 }), 1);
-  const [pattern, setPattern] = useState<Solid>(defaultPattern);
+  const defaultPattern = new SolidPattern(1, new RGBColor({ red: 255, green: 0, blue: 0 }));
+  const [pattern, setPattern] = useState<SolidPattern>(defaultPattern);
   
   const onChangeColor = (color: HSVColor) => {
-    setPattern(new Solid(color, pattern.length))
+    setPattern(new SolidPattern(pattern.length, color.toRGB()))
   }
 
   return (<>
@@ -36,7 +36,7 @@ const AddSolidPattern = (props: AddSolidPatternProps) => {
       variant='outlined' 
       onClick={() => props.onConfirm(pattern)}
       style={{ background: pattern.toCSS() }}>Confirm</Button>
-    <ColorPicker className={classes.picker} hsv={pattern.color} onChange={onChangeColor} />
+    <ColorPicker className={classes.picker} hsv={pattern.color.toHSV()} onChange={onChangeColor} />
   </>)
 }
 

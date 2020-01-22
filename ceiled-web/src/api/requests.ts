@@ -1,4 +1,4 @@
-import { Pattern, Animation } from "../components/animations";
+import { IPattern } from "./patterns";
 
 export interface AuthorisedRequest {
   authToken: string;
@@ -25,17 +25,17 @@ export interface SetPatternRequest extends AuthorisedRequest {
   authToken: string;
   action: 'set';
   channel: number | 'all';
-  pattern: Pattern;
+  pattern: IPattern;
 }
 
 export interface SetPatternsRequest extends AuthorisedRequest {
   authToken: string;
   action: 'set';
-  patterns: Map<number, Pattern>;
+  patterns: Map<number, IPattern>;
 }
 
 export interface SetAnimationsRequest extends AuthorisedRequest {
   authToken: string;
   action: 'set';
-  animations: Map<number, Animation>;
+  animations: Map<number, IPattern[]>;
 }

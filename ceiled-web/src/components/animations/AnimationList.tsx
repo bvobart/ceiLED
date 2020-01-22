@@ -1,8 +1,8 @@
 import React, { useState, FunctionComponent } from 'react';
 import { List, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { Animation, Pattern, Solid, FadeLinear, FadeSigmoid } from '.';
-import { SolidTile, FadeLinearTile, FadeSigmoidTile } from './tiles';
+import { Animation, Pattern, SolidPattern, FadePattern } from '../../api/patterns';
+import { SolidTile, FadeTile } from './tiles';
 import AddPattern from './AddPattern';
 import DraggableItem from './DraggableItem';
 
@@ -55,14 +55,11 @@ const AnimationList: FunctionComponent<AnimationListProps> = (props) => {
       <List disablePadding>
         {
           animation.map((pattern: Pattern) => {
-            if (pattern instanceof Solid) {
+            if (pattern instanceof SolidPattern) {
               return <SolidTile className={classes.solidTile} pattern={pattern}/>
             }
-            if (pattern instanceof FadeLinear) {
-              return <FadeLinearTile className={classes.fadeTile} pattern={pattern} height={`${48 * pattern.length}px`} />
-            }
-            if (pattern instanceof FadeSigmoid) {
-              return <FadeSigmoidTile className={classes.fadeTile} pattern={pattern} height={`${48 * pattern.length}px`} />
+            if (pattern instanceof FadePattern) {
+              return <FadeTile className={classes.fadeTile} pattern={pattern} height={`${48 * pattern.length}px`} />
             }
             return <div className={classes.solidTile}>NONE</div>
           }).map((elem, index) => {

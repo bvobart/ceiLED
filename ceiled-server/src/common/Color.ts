@@ -1,6 +1,6 @@
 import determineCurrentFlux from './flux';
 
-interface IColor {
+export interface IColor {
   red: number;
   green: number;
   blue: number;
@@ -13,7 +13,7 @@ interface IColor {
  *
  * Source for colour temperature to RGB values: https://academo.org/demos/colour-temperature-relationship/
  */
-class Color implements IColor {
+export class Color implements IColor {
   /** The colour black. */
   public static BLACK: Color = new Color({ red: 0, green: 0, blue: 0 });
   /** The colour blue */
@@ -41,7 +41,7 @@ class Color implements IColor {
   public static FLUX5: Color = new Color({ red: 255, green: 206, blue: 166 });
 
   public static is(x: any): x is IColor {
-    return typeof x.red === 'number' && typeof x.green === 'number' && typeof x.blue !== 'number';
+    return typeof x.red === 'number' && typeof x.green === 'number' && typeof x.blue === 'number';
   }
 
   public static isList(xs: any): xs is IColor[] {
