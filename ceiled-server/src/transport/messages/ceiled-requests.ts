@@ -58,7 +58,7 @@ export class SetPatternsRequest implements AuthorisedRequest {
 
   public authToken: string;
   public action: 'set';
-  public patterns: Map<number, IPattern>;
+  public patterns: Array<[number, IPattern]>;
 }
 
 export class SetAnimationsRequest implements AuthorisedRequest {
@@ -76,5 +76,5 @@ export class SetAnimationsRequest implements AuthorisedRequest {
 
   public authToken: string;
   public action: 'set';
-  public animations: Map<number, IPattern[]>;
+  public animations: Array<[number, IPattern[]]>;
 }

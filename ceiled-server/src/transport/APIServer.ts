@@ -204,7 +204,7 @@ export class APIServer {
       // get all
       if (message.channel === 'all') {
         const patterns = await this.service.getPatterns();
-        const res: PatternsResponse = { patterns };
+        const res: PatternsResponse = { patterns: Array.from(patterns.entries()) };
         socket.emit(Events.CEILED, res);
         // get one
       } else {
@@ -221,19 +221,25 @@ export class APIServer {
     } else if (SetPatternRequest.is(message)) {
       const pattern = decodePattern(message.pattern);
       await this.service.setPattern(message.channel, pattern);
-      const res: PatternResponse = { channel: message.channel, pattern };
-      socket.broadcast.emit(Events.CEILED, res);
+      if (message.channel === 'all') {
+        const patterns = await this.service.getPatterns();
+        const res: PatternsResponse = { patterns: Array.from(patterns.entries()) };
+        socket.broadcast.emit(Events.CEILED, res);
+      } else {
+        const res: PatternResponse = { channel: message.channel, pattern };
+        socket.broadcast.emit(Events.CEILED, res);
+      }
 
       // set patterns
     } else if (SetPatternsRequest.is(message)) {
-      const patterns = decodePatternMap(message.patterns);
+      const patterns = decodePatternMap(new Map(message.patterns));
       await this.service.setPatterns(patterns);
-      const res: PatternsResponse = { patterns };
+      const res: PatternsResponse = { patterns: message.patterns };
       socket.broadcast.emit(Events.CEILED, res);
 
       // set animations
     } else if (SetAnimationsRequest.is(message)) {
-      const animations = decodeAnimationMap(message.animations);
+      const animations = decodeAnimationMap(new Map(message.animations));
       await this.service.setAnimations(animations);
       const res: AnimationsResponse = { animations: message.animations };
       socket.broadcast.emit(Events.CEILED, res);

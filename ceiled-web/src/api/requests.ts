@@ -31,11 +31,11 @@ export interface SetPatternRequest extends AuthorisedRequest {
 export interface SetPatternsRequest extends AuthorisedRequest {
   authToken: string;
   action: 'set';
-  patterns: Map<number, IPattern>;
+  patterns: Array<[number, IPattern]>;
 }
 
 export interface SetAnimationsRequest extends AuthorisedRequest {
   authToken: string;
   action: 'set';
-  animations: Map<number, IPattern[]>;
+  animations: Array<[number, IPattern[]]>;
 }

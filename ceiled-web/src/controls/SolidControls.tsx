@@ -5,6 +5,7 @@ import { SolidPattern } from '../api/patterns';
 import ColorPicker from '../components/color-picking/ColorPicker';
 import { HSVColor } from '../components/color-picking/colors';
 import useCeiledAPI from '../hooks/useCeiledAPI';
+import { range } from '../components/animations/utils';
 
 const useStyles = makeStyles({
   panel: {
@@ -31,20 +32,21 @@ const key = 'solids-state';
  */
 const SolidControls = () => {
   const classes = useStyles();
-  const [solidsState, setSolidsState] = useSolidsState();
   const [ceiledState, api] = useCeiledAPI();
+  const [solidsState, setSolidsState] = useSolidsState();
+  const [syncCount, setSyncCount] = useState(0);
 
-  const onChangeColor = (channel: number, newColor: HSVColor) => {
-    // TODO: throttle this a bit maybe?
+  const onChangeColor = useCallback((channel: number, newColor: HSVColor) => {
     setSolidsState(new Map(solidsState.set(channel, newColor)));
     api.setPattern(channel, new SolidPattern(1, newColor.toRGB()));
-  }
+  }, [solidsState, api, setSolidsState]);
 
-  const onSync = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const onSync = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.stopPropagation();
-    console.log("Syncing");
+    api.getPattern('all');
     setSolidsState(decodeCeiledState(ceiledState));
-  }
+    setSyncCount(syncCount + 1);
+  }, [ceiledState, api, syncCount, setSolidsState, setSyncCount]);
 
   return (
     <ExpansionPanel className={classes.panel}>
@@ -56,18 +58,15 @@ const SolidControls = () => {
       </ExpansionPanelSummary>
       <div className={classes.content}>
         <Grid container spacing={1}>
-          <Grid item xs={12} sm={4}>
-            <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>Channel 1</Typography>
-            <ColorPicker preview className={classes.picker} hsv={solidsState.get(0) || HSVColor.random()} onChange={(c) => onChangeColor(0, c)} />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>Channel 2</Typography>
-            <ColorPicker preview className={classes.picker} hsv={solidsState.get(1) || HSVColor.random()} onChange={(c) => onChangeColor(1, c)} />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>Channel 3</Typography>
-            <ColorPicker preview className={classes.picker} hsv={solidsState.get(2) || HSVColor.random()} onChange={(c) => onChangeColor(2, c)} />
-          </Grid>
+          {range(3).map(channel => {
+            const color = solidsState.get(channel) || HSVColor.random();
+            return (
+              <Grid item xs={12} sm={4} key={`solid-picker-${channel}-${syncCount}`}>
+                <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>Channel {channel + 1}</Typography>
+                <ColorPicker preview className={classes.picker} hsv={color} onChange={(c) => onChangeColor(channel, c)} />
+              </Grid>
+            );
+          })}
         </Grid>
       </div>
     </ExpansionPanel>

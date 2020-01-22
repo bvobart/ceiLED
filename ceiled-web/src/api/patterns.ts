@@ -58,12 +58,13 @@ export const decodePattern = (p: any): Pattern => {
   throw new Error('invalid pattern: ' + JSON.stringify(p));
 }
 
-export const decodePatternOrAnimation = (value: any): Pattern | Animation => {
-  if (isPatternArray(value)) {
-    return value.map(decodePattern);
-  }
+export const decodeAnimation = (ps: IPattern[]): Animation => {
+  return ps.map(decodePattern);
+}
 
-  return decodePattern(value);
+export const decodePatternOrAnimation = (value: any): Pattern | Animation => {
+  if (isPatternArray(value)) return decodeAnimation(value);
+  else return decodePattern(value);
 }
 
 export class SolidPattern implements Pattern {

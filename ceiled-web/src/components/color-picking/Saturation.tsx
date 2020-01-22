@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import throttle from 'lodash.throttle';
 import { grey } from '@material-ui/core/colors';
 import { HSVColor } from './colors';
 
@@ -12,7 +13,7 @@ const Saturation = (props: SaturationProps) => {
   const cssColor = `hsl(${props.hsv.h * 360}, 100%, 50%)`;
   const backgroundRef = useRef<HTMLDivElement>(null);
 
-  const onPointerMove = (pageX: number, pageY: number) => {
+  const onPointerMove = throttle((pageX: number, pageY: number) => {
     if (backgroundRef.current) {
       const { width, height, left, top } = backgroundRef.current.getBoundingClientRect();
       const mouseX = pageX - left - window.pageXOffset;
@@ -26,7 +27,7 @@ const Saturation = (props: SaturationProps) => {
         v: -y / height + 1,
       }));
     }
-  }
+  }, 20, { leading: true, trailing: true });
 
   const onClick = (event: React.MouseEvent) => onPointerMove(event.pageX, event.pageY);
   const onMouseMove = (event: MouseEvent) => onPointerMove(event.pageX, event.pageY);

@@ -3,14 +3,14 @@ import { IPattern } from '../../patterns/Pattern';
 /* tslint:disable:max-classes-per-file */
 
 export interface PatternResponse {
-  channel: number | 'all';
+  channel: number;
   pattern: IPattern;
 }
 
 export interface PatternsResponse {
-  patterns: Map<number, IPattern>;
+  patterns: Array<[number, IPattern]>;
 }
 
 export interface AnimationsResponse {
-  animations: Map<number, IPattern[]>;
+  animations: Array<[number, IPattern[]]>;
 }

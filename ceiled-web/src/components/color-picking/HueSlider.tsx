@@ -1,6 +1,7 @@
 import React from 'react';
 import { Slider, makeStyles } from '@material-ui/core';
 import { HSVColor } from './colors';
+import throttle from 'lodash.throttle';
 
 interface HueProps {
   className?: string
@@ -27,10 +28,10 @@ const useStyles = makeStyles({
 const HueSlider = (props: HueProps) => {
   const classes = useStyles();
 
-  const onChange = (_: React.ChangeEvent<{}>, newHue: number | number[]) => {
+  const onChange = throttle((_: React.ChangeEvent<{}>, newHue: number | number[]) => {
     const newHSV = new HSVColor({ h: newHue as number / 360, s: props.hsv.s, v: props.hsv.v });
     props.onChange(newHSV);
-  }
+  }, 50, { leading: true, trailing: true });
 
   return (
     <div className={props.className} style={{ background: hueGradient, borderRadius: '4px' }}>
