@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { makeStyles, Grid, Typography, Divider } from '@material-ui/core';
-import { Animation } from '../../api/patterns';
+import { Animation, IPattern, decodeAnimation } from '../../api/patterns';
 import { replace, reorder, range, remove, insert } from './utils';
 import DroppableAnimationList from './DroppableAnimationList';
+
+const key = 'animations-state';
 
 const numChannels = 3;
 
@@ -24,7 +26,7 @@ const useStyles = makeStyles({
 
 const AnimationComposer = () => {
   const classes = useStyles();
-  const [animations, setAnimations] = useState<Animation[]>(range(numChannels).map(() => []));
+  const [animations, setAnimations] = useAnimations();
 
   const onDragEnd = (result: DropResult) => {
     // element was dropped outside of droppables
@@ -76,3 +78,24 @@ const AnimationComposer = () => {
 }
 
 export default AnimationComposer;
+
+export const useAnimations = (): [Animation[], (state: Animation[]) => void] => {
+  const savedState = decodeSavedState(localStorage.getItem(key) || `[${'[],'.repeat(numChannels - 1)}[]]`);
+  const [state, setState] = useState(savedState);
+
+  const updateState = useCallback((state: Animation[]): void => {
+    localStorage.setItem(key, encodeSavedState(state));
+    setState(state);
+  }, [setState]);
+
+  return [state, updateState];
+}
+
+const encodeSavedState = (state: Animation[]): string => {
+  return JSON.stringify(state);
+}
+
+const decodeSavedState = (state: string): Animation[] => {
+  const saved: IPattern[][] = JSON.parse(state);
+  return saved.map(decodeAnimation);
+}
