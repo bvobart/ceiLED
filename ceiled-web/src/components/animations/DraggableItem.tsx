@@ -4,12 +4,13 @@ import { ListItem } from '@material-ui/core';
 
 export interface DraggableItemProps {
   index: number;
+  disabled?: boolean;
 }
 
 const DraggableItem: FunctionComponent<DraggableItemProps> = (props) => {
   const id = `draggable-item-${props.index}`;
   return (
-    <Draggable draggableId={id} index={props.index}>
+    <Draggable draggableId={id} index={props.index} isDragDisabled={props.disabled}>
       {provided => (
         <ListItem dense disableGutters
           ref={provided.innerRef} 

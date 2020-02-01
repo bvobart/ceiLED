@@ -4,7 +4,9 @@ import { Pattern, PatternType, SolidPattern } from '../../api/patterns';
 import EditSolidPattern from './EditSolidPattern';
 
 const useStyles = makeStyles({
-  root: {},  
+  root: {
+    width: '100%',
+  },  
   typeForm: {
     width: '100%',
   },

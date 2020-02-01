@@ -3,7 +3,7 @@ import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { SolidPattern } from '../../api/patterns';
 import ColorPicker from '../color-picking/ColorPicker';
-import { HSVColor, RGBColor } from '../color-picking/colors';
+import { HSVColor } from '../color-picking/colors';
 
 const useStyles = makeStyles({
   button: {

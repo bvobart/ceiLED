@@ -1,7 +1,10 @@
-import React, { FunctionComponent } from 'react';
-import { makeStyles } from '@material-ui/core';
-import { FadePattern, SolidPattern, Pattern } from '../../api/patterns';
+import React, { FunctionComponent, useState } from 'react';
+import { makeStyles, Grid, IconButton } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/DeleteOutlined';
+import EditIcon from '@material-ui/icons/EditOutlined';
 import Tile from '../color-picking/Tile';
+import { FadePattern, SolidPattern, Pattern } from '../../api/patterns';
+import EditPattern from './EditPattern';
 
 const useStyles = makeStyles({
   solidTile: {
@@ -13,7 +16,51 @@ const useStyles = makeStyles({
     borderRadius: '4px',
     width: '100%',
   },
+  editTile: {
+    minHeight: '48px',
+    marginRight: '8px',
+  },
+  icon: {
+    // TODO: set the colour of the icon based on the pattern's colour so that the icons are always visible
+    color: 'rgba(255, 255, 255, 0.7)',
+  }
 });
+
+//----------------------------------------------------------------------------------------
+
+export interface EditablePatternTileProps {
+  pattern: Pattern;
+  onEditStart?: () => void;
+  onEditConfirm: (pattern: Pattern) => void;
+  onDelete: () => void;
+}
+
+export const EditablePatternTile: FunctionComponent<EditablePatternTileProps> = (props) => {
+  const { pattern, onEditStart, onEditConfirm, onDelete } = props;
+  const classes = useStyles();
+  const [editing, setEditing] = useState(false);
+ 
+  const onEdit = () => {
+    setEditing(true);
+    onEditStart && onEditStart();
+  }
+
+  const onConfirm = (newPattern: Pattern) => {
+    setEditing(false);
+    onEditConfirm(newPattern);
+  }
+
+  return editing ? (
+    <EditPattern pattern={pattern} onConfirm={onConfirm} />
+  ) : (
+    <PatternTile pattern={pattern}>
+      <Grid className={classes.editTile} container justify='flex-end' alignItems='center'>
+        <IconButton size='small' onClick={onEdit}><EditIcon className={classes.icon} /></IconButton>
+        <IconButton size='small' onClick={onDelete}><DeleteIcon className={classes.icon} /></IconButton>
+      </Grid>
+    </PatternTile>
+  );
+}
 
 //----------------------------------------------------------------------------------------
 
