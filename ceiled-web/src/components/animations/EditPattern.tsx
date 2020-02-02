@@ -74,8 +74,10 @@ const Editor = (props: EditorProps) => {
   switch (type) {
     case PatternType.SOLID:
       return <EditSolidPattern pattern={pattern as SolidPattern | undefined} onConfirm={onConfirm} />
-    case PatternType.FADE_LINEAR || PatternType.FADE_SIGMOID:
-      return <EditFadePattern pattern={pattern as FadePattern | undefined} onConfirm={onConfirm} />
+    case PatternType.FADE_LINEAR:
+      return <EditFadePattern type={type} pattern={pattern as FadePattern | undefined} onConfirm={onConfirm} />
+    case PatternType.FADE_SIGMOID:
+      return <EditFadePattern type={type} pattern={pattern as FadePattern | undefined} onConfirm={onConfirm} />
     
     default:
       return <div />
