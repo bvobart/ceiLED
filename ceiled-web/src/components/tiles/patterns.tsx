@@ -2,9 +2,10 @@ import React, { FunctionComponent, useState } from 'react';
 import { makeStyles, Grid, IconButton } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteOutlined';
 import EditIcon from '@material-ui/icons/EditOutlined';
-import Tile from '../color-picking/Tile';
 import { FadePattern, SolidPattern, Pattern } from '../../api/patterns';
-import EditPattern from './EditPattern';
+import EditPattern from '../animations/EditPattern';
+import OutlinedBox from '../global/OutlinedBox';
+import { Tile } from '.';
 
 const useStyles = makeStyles({
   solidTile: {
@@ -23,6 +24,12 @@ const useStyles = makeStyles({
   icon: {
     // TODO: set the colour of the icon based on the pattern's colour so that the icons are always visible
     color: 'rgba(255, 255, 255, 0.7)',
+  },
+  outlined: {
+    width: '100%',
+    borderRadius: '4px',
+    border: '1px solid rgba(255, 255, 255, 0.23)',
+    padding: '4px 4px 8px 4px',
   }
 });
 
@@ -51,7 +58,9 @@ export const EditablePatternTile: FunctionComponent<EditablePatternTileProps> = 
   }
 
   return editing ? (
-    <EditPattern pattern={pattern} onConfirm={onConfirm} />
+    <OutlinedBox label='Edit pattern'>
+      <EditPattern pattern={pattern} onConfirm={onConfirm} />
+    </OutlinedBox>
   ) : (
     <PatternTile pattern={pattern}>
       <Grid className={classes.editTile} container justify='flex-end' alignItems='center'>

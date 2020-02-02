@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { makeStyles, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
-import { Pattern, PatternType, SolidPattern } from '../../api/patterns';
+import { Pattern, PatternType, SolidPattern, FadePattern } from '../../api/patterns';
 import EditSolidPattern from './EditSolidPattern';
+import EditFadePattern from './EditFadePattern';
 
 const useStyles = makeStyles({
   root: {
@@ -30,26 +31,31 @@ const EditPattern = (props: EditPatternProps) => {
   const inputLabel = useRef<HTMLLabelElement>(null);
   const [labelWidth, setLabelWidth] = useState(0);
   useEffect(() => {
-    setLabelWidth(inputLabel.current!.offsetWidth);
+    setLabelWidth(inputLabel.current ? inputLabel.current.offsetWidth : 0);
   }, []);
+
+  const isEditing = pattern !== undefined;
+  const isEditingFade = pattern && (pattern.type === PatternType.FADE_LINEAR || pattern.type === PatternType.FADE_SIGMOID)
 
   return (
     <div className={classes.root}>
-      <FormControl className={classes.typeForm} variant='outlined' margin='dense'>
-        <InputLabel ref={inputLabel} id='select-patterntype-label'>Pattern Type</InputLabel>
-        <Select
-          className={classes.select}
-          labelId='select-patterntype-label'
-          id='select-patterntype'
-          value={patternType}
-          onChange={event => setPatternType(event.target.value as PatternType)}
-          labelWidth={labelWidth}
-        >
-          <MenuItem value={PatternType.SOLID}>Solid</MenuItem>
-          <MenuItem value={PatternType.FADE_LINEAR}>Linear Fade</MenuItem>
-          <MenuItem value={PatternType.FADE_SIGMOID}>Sigmoid Fade</MenuItem>
-        </Select>
-      </FormControl>
+      { (!isEditing || (isEditing && isEditingFade)) && 
+        <FormControl className={classes.typeForm} variant='outlined' margin='dense'>
+          <InputLabel ref={inputLabel} id='select-patterntype-label'>Pattern Type</InputLabel>
+          <Select
+            className={classes.select}
+            labelId='select-patterntype-label'
+            id='select-patterntype'
+            value={patternType}
+            onChange={event => setPatternType(event.target.value as PatternType)}
+            labelWidth={labelWidth}
+          >
+            { !isEditing && <MenuItem value={PatternType.SOLID}>Solid</MenuItem>}
+            <MenuItem value={PatternType.FADE_LINEAR}>Linear Fade</MenuItem>
+            <MenuItem value={PatternType.FADE_SIGMOID}>Sigmoid Fade</MenuItem>
+          </Select>
+        </FormControl>
+      }
       <Editor type={patternType} pattern={pattern} onConfirm={onConfirm} />
     </div>
   )
@@ -68,7 +74,9 @@ const Editor = (props: EditorProps) => {
   switch (type) {
     case PatternType.SOLID:
       return <EditSolidPattern pattern={pattern as SolidPattern | undefined} onConfirm={onConfirm} />
-    // TODO: implement and add EditFadePattern
+    case PatternType.FADE_LINEAR || PatternType.FADE_SIGMOID:
+      return <EditFadePattern pattern={pattern as FadePattern | undefined} onConfirm={onConfirm} />
+    
     default:
       return <div />
   }

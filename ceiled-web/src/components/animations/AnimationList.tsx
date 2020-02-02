@@ -2,7 +2,7 @@ import React, { useState, FunctionComponent } from 'react';
 import { List, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { Animation, Pattern } from '../../api/patterns';
-import { EditablePatternTile } from './tiles';
+import { EditablePatternTile } from '../tiles/patterns';
 import DraggableItem from './DraggableItem';
 import EditPattern from './EditPattern';
 import { remove, replace } from './utils';

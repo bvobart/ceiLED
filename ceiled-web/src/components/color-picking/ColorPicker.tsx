@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { HSVColor } from './colors';
+import { Tile } from '../tiles';
 import Hue from './HueSlider';
 import Saturation from './Saturation';
-import Tile from './Tile';
 
 interface ColorPickerProps {
   className: string
