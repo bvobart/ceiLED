@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react"
-import AnimationList, { AnimationListProps } from "./AnimationList"
 import { Droppable } from "react-beautiful-dnd"
+import AnimationList, { AnimationListProps } from "../AnimationList"
 
 export interface DroppableAnimationListProps extends AnimationListProps {
   droppableId: string;

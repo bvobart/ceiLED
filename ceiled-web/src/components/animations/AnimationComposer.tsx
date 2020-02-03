@@ -3,7 +3,7 @@ import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { makeStyles, Grid, Typography, Divider } from '@material-ui/core';
 import { Animation, IPattern, decodeAnimation } from '../../api/patterns';
 import { replace, reorder, range, remove, insert } from './utils';
-import DroppableAnimationList from './DroppableAnimationList';
+import DroppableAnimationList from './dragdrop/DroppableAnimationList';
 
 const key = 'animations-state';
 

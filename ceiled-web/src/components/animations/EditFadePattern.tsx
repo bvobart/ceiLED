@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button, makeStyles } from '@material-ui/core';
 import { FadePattern, PatternType } from '../../api/patterns';
 import { HSVColor } from '../color-picking/colors';
 import OutlinedBox from '../global/OutlinedBox';
 import { EditableTile } from '../tiles';
-import { replace, remove } from './utils';
+import { replace, remove, reorder } from './utils';
+import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd';
+import DraggableDiv from './dragdrop/DraggableDiv';
 
 const useStyles = makeStyles({
   buttonConfirm: {
@@ -24,6 +26,7 @@ const useStyles = makeStyles({
   }
 });
 
+let droppableCount = 0;
 
 export interface EditFadePatternProps {
   pattern?: FadePattern;
@@ -47,13 +50,28 @@ const EditFadePattern = (props: EditFadePatternProps) => {
     onConfirm(new FadePattern(type, length, rgbs));
   }
 
-  return (<>
-    <OutlinedBox label='Colors' style={{ marginTop: '8px' }}>
-      {colors.map((color, index) => (
+  const onDragEnd = (result: DropResult) => {
+    // element was dropped outside of droppables
+    if (!result.destination) return;
+    // element was dragged, but dropped in its original spot
+    if (result.destination.index === result.source.index) return;
+    // element was dragged and dropped into the same column (there is only one column)
+    if (result.source.droppableId === result.destination.droppableId) {
+      const newColors = reorder(colors, result.source.index, result.destination.index);
+      setColors(newColors);
+    }
+  }
+
+  /**
+   * ColorTiles is a sub-component that renders the list of draggable, editable color tiles.
+   * Needs to be separate component, else the list won't rerender upon drag 'n drop.
+   */
+  const ColorTiles = useCallback(() => (
+    <>{colors.map((color, index) => (
+      <DraggableDiv index={index} key={`edittile-${index}`}>
         <EditableTile
           // make the first tile have rounded top and last tile have rounded bottom
-          className={index === 0 ? classes.roundedTop : index === colors.length - 1 ? classes.roundedBottom : undefined}
-          key={`edittile-${index}`} 
+          className={index === 0 ? classes.roundedTop : index === colors.length - 1 ? classes.roundedBottom : undefined} 
           hsv={color} 
           onEditConfirm={newColor => setColors(replace(colors, index, newColor))}
           onDelete={() => {
@@ -61,7 +79,22 @@ const EditFadePattern = (props: EditFadePatternProps) => {
             setColors(cs);
           }}
         />
-      ))}
+      </DraggableDiv>
+    ))}</>
+  ), [colors, classes.roundedTop, classes.roundedBottom]);
+
+  return (<>
+    <OutlinedBox label='Colors' style={{ marginTop: '8px' }}>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId={`edit-fade-${droppableCount++}`}>
+          { provided => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              <ColorTiles />
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
       <Button className={classes.buttonAdd} variant='outlined' onClick={onClickAdd}>Add Color</Button>
     </OutlinedBox>
     <Button className={classes.buttonConfirm} variant='outlined' onClick={onClickConfirm}>Confirm</Button>
