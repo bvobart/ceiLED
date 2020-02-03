@@ -35,6 +35,7 @@ const SolidControls = () => {
   const [ceiledState, api] = useCeiledAPI();
   const [solidsState, setSolidsState] = useSolidsState();
   const [syncCount, setSyncCount] = useState(0);
+  const [expanded, setExpanded] = useState(false);
 
   const onChangeColor = useCallback((channel: number, newColor: HSVColor) => {
     setSolidsState(new Map(solidsState.set(channel, newColor)));
@@ -49,11 +50,11 @@ const SolidControls = () => {
   }, [ceiledState, api, syncCount, setSolidsState, setSyncCount]);
 
   return (
-    <ExpansionPanel className={classes.panel}>
-      <ExpansionPanelSummary>
+    <ExpansionPanel className={classes.panel} expanded={expanded}>
+      <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
         <Grid container justify='space-between'>
           <Grid item><Typography variant='h6'>Solids</Typography></Grid>
-          <Grid item><Button variant='outlined' onClick={onSync}>Sync</Button></Grid>
+          <Grid item><Button variant='outlined' onClick={onSync} disabled={!expanded}>Sync</Button></Grid>
         </Grid>
       </ExpansionPanelSummary>
       <div className={classes.content}>
