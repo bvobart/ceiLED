@@ -66,22 +66,23 @@ const EditFadePattern = (props: EditFadePatternProps) => {
    * ColorTiles is a sub-component that renders the list of draggable, editable color tiles.
    * Needs to be separate component, else the list won't rerender upon drag 'n drop.
    */
-  const ColorTiles = useCallback(() => (
-    <>{colors.map((color, index) => (
-      <DraggableDiv index={index} key={`edittile-${index}`}>
-        <EditableTile
-          // make the first tile have rounded top and last tile have rounded bottom
-          className={index === 0 ? classes.roundedTop : index === colors.length - 1 ? classes.roundedBottom : undefined} 
-          hsv={color} 
-          onEditConfirm={newColor => setColors(replace(colors, index, newColor))}
-          onDelete={() => {
-            const [cs] = remove(colors, index);
-            setColors(cs);
-          }}
-        />
-      </DraggableDiv>
-    ))}</>
-  ), [colors, classes.roundedTop, classes.roundedBottom]);
+  const ColorTiles = useCallback(() => (<>
+    {colors.map((color, index) => (
+      <DraggableEditableTile
+        // make the first tile have rounded top and last tile have rounded bottom
+        className={index === 0 ? classes.roundedTop : index === colors.length - 1 ? classes.roundedBottom : undefined} 
+        color={color}
+        index={index}
+        onEditConfirm={newColor => {
+          setColors(replace(colors, index, newColor));
+        }}
+        onDelete={() => {
+          const [cs] = remove(colors, index);
+          setColors(cs);
+        }}
+      />
+    ))}
+  </>), [colors, classes.roundedTop, classes.roundedBottom]);
 
   return (<>
     <OutlinedBox label='Colors' style={{ marginTop: '8px' }}>
@@ -102,3 +103,35 @@ const EditFadePattern = (props: EditFadePatternProps) => {
 }
 
 export default EditFadePattern;
+
+interface DraggableEditableTileProps {
+  className?: string;
+  color: HSVColor;
+  index: number;
+  onEditConfirm: (color: HSVColor) => void;
+  onDelete: () => void;
+}
+
+/**
+ * DraggableEditableTile is a draggable and editable color tile that disables drag and drop while editing the color.
+ */
+const DraggableEditableTile = (props: DraggableEditableTileProps) => {
+  const { className, color, index, onEditConfirm, onDelete } = props;
+  const [dragDisabled, setDragDisabled] = useState(false);
+  return (
+    <DraggableDiv index={index} key={`edittile-${index}`} disabled={dragDisabled}>
+      <EditableTile
+        className={className} 
+        hsv={color}
+        onEditStart={() => {
+          setDragDisabled(true);
+        }}
+        onEditConfirm={newColor => {
+          setDragDisabled(false);
+          onEditConfirm(newColor);
+        }}
+        onDelete={onDelete}
+      />
+    </DraggableDiv>
+  )
+}
