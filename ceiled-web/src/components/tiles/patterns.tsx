@@ -100,7 +100,9 @@ export interface SolidTileProps {
 export const SolidTile: FunctionComponent<SolidTileProps> = (props) => {
   const { pattern } = props;
   const classes = useStyles();
-  return <Tile className={classes.solidTile} hsv={pattern.color.toHSV()}>{props.children}</Tile>
+  // minimum height is the pattern's length times the height of one block, plus the padding normally found in between the blocks.
+  const minHeight = 48 * pattern.length + 8 * (pattern.length - 1);
+  return <Tile className={classes.solidTile} hsv={pattern.color.toHSV()} style={{ minHeight: `${minHeight}px` }}>{props.children}</Tile>
 }
 
 //----------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { makeStyles, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
+import { makeStyles, FormControl, InputLabel, Select, MenuItem, TextField } from '@material-ui/core';
 import { Pattern, PatternType, SolidPattern, FadePattern } from '../../api/patterns';
 import EditSolidPattern from './EditSolidPattern';
 import EditFadePattern from './EditFadePattern';
@@ -13,6 +13,9 @@ const useStyles = makeStyles({
   },
   select: {
     minHeight: '44px',
+  },
+  lengthField: {
+    marginTop: '8px',
   }
 });
 
@@ -26,6 +29,8 @@ const EditPattern = (props: EditPatternProps) => {
   const classes = useStyles();
   const defaultType = pattern ? pattern.type : PatternType.SOLID;
   const [patternType, setPatternType] = useState<PatternType>(defaultType);
+  const defaultLength = pattern ? pattern.length : 1;
+  const [length, setLength] = useState(defaultLength);
 
   // ensures that the outline of the selection box is broken by the label
   const inputLabel = useRef<HTMLLabelElement>(null);
@@ -33,6 +38,18 @@ const EditPattern = (props: EditPatternProps) => {
   useEffect(() => {
     setLabelWidth(inputLabel.current ? inputLabel.current.offsetWidth : 0);
   }, []);
+
+  // upon changing the pattern length
+  const onChangeLength = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newLength = parseInt(event.target.value);
+    if (newLength > 0) setLength(newLength);
+  }
+
+  // upon confirming the new pattern in the editor
+  const onEditorConfirm = (newPattern: Pattern) => {
+    newPattern.length = length;
+    onConfirm(newPattern);
+  }
 
   const isEditing = pattern !== undefined;
   const isEditingFade = pattern && (pattern.type === PatternType.FADE_LINEAR || pattern.type === PatternType.FADE_SIGMOID)
@@ -56,7 +73,16 @@ const EditPattern = (props: EditPatternProps) => {
           </Select>
         </FormControl>
       }
-      <Editor type={patternType} pattern={pattern} onConfirm={onConfirm} />
+      <TextField 
+        className={classes.lengthField} 
+        variant='outlined' 
+        label='Length' 
+        margin='dense'
+        type='number' 
+        value={length} 
+        onChange={onChangeLength} 
+      />
+      <Editor type={patternType} pattern={pattern} onConfirm={onEditorConfirm} />
     </div>
   )
 }

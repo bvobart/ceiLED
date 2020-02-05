@@ -70,6 +70,7 @@ const EditFadePattern = (props: EditFadePatternProps) => {
     {colors.map((color, index) => (
       <DraggableEditableTile
         // make the first tile have rounded top and last tile have rounded bottom
+        key={`edittile-${index}`}
         className={index === 0 ? classes.roundedTop : index === colors.length - 1 ? classes.roundedBottom : undefined} 
         color={color}
         index={index}
@@ -119,7 +120,7 @@ const DraggableEditableTile = (props: DraggableEditableTileProps) => {
   const { className, color, index, onEditConfirm, onDelete } = props;
   const [dragDisabled, setDragDisabled] = useState(false);
   return (
-    <DraggableDiv index={index} key={`edittile-${index}`} disabled={dragDisabled}>
+    <DraggableDiv index={index} disabled={dragDisabled}>
       <EditableTile
         className={className} 
         hsv={color}

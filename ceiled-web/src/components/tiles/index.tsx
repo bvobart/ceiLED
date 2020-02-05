@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, CSSProperties } from 'react';
 import { makeStyles, Grid, IconButton, Button } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteOutlined';
 import EditIcon from '@material-ui/icons/EditOutlined';
@@ -83,9 +83,11 @@ export const EditableTile: FunctionComponent<EditableTileProps> = (props) => {
 export interface TileProps {
   className?: string
   hsv: HSVColor
+  style?: CSSProperties
 }
 
 export const Tile: FunctionComponent<TileProps> = (props) => {
-  const background = props.hsv ? props.hsv.toCSS() : 'rgba(0, 0, 0, 0)';
-  return <div className={props.className} style={{ background }}>{props.children}</div>
+  const { className, children, hsv, style } = props;
+  const background = hsv ? hsv.toCSS() : 'rgba(0, 0, 0, 0)';
+  return <div className={className} style={{ ...style, background }}>{children}</div>
 }
