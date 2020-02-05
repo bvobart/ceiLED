@@ -14,6 +14,7 @@ import { CeiledProvider } from './hooks/context/CeiledContext';
 const useStyles = makeStyles({
   container: {
     padding: 0,
+    overflowX: 'hidden',
   },
 })
 

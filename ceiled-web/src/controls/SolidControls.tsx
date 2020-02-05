@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { ExpansionPanel, ExpansionPanelSummary, Grid, Typography, makeStyles, Button } from '@material-ui/core';
+import { ExpansionPanel, ExpansionPanelSummary, Grid, Typography, makeStyles, Button, GridList, GridListTile, useTheme, useMediaQuery } from '@material-ui/core';
 import { CeiledState } from '../api';
 import { SolidPattern } from '../api/patterns';
 import ColorPicker from '../components/color-picking/ColorPicker';
@@ -13,6 +13,7 @@ const useStyles = makeStyles({
   },
   content: {
     padding: '0px 8px 8px 8px',
+    userSelect: 'none',
   },
   picker: {
     minHeight: '276px',
@@ -20,6 +21,10 @@ const useStyles = makeStyles({
   channelLabel: {
     width: '100%'
   },
+  gridList: {
+    flexWrap: 'nowrap',
+    transform: 'translateZ(0)',
+  }
 });
 
 const key = 'solids-state';
@@ -36,6 +41,8 @@ const SolidControls = () => {
   const [solidsState, setSolidsState] = useSolidsState();
   const [syncCount, setSyncCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const theme = useTheme();
+  const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
 
   const onChangeColor = useCallback((channel: number, newColor: HSVColor) => {
     setSolidsState(new Map(solidsState.set(channel, newColor)));
@@ -58,17 +65,17 @@ const SolidControls = () => {
         </Grid>
       </ExpansionPanelSummary>
       <div className={classes.content}>
-        <Grid container spacing={1}>
+        <GridList className={classes.gridList} spacing={8} cellHeight='auto' cols={isNotMobile ? 3 : 1.5}>
           {range(3).map(channel => {
             const color = solidsState.get(channel) || HSVColor.random();
             return (
-              <Grid item xs={12} sm={4} key={`solid-picker-${channel}-${syncCount}`}>
+              <GridListTile key={`solid-picker-${channel}-${syncCount}`}>
                 <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>Channel {channel + 1}</Typography>
                 <ColorPicker preview className={classes.picker} hsv={color} onChange={(c) => onChangeColor(channel, c)} />
-              </Grid>
+              </GridListTile>
             );
           })}
-        </Grid>
+        </GridList>
       </div>
     </ExpansionPanel>
   )

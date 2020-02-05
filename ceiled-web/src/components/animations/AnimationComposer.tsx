@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { makeStyles, Grid, Typography, Divider } from '@material-ui/core';
+import { makeStyles, Typography, Divider, useTheme, useMediaQuery, GridList, GridListTile } from '@material-ui/core';
 import { Animation, IPattern, decodeAnimation } from '../../api/patterns';
 import { replace, reorder, range, remove, insert } from './utils';
 import DroppableAnimationList from './dragdrop/DroppableAnimationList';
@@ -10,11 +10,14 @@ const key = 'animations-state';
 const numChannels = 3;
 
 const useStyles = makeStyles({
-  content: {
+  root: {
     padding: '0px 8px 8px 8px',
+    userSelect: 'none',
+    flexWrap: 'nowrap',
   },
   animator: {
     width: '100%',
+    marginTop: '4px',
   },
   label: {
     width: '100%',
@@ -26,6 +29,8 @@ const useStyles = makeStyles({
 
 const AnimationComposer = () => {
   const classes = useStyles();
+  const theme = useTheme();
+  const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
   const [animations, setAnimations] = useAnimations();
 
   const onDragEnd = (result: DropResult) => {
@@ -58,9 +63,9 @@ const AnimationComposer = () => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Grid className={classes.content} container spacing={1}>
+      <GridList className={classes.root} spacing={8} cellHeight='auto' cols={isNotMobile ? 3 : 1.5}>
         {range(numChannels).map((channel) => (
-          <Grid item key={channel} xs={4}>
+          <GridListTile key={channel}>
             <Typography gutterBottom className={classes.label} align='center' variant='subtitle1'>Channel {channel + 1}</Typography>
             <Divider />
             <DroppableAnimationList
@@ -70,9 +75,9 @@ const AnimationComposer = () => {
               droppableId={`channel-${channel}`} 
               onChange={anim => setAnimations(replace(animations, channel, anim))}
             />
-          </Grid>
+          </GridListTile>
         ))}
-      </Grid>
+      </GridList>
     </DragDropContext>
   )
 }
