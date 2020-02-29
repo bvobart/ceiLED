@@ -6,6 +6,12 @@ export interface ErrorMessage {
 }
 
 export class InvalidRequestMessage implements ErrorMessage {
+  static is(x: any): x is InvalidRequestMessage {
+    return x && typeof x.message === 'string'
+      && Object.values(Events).includes(x.event)
+      && x.request;
+  }
+
   public message = 'Invalid request';
   public event: Events;
   public request: any;

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField } from '@material-ui/core';
+import { Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField, Typography } from '@material-ui/core';
 import useCeiledErrors from '../hooks/useCeiledErrors';
-import { InternalErrorMessage } from '../api/responses';
+import { InternalErrorMessage, InvalidRequestMessage } from '../api/responses';
+import Highlight from 'react-highlight.js';
 
 interface ErrorDialogProps {}
 
@@ -28,12 +29,28 @@ const ErrorDialog = (props: ErrorDialogProps) => {
             /></>
           : ''
         }
+        {InvalidRequestMessage.is(error)
+          ? <>
+              <Typography variant='body1'>Request</Typography>
+              <Highlight language='json'>
+                {JSON.stringify(censorAuthToken(error.request), null, 2)}
+              </Highlight>
+            </>
+          : ''
+        }
       </DialogContent>
       <DialogActions>
         <Button onClick={dismiss}>Dismiss</Button>
       </DialogActions>
     </Dialog>
   )
+}
+
+const censorAuthToken = (msg: any): any => {
+  if (msg.authToken) {
+    msg.authToken = '<censored>';
+  }
+  return msg;
 }
 
 export default ErrorDialog;
