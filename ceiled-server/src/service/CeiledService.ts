@@ -5,7 +5,7 @@ import { Animation } from '../patterns/Animation';
 import { Pattern } from '../patterns/Pattern';
 import { SolidPattern } from '../patterns/SolidPattern';
 import { inRange, range } from '../patterns/utils';
-import { AnimationEngine } from './AnimationEngine';
+import { AnimationEngine } from './animations/AnimationEngine';
 import { Service } from './Service';
 
 /**
@@ -100,7 +100,9 @@ export class CeiledService implements Service {
   }
 
   public async setPattern(channel: number | 'all', pattern: Pattern): Promise<void> {
+    this.animationEngine.pause();
     await pattern.show(channel, this.driver, this.animationEngine.speed);
+
     if (channel === 'all') {
       for (const c of range(this.driver.channels)) this.currentPatterns.set(c, pattern);
     } else {
@@ -115,6 +117,7 @@ export class CeiledService implements Service {
       this.currentPatterns.set(channel, pattern);
     }
 
+    this.animationEngine.pause();
     await Promise.all(applying);
   }
 

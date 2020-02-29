@@ -14,7 +14,7 @@ import { APIServer } from './transport/APIServer';
  */
 const launch = async (): Promise<void> => {
   // set some server settings
-  const port: number = parseInt(process.env.PORT, 10) || 6565;
+  const port: number = parseInt(process.env.PORT || '', 10) || 6565;
   const insecure: boolean = process.env.INSECURE ? true : false;
   const keyFile: string = __dirname + '/../' + (process.env.KEY_FILE || 'localhost.key.pem');
   const certFile: string = __dirname + '/../' + (process.env.CERT_FILE || 'localhost.cert.pem');

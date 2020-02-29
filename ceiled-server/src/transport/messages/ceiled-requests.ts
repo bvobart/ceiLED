@@ -46,14 +46,15 @@ export class SetPatternRequest implements AuthorisedRequest {
 export class SetPatternsRequest implements AuthorisedRequest {
   public static is(x: any): x is SetPatternsRequest {
     if (x.action !== 'set') return false;
-    if (x.patterns && x.patterns instanceof Map) {
-      for (const [channel, pattern] of x.patterns.entries()) {
-        if (typeof channel !== 'number' || !isPattern(pattern)) return false;
-      }
+    if (!x.patterns || !Array.isArray(x.patterns)) return false;
 
-      return AuthorisedRequest.is(x);
+    for (const pair of x.patterns) {
+      if (!Array.isArray(pair) || pair.length !== 2) return false;
+      const [channel, pattern] = pair;
+      if (typeof channel !== 'number' || !isPattern(pattern)) return false;
     }
-    return false;
+
+    return AuthorisedRequest.is(x);
   }
 
   public authToken: string;
@@ -64,14 +65,15 @@ export class SetPatternsRequest implements AuthorisedRequest {
 export class SetAnimationsRequest implements AuthorisedRequest {
   public static is(x: any): x is SetAnimationsRequest {
     if (x.action !== 'set') return false;
-    if (x.animations && x.animations instanceof Map) {
-      for (const [channel, patterns] of x.animations.entries()) {
-        if (typeof channel !== 'number' || !isPatternArray(patterns)) return false;
-      }
+    if (!x.animations || !Array.isArray(x.animations)) return false;
 
-      return AuthorisedRequest.is(x);
+    for (const pair of x.animations) {
+      if (!Array.isArray(pair) || pair.length !== 2) return false;
+      const [channel, patterns] = pair;
+      if (typeof channel !== 'number' || !isPatternArray(patterns)) return false;
     }
-    return false;
+
+    return AuthorisedRequest.is(x);
   }
 
   public authToken: string;

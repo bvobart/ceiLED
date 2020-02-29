@@ -13,7 +13,7 @@ export class AuthRepository {
     this.collection = collection;
   }
 
-  public findByToken(token: string): Promise<Auth> {
+  public findByToken(token: string): Promise<Auth | null> {
     return this.collection.findOne({ token });
   }
 

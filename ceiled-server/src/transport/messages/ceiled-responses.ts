@@ -4,7 +4,7 @@ import { IPattern } from '../../patterns/Pattern';
 
 export interface PatternResponse {
   channel: number;
-  pattern: IPattern;
+  pattern: IPattern | undefined;
 }
 
 export interface PatternsResponse {

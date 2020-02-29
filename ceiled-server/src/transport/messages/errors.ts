@@ -28,7 +28,7 @@ export class InternalErrorMessage implements ErrorMessage {
 
   constructor(event: Events, request: any, error: Error) {
     this.message = error.message;
-    this.stackTrace = error.stack;
+    this.stackTrace = error.stack || 'Stacktrace unknown';
     this.event = event;
     this.request = request;
   }

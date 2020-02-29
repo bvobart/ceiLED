@@ -1,12 +1,13 @@
-import { Driver } from '../hardware/Driver';
-import { Animation } from '../patterns/Animation';
-import { Pattern } from '../patterns/Pattern';
+import { Driver } from '../../hardware/Driver';
+import { Animation } from '../../patterns/Animation';
+import { Pattern } from '../../patterns/Pattern';
+import { BufferDriver } from './BufferDriver';
 
 export class AnimationEngine {
-  public speed: number = 120; // bpm
+  public speed: number = 30; // bpm
   public onError: (error: Error) => void;
 
-  private driver: Driver;
+  private driver: BufferDriver;
 
   private animations: Map<number, Animation> = new Map();
   private activePatterns: Map<number, Pattern> = new Map();
@@ -14,7 +15,7 @@ export class AnimationEngine {
   private timeout: NodeJS.Timeout;
 
   constructor(driver: Driver) {
-    this.driver = driver;
+    this.driver = new BufferDriver(driver);
   }
 
   public isRunning(): boolean {
@@ -55,7 +56,7 @@ export class AnimationEngine {
     const execTime = endTime[0] * 1000 + endTime[1] / 1000000;
 
     const millis = (60 * 1000) / this.speed - execTime;
-    this.timeout = setTimeout(this.run, Math.max(millis, 0));
+    this.timeout = setTimeout(this.run.bind(this), Math.max(millis, 0));
   }
 
   private async playNextBeat(): Promise<void> {
@@ -69,5 +70,6 @@ export class AnimationEngine {
     }
 
     await Promise.all(promises);
+    this.driver.flush();
   }
 }
