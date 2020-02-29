@@ -19,17 +19,15 @@ export interface IPattern {
 
 export interface Pattern extends IPattern {
   /**
-   * Displays the pattern on the specified channel on the specified driver. Should never block.
+   * Displays the pattern on the specified channel, on the specified driver, at the specified speed.
+   * This method should resolve when it has finished applying the colours for one beat of the
+   * patterns total length. This method should be called `this.length` amount of times to ensure that
+   * the pattern is shown in its entirety.
    * If the pattern does some form of an animation, then `speed` determines how fast the animation
    * will display and should be defined in beats per minute.
-   * Thus `speed * 60 * 1000 * this.length` is the number of milliseconds this pattern will display for.
+   * Thus `60 * 1000 / speed` is the number of milliseconds this pattern will display for.
    */
   show(channel: number | 'all', driver: Driver, speed?: number): Promise<void>;
-
-  /**
-   * Stops displaying the pattern. Should never block.
-   */
-  stop(): void;
 }
 
 export const isPattern = (x: any): x is IPattern => {
@@ -59,7 +57,11 @@ export const decodePattern = (p: any): Pattern => {
 
   if (p.type === PatternType.FADE_LINEAR || p.type === PatternType.FADE_SIGMOID) {
     if (Color.isList(p.colors)) {
-      return new FadePattern(p.type, p.length, p.colors.map((c: IColor) => new Color(c)));
+      return new FadePattern(
+        p.type,
+        p.length,
+        p.colors.map((c: IColor) => new Color(c)),
+      );
     } else {
       throw new Error(`Invalid fade pattern: invalid colors: ${JSON.stringify(p.colors)}`);
     }

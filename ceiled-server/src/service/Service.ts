@@ -12,7 +12,7 @@ export interface Service {
   setFlux(flux: number): Promise<void>;
 
   off(): Promise<void>;
-  getPattern(channel: number): Promise<Pattern>;
+  getPattern(channel: number): Promise<Pattern | undefined>;
   getPatterns(): Promise<Map<number, Pattern>>;
   setPattern(channel: number | 'all', pattern: Pattern): Promise<void>;
   setPatterns(patterns: Map<number, Pattern>): Promise<void>;

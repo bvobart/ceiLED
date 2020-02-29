@@ -25,8 +25,4 @@ export class SolidPattern implements Pattern {
 
     return driver.setColors(colors);
   }
-
-  public stop(): void {
-    // there is no need to stop this pattern, since it is not continually set.
-  }
 }

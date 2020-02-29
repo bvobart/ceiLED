@@ -21,6 +21,14 @@ export class AnimationEngine {
     return this.running;
   }
 
+  public getCurrentPattern(channel: number): Pattern | undefined {
+    return this.activePatterns.get(channel);
+  }
+
+  public getCurrentPatterns(): Map<number, Pattern> {
+    return this.activePatterns;
+  }
+
   public play(animations: Map<number, Animation>): void {
     this.animations = animations;
     this.activePatterns = new Map();
@@ -54,9 +62,8 @@ export class AnimationEngine {
     const promises = new Array<Promise<void>>();
 
     for (const [channel, animation] of this.animations) {
-      const lastPattern = this.activePatterns.get(channel);
       const pattern = animation.next().value;
-      if (pattern && pattern !== lastPattern) {
+      if (pattern) {
         promises.push(pattern.show(channel, this.driver, this.speed));
       }
     }

@@ -14,11 +14,11 @@ import { Service } from './Service';
  */
 export class CeiledService implements Service {
   private driver: Driver;
-
   private brightness: number;
   private roomlight: number;
   private flux: number;
-  private autoFluxTimeout: NodeJS.Timeout;
+
+  private autoFluxTimeout: NodeJS.Timeout | undefined;
   private currentPatterns: Map<number, Pattern>;
   private animationEngine: AnimationEngine;
 
@@ -40,11 +40,10 @@ export class CeiledService implements Service {
 
   public setBrightness(brightness: number): Promise<void> {
     const newBrightness = inRange(brightness, 0, 100);
+    if (this.brightness === newBrightness) return Promise.resolve();
 
-    if (this.brightness !== newBrightness) {
-      this.brightness = newBrightness;
-      return this.driver.setBrightness(newBrightness * 2.55);
-    }
+    this.brightness = newBrightness;
+    return this.driver.setBrightness(newBrightness * 2.55);
   }
 
   public async getRoomlight(): Promise<number> {
@@ -55,17 +54,15 @@ export class CeiledService implements Service {
 
   public setRoomlight(roomlight: number): Promise<void> {
     const newRoomlight = inRange(roomlight, 0, 100);
+    if (this.roomlight === newRoomlight) return Promise.resolve();
 
-    if (this.roomlight !== newRoomlight) {
-      this.roomlight = newRoomlight;
-      return this.driver.setRoomlight(newRoomlight * 2.55);
-    }
+    this.roomlight = newRoomlight;
+    return this.driver.setRoomlight(newRoomlight * 2.55);
   }
 
   public async getFlux(): Promise<number> {
-    if (this.flux === -1) {
-      return -1;
-    }
+    if (this.flux === -1) return -1;
+
     const flux = await this.driver.getFlux();
     this.flux = flux;
     return flux;
@@ -73,15 +70,14 @@ export class CeiledService implements Service {
 
   public setFlux(flux: number): Promise<void> {
     const newFlux = inRange(flux, -1, 5);
+    if (this.flux === newFlux) return Promise.resolve();
 
-    if (this.flux !== newFlux) {
-      this.flux = newFlux;
-      if (newFlux === -1) {
-        return this.autoUpdateFlux();
-      } else {
-        this.clearAutoFluxTimer();
-        return this.driver.setFlux(newFlux);
-      }
+    this.flux = newFlux;
+    if (newFlux === -1) {
+      return this.autoUpdateFlux();
+    } else {
+      this.clearAutoFluxTimer();
+      return this.driver.setFlux(newFlux);
     }
   }
 
@@ -89,11 +85,17 @@ export class CeiledService implements Service {
     return this.driver.off();
   }
 
-  public getPattern(channel: number): Promise<Pattern> {
+  public getPattern(channel: number): Promise<Pattern | undefined> {
+    if (this.animationEngine.isRunning()) {
+      return Promise.resolve(this.animationEngine.getCurrentPattern(channel));
+    }
     return Promise.resolve(this.currentPatterns.get(channel));
   }
 
   public getPatterns(): Promise<Map<number, Pattern>> {
+    if (this.animationEngine.isRunning()) {
+      return Promise.resolve(this.animationEngine.getCurrentPatterns());
+    }
     return Promise.resolve(this.currentPatterns);
   }
 

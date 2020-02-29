@@ -10,7 +10,7 @@ export class CeiledDriver implements Driver {
   public isConnected: boolean = false;
 
   private socketFileName: string;
-  private socket: Socket;
+  private socket: Socket | null;
   private shouldReconnect: boolean = true;
 
   private nextRequestId: number = 0;
@@ -28,8 +28,8 @@ export class CeiledDriver implements Driver {
         this.isConnected = true;
         this.shouldReconnect = true;
 
-        this.socket.on('data', this.onResponse.bind(this));
-        this.socket.on('close', async hadErr => {
+        this.socket?.on('data', this.onResponse.bind(this));
+        this.socket?.on('close', async hadErr => {
           this.isConnected = false;
           console.error('--> ceiled-driver disconnected', hadErr ? 'with error' : '');
           console.log('--> trying to reconnect to ceiled-driver...');
@@ -78,8 +78,7 @@ export class CeiledDriver implements Driver {
       const id = this.nextRequestId++;
       let cmd = `id ${id} set`;
 
-      for (const channel of colors.keys()) {
-        const color = colors.get(channel);
+      for (const [channel, color] of colors.entries()) {
         cmd = cmd + ` ${channel} solid ${color.red} ${color.green} ${color.blue},`;
       }
 
@@ -100,8 +99,7 @@ export class CeiledDriver implements Driver {
       const id = this.nextRequestId++;
       let cmd = `id ${id} set`;
 
-      for (const channel of colors.keys()) {
-        const color = colors.get(channel);
+      for (const [channel, color] of colors.entries()) {
         cmd =
           cmd +
           ` ${channel} fade ${color.red} ${color.green} ${color.blue} ${Math.round(
