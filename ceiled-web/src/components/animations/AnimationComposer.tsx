@@ -1,11 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { makeStyles, Typography, Divider, useTheme, useMediaQuery, GridList, GridListTile } from '@material-ui/core';
-import { Animation, IPattern, decodeAnimation } from '../../api/patterns';
 import { replace, reorder, range, remove, insert } from './utils';
 import DroppableAnimationList from './dragdrop/DroppableAnimationList';
-
-const key = 'animations-state';
+import useAnimations from '../../hooks/animations/useAnimations';
 
 const numChannels = 3;
 
@@ -83,24 +81,3 @@ const AnimationComposer = () => {
 }
 
 export default AnimationComposer;
-
-export const useAnimations = (): [Animation[], (state: Animation[]) => void] => {
-  const savedState = decodeSavedState(localStorage.getItem(key) || `[${'[],'.repeat(numChannels - 1)}[]]`);
-  const [state, setState] = useState(savedState);
-
-  const updateState = useCallback((state: Animation[]): void => {
-    localStorage.setItem(key, encodeSavedState(state));
-    setState(state);
-  }, [setState]);
-
-  return [state, updateState];
-}
-
-const encodeSavedState = (state: Animation[]): string => {
-  return JSON.stringify(state);
-}
-
-const decodeSavedState = (state: string): Animation[] => {
-  const saved: IPattern[][] = JSON.parse(state);
-  return saved.map(decodeAnimation);
-}
