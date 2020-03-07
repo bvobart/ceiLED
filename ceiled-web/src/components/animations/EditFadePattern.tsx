@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Button, makeStyles } from '@material-ui/core';
+import { Button, makeStyles, Grid } from '@material-ui/core';
 import { FadePattern, PatternType } from '../../api/patterns';
 import { HSVColor } from '../color-picking/colors';
 import OutlinedBox from '../global/OutlinedBox';
@@ -9,10 +9,17 @@ import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd';
 import DraggableDiv from './dragdrop/DraggableDiv';
 
 const useStyles = makeStyles({
+  buttonCancel: {
+    width: '100%',
+    marginTop: '8px',
+    minHeight: '48px',
+    background: '#b2102f',
+  },
   buttonConfirm: {
     width: '100%',
     marginTop: '8px',
     minHeight: '48px',
+    background: '#00a152',
   },
   buttonAdd: {
     width: '100%',
@@ -30,7 +37,7 @@ let droppableCount = 0;
 
 export interface EditFadePatternProps {
   pattern?: FadePattern;
-  onConfirm: (pattern: FadePattern) => void;
+  onConfirm: (pattern: FadePattern | undefined) => void;
   type: PatternType.FADE_LINEAR | PatternType.FADE_SIGMOID;
 }
 
@@ -49,6 +56,8 @@ const EditFadePattern = (props: EditFadePatternProps) => {
     const rgbs = colors.map(c => c.toRGB());
     onConfirm(new FadePattern(type, length, rgbs));
   }
+
+  const onClickCancel = () => onConfirm(initialPattern);
 
   const onDragEnd = (result: DropResult) => {
     // element was dropped outside of droppables
@@ -99,7 +108,14 @@ const EditFadePattern = (props: EditFadePatternProps) => {
       </DragDropContext>
       <Button className={classes.buttonAdd} variant='outlined' onClick={onClickAdd}>Add Color</Button>
     </OutlinedBox>
-    <Button className={classes.buttonConfirm} variant='outlined' onClick={onClickConfirm}>Confirm</Button>
+    <Grid container>
+      <Grid item xs={8}>
+        <Button className={classes.buttonConfirm} variant='outlined' onClick={onClickConfirm}>Confirm</Button>
+      </Grid>
+      <Grid item xs={4}>
+        <Button className={classes.buttonCancel} variant='outlined' onClick={onClickCancel}>Cancel</Button>
+      </Grid>
+    </Grid>
   </>)
 }
 

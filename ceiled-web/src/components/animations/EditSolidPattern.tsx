@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import { Button } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { SolidPattern } from '../../api/patterns';
 import ColorPicker from '../color-picking/ColorPicker';
 import { HSVColor } from '../color-picking/colors';
 
 const useStyles = makeStyles({
-  button: {
+  buttonCancel: {
+    width: '100%',
+    marginTop: '4px',
+    minHeight: '48px',
+    background: '#b2102f',
+  },
+  buttonConfirm: {
     width: '100%',
     marginTop: '4px',
     minHeight: '48px',
@@ -18,7 +24,7 @@ const useStyles = makeStyles({
 
 export interface EditSolidPatternProps {
   pattern?: SolidPattern;
-  onConfirm: (pattern: SolidPattern) => void;
+  onConfirm: (pattern: SolidPattern | undefined) => void;
 }
 
 const key = 'animations-pick-solid';
@@ -36,13 +42,25 @@ const EditSolidPattern = (props: EditSolidPatternProps) => {
     onConfirm(new SolidPattern(length, color.toRGB()));
   }
 
+  const onClickCancel = () => onConfirm(initialPattern);
+
   return (<>
     <ColorPicker className={classes.picker} hsv={color} onChange={setColor} />
-    <Button 
-      className={classes.button} 
-      variant='outlined' 
-      onClick={onClickConfirm}
-      style={{ background: color.toCSS() }}>Confirm</Button>
+    <Grid container justify='space-between'>
+      <Grid item xs={8}>
+        <Button 
+          className={classes.buttonConfirm} 
+          variant='outlined' 
+          onClick={onClickConfirm}
+          style={{ background: color.toCSS() }}>Confirm</Button>
+      </Grid>
+      <Grid item xs={4}>
+        <Button 
+          className={classes.buttonCancel} 
+          variant='outlined' 
+          onClick={onClickCancel}>Cancel</Button>
+      </Grid>
+    </Grid>
   </>)
 }
 

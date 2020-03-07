@@ -52,9 +52,9 @@ export const EditablePatternTile: FunctionComponent<EditablePatternTileProps> = 
     onEditStart && onEditStart();
   }
 
-  const onConfirm = (newPattern: Pattern) => {
+  const onConfirm = (newPattern: Pattern | undefined) => {
     setEditing(false);
-    onEditConfirm(newPattern);
+    if (newPattern) onEditConfirm(newPattern);
   }
 
   return editing ? (

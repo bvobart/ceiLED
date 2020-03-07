@@ -34,8 +34,8 @@ const AnimationList: FunctionComponent<AnimationListProps> = (props) => {
   const classes = useStyles();
   const [adding, setAdding] = useState<boolean>(false);
 
-  const onAddPattern = (pattern: Pattern) => {
-    onChange([...animation, pattern]);
+  const onAddPattern = (pattern: Pattern | undefined) => {
+    if (pattern) onChange([...animation, pattern]);
     setAdding(false);
   };
 

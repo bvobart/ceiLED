@@ -21,7 +21,7 @@ const useStyles = makeStyles({
 
 interface EditPatternProps {
   pattern?: Pattern;
-  onConfirm: (pattern: Pattern) => void;
+  onConfirm: (pattern: Pattern | undefined) => void;
 }
 
 /**
@@ -53,8 +53,8 @@ const EditPattern = (props: EditPatternProps) => {
   }
 
   // upon confirming the new pattern in the editor
-  const onEditorConfirm = (newPattern: Pattern) => {
-    newPattern.length = length;
+  const onEditorConfirm = (newPattern: Pattern | undefined) => {
+    if (newPattern) newPattern.length = length;
     onConfirm(newPattern);
   }
 
@@ -99,7 +99,7 @@ export default EditPattern;
 interface EditorProps {
   type: PatternType;
   pattern?: Pattern;
-  onConfirm: (pattern: Pattern) => void;
+  onConfirm: (pattern: Pattern | undefined) => void;
 }
 
 const Editor = (props: EditorProps) => {

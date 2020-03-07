@@ -13,7 +13,7 @@ const useStyles = makeStyles({
     minWidth: '400px',
   },
   speed: {
-    padding: "0px 24px 0px 24px",
+    padding: "0px 24px 8px 24px",
   },
 });
 
