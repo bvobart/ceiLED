@@ -4,12 +4,16 @@ import AnimationComposer from '../components/animations/AnimationComposer';
 import { CeiledState } from '../api';
 import { Animation } from '../api/patterns';
 import useAnimations from '../hooks/animations/useAnimations';
-import useCeiledAPI from '../hooks/useCeiledAPI';
-import { AnimationsProvider } from '../hooks/animations/AnimationsContext';
+import useCeiledAPI from '../hooks/api/useCeiledAPI';
+import { AnimationsProvider } from '../hooks/context/AnimationsContext';
+import SpeedSlider from '../components/animations/SpeedSlider';
 
 const useStyles = makeStyles({
   panel: {
     minWidth: '400px',
+  },
+  speed: {
+    padding: "0px 24px 0px 24px",
   },
 });
 
@@ -24,11 +28,13 @@ const AnimationControls = () => {
         <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
           <Grid container justify='space-between'>
             <Typography variant='h6'>Animations</Typography>
-            <SendButton disabled={!expanded} />
-            <SyncButton disabled={!expanded} />
+            <Grid item container xs={4} justify='space-between'>
+              <SendButton disabled={!expanded} />
+              <SyncButton disabled={!expanded} />
+            </Grid>
           </Grid>
         </ExpansionPanelSummary>
-
+        <SpeedSlider className={classes.speed} />
         <AnimationComposer key={`animation-composer-${syncCount}`} />
       </AnimationsProvider>
     </ExpansionPanel>

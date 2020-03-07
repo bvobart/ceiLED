@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
-import { Events } from "../api";
-import { SetSettingRequest, GetSettingRequest } from '../api/requests';
+import { Events } from "../../api";
+import { SetSettingRequest, GetSettingRequest } from '../../api/requests';
 import useAuthToken from "./useAuthToken";
-import useCeiledSocket from './context/useCeiledSocket';
+import useCeiledSocket from './useCeiledSocket';
 
 const useFlux = (): [number, (newFlux: number) => void] => {
   const [flux, setFlux] = useState(-1);

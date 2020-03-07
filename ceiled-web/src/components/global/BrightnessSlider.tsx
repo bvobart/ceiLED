@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Typography, Slider } from '@material-ui/core';
-import useBrightness from '../../hooks/useBrightness';
+import useBrightness from '../../hooks/api/useBrightness';
 
 interface BrightnessSliderProps {
   className?: string
@@ -22,7 +22,7 @@ const BrightnessSlider = (props: BrightnessSliderProps) => {
       <Grid item xs={12} sm={9}>
         <Slider
           value={brightness}
-          onChange={(_, newBrightness) => setBrightness(newBrightness as number)}
+          onChange={(_, newBrightness) => brightness !== newBrightness && setBrightness(newBrightness as number)}
           min={0}
           max={100}
           step={1}

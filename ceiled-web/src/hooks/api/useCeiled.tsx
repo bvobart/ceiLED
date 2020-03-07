@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import socketIO from 'socket.io-client';
-import { CeiledStatus, Events } from '../api';
+import { CeiledStatus, Events } from '../../api';
 import useAuthToken from './useAuthToken';
-import useCeiledSocket from './context/useCeiledSocket';
+import useCeiledSocket from './useCeiledSocket';
 
 const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => Promise<void>] => {
   const [socket, setSocket] = useCeiledSocket();

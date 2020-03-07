@@ -4,8 +4,8 @@ import { CeiledState } from '../api';
 import { SolidPattern } from '../api/patterns';
 import ColorPicker from '../components/color-picking/ColorPicker';
 import { HSVColor } from '../components/color-picking/colors';
-import useCeiledAPI from '../hooks/useCeiledAPI';
 import { range } from '../components/animations/utils';
+import useCeiledAPI from '../hooks/api/useCeiledAPI';
 
 const useStyles = makeStyles({
   panel: {

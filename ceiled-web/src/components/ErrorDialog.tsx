@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField, Typography } from '@material-ui/core';
-import useCeiledErrors from '../hooks/useCeiledErrors';
-import { InternalErrorMessage, InvalidRequestMessage } from '../api/responses';
+import { InternalErrorMessage, InvalidRequestMessage } from '../api/errors';
+import useCeiledErrors from '../hooks/api/useCeiledErrors';
 import Highlight from 'react-highlight.js';
 
 interface ErrorDialogProps {}

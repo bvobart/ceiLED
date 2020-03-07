@@ -5,7 +5,7 @@ import { red, green } from '@material-ui/core/colors';
 
 import { CeiledStatus } from '../api';
 import config from '../config';
-import useCeiled from '../hooks/useCeiled';
+import useCeiled from '../hooks/api/useCeiled';
 
 const useStyles = makeStyles({
   card: {

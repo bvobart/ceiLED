@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Typography, Slider } from '@material-ui/core';
-import useFlux from '../../hooks/useFlux';
+import useFlux from '../../hooks/api/useFlux';
 
 interface FluxSliderProps {
   className?: string

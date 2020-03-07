@@ -17,6 +17,7 @@ export enum Events {
   ROOMLIGHT = 'roomlight',
   FLUX = 'flux',
   CEILED = 'ceiled',
+  SPEED = 'speed',
 }
 
 // TODO: possibly make all CeiledAPI method return some form of error object if there is a client-side error in sending the request (e.g. not connected)

@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Events, CeiledState } from '../api';
-import useCeiledSocket from './context/useCeiledSocket';
-import { Pattern, Animation, decodePatternOrAnimation, IPattern, decodePattern, decodeAnimation } from '../api/patterns';
-import { GetPatternRequest } from '../api/requests';
+import { Events, CeiledState } from '../../api';
+import { Pattern, Animation, decodePatternOrAnimation, IPattern, decodePattern, decodeAnimation } from '../../api/patterns';
+import { GetPatternRequest } from '../../api/requests';
+import { PatternResponse, PatternsResponse, AnimationsResponse } from '../../api/responses';
 import useAuthToken from './useAuthToken';
-import { PatternResponse, PatternsResponse, AnimationsResponse } from '../api/responses';
+import useCeiledSocket from './useCeiledSocket';
 
 const key = 'ceiledState';
 

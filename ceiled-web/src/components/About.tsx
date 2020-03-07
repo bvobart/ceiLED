@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography, Link, TextField } from '@material-ui/core';
-import useAuthToken from '../hooks/useAuthToken';
+import useAuthToken from '../hooks/api/useAuthToken';
 
 interface AboutProps {
   className?: string

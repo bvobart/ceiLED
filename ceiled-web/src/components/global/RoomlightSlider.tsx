@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Typography, Slider } from '@material-ui/core';
-import useRoomlight from '../../hooks/useRoomlight';
+import useRoomlight from '../../hooks/api/useRoomlight';
 
 interface RoomlightSliderProps {
   className?: string
@@ -22,7 +22,7 @@ const RoomlightSlider = (props: RoomlightSliderProps) => {
       <Grid item xs={12} sm={9}>
         <Slider
           value={roomlight}
-          onChange={(_, newRoomlight) => setRoomlight(newRoomlight as number)}
+          onChange={(_, newRoomlight) => roomlight !== newRoomlight && setRoomlight(newRoomlight as number)}
           min={0}
           max={100}
           step={1}

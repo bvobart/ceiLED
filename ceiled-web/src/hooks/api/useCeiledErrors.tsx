@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Events } from '../api';
-import useCeiledSocket from './context/useCeiledSocket';
-import { ErrorMessage } from '../api/responses';
+import { Events } from '../../api';
+import { ErrorMessage } from '../../api/errors';
+import useCeiledSocket from './useCeiledSocket';
 
 const useCeiledErrors = (): [ErrorMessage | null, () => void] => {
   const [socket] = useCeiledSocket();

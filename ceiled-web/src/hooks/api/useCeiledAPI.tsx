@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
-import { Events, CeiledAPI } from '../api';
-import { Animation, Pattern } from '../api/patterns';
-import { GetPatternRequest, SetPatternRequest, SetPatternsRequest, SetAnimationsRequest } from '../api/requests';
+import { Events, CeiledAPI } from '../../api';
+import { Animation, Pattern } from '../../api/patterns';
+import { GetPatternRequest, SetPatternRequest, SetPatternsRequest, SetAnimationsRequest } from '../../api/requests';
 import useAuthToken from './useAuthToken';
-import useCeiledSocket from './context/useCeiledSocket';
+import useCeiledSocket from './useCeiledSocket';
 import useCeiledState from './useCeiledState';
 
 const useCeiledAPI = (): [Map<number, Pattern | Animation>, CeiledAPI] => {

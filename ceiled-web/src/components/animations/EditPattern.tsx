@@ -24,6 +24,13 @@ interface EditPatternProps {
   onConfirm: (pattern: Pattern) => void;
 }
 
+/**
+ * Component to compose a new pattern or edit an existing one.
+ * 
+ * TODO: add new menu option and editor for 'Predefined', where user can pick from a couple of quick 'n easy predefined patterns.
+ * TODO: if creating a new pattern, on confirm, save the selected pattern type to localStorage
+ * TODO: if creating a new pattern, use previously selected pattern type as defaultType.
+ */
 const EditPattern = (props: EditPatternProps) => {
   const { pattern, onConfirm } = props;
   const classes = useStyles();
