@@ -30,6 +30,7 @@ export enum Events {
   ROOMLIGHT = 'roomlight',
   FLUX = 'flux',
   CEILED = 'ceiled',
+  SPEED = 'speed',
 }
 
 export class APIServer {
@@ -131,6 +132,9 @@ export class APIServer {
     socket.on(Events.CEILED, (m: any) =>
       this.authorised(handleError(this.handleCeiled.bind(this)))(Events.CEILED, socket, m),
     );
+    socket.on(Events.SPEED, (m: any) =>
+      this.authorised(handleError(this.handleSpeed.bind(this)))(Events.SPEED, socket, m),
+    );
   }
 
   /**
@@ -189,6 +193,24 @@ export class APIServer {
       socket.broadcast.emit(Events.FLUX, message.value);
     } else {
       socket.emit(Events.ERRORS, new InvalidRequestMessage(Events.FLUX, message));
+    }
+  }
+
+  /**
+   * Handles an incoming message on `Events.SPEED`.
+   * Speed should be handled with care, it can be strong stuff :P
+   * @param socket the active socket that the message was sent through
+   * @param message the incoming message
+   */
+  public async handleSpeed(socket: SocketIO.Socket, message: any): Promise<void> {
+    if (GetSettingRequest.is(message)) {
+      const speed = await this.service.getSpeed();
+      socket.emit(Events.SPEED, speed);
+    } else if (SetSettingRequest.is<number>(message, 'number')) {
+      await this.service.setSpeed(message.value);
+      socket.broadcast.emit(Events.SPEED, message.value);
+    } else {
+      socket.emit(Events.SPEED, new InvalidRequestMessage(Events.SPEED, message));
     }
   }
 

@@ -17,4 +17,7 @@ export interface Service {
   setPattern(channel: number | 'all', pattern: Pattern): Promise<void>;
   setPatterns(patterns: Map<number, Pattern>): Promise<void>;
   setAnimations(animations: Map<number, Animation>): Promise<void>;
+
+  getSpeed(): Promise<number>;
+  setSpeed(speed: number): Promise<void>;
 }

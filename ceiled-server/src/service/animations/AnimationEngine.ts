@@ -30,6 +30,11 @@ export class AnimationEngine {
     return this.activePatterns;
   }
 
+  public async setSpeed(speed: number): Promise<void> {
+    if (speed <= 0) return Promise.reject('speed must be more than 0 bpm');
+    this.speed = speed;
+  }
+
   public play(animations: Map<number, Animation>): void {
     this.animations = animations;
     this.activePatterns = new Map();

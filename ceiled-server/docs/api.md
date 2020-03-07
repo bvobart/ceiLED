@@ -100,6 +100,16 @@ This event is the 'main' API as this is the event on which the requests are sent
 }
 ```
 
+#### Request: Set animation speed
+
+```typescript
+{
+  authToken: string,  // Authorisation Token
+  action: 'set',
+  speed: number,      // desired speed of the animation, in BPM.
+}
+```
+
 #### Response: Get current pattern / single new pattern was set.
 
 ```typescript

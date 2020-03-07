@@ -131,6 +131,14 @@ export class CeiledService implements Service {
     this.animationEngine.play(animations);
   }
 
+  public async getSpeed(): Promise<number> {
+    return this.animationEngine.speed;
+  }
+
+  public setSpeed(speed: number): Promise<void> {
+    return this.animationEngine.setSpeed(speed);
+  }
+
   /**
    * Initialises the brightness, roomlight and flux setting values by retrieving them from the driver.
    */
