@@ -16,16 +16,29 @@ export interface IColor {
 export class Color implements IColor {
   /** The colour black. */
   public static BLACK: Color = new Color({ red: 0, green: 0, blue: 0 });
-  /** The colour blue */
-  public static BLUE: Color = new Color({ red: 0, green: 0, blue: 255 });
-  /** The colour green */
-  public static GREEN: Color = new Color({ red: 0, green: 255, blue: 0 });
-  /** The colour purple */
-  public static PURPLE: Color = new Color({ red: 255, green: 0, blue: 255 });
-  /** The colour red */
-  public static RED: Color = new Color({ red: 255, green: 0, blue: 0 });
   /** The colour white */
   public static WHITE: Color = new Color({ red: 255, green: 255, blue: 255 });
+
+  /** The colour red */
+  public static RED: Color = new Color({ red: 255, green: 0, blue: 0 });
+  /** The colour orange */
+  public static ORANGE: Color = new Color({ red: 255, green: 127, blue: 0 });
+  /** The colour yellow */
+  public static YELLOW: Color = new Color({ red: 255, green: 255, blue: 0 });
+  /** The colour lime */
+  public static LIME: Color = new Color({ red: 172, green: 255, blue: 0 });
+  /** The colour green */
+  public static GREEN: Color = new Color({ red: 0, green: 255, blue: 0 });
+  /** The color turquoise */
+  public static TURQUOISE: Color = new Color({ red: 0, green: 164, blue: 255 });
+  /** The colour light blue */
+  public static LIGHTBLUE: Color = new Color({ red: 0, green: 255, blue: 255 });
+  /** The colour blue */
+  public static BLUE: Color = new Color({ red: 0, green: 0, blue: 255 });
+  /** The colour purple */
+  public static PURPLE: Color = new Color({ red: 200, green: 0, blue: 255 });
+  /** The colour pink */
+  public static PINK: Color = new Color({ red: 255, green: 0, blue: 200 });
 
   /** The colour of standard room lighting */
   public static ROOMLIGHT: Color = new Color({ red: 255, green: 132, blue: 24 });

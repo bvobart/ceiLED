@@ -10,7 +10,7 @@ export class Animation implements IterableIterator<Pattern> {
   }
 
   public next(): IteratorResult<Pattern, null> {
-    if (!this.patterns) return { done: true, value: null };
+    if (!this.patterns || this.patterns.length === 0) return { done: true, value: null };
 
     const pattern = this.patterns[this.currentIndex % this.patterns.length];
     if (this.repeat > 0) {
