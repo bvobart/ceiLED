@@ -1,3 +1,4 @@
+import { Moods } from '../../patterns/moods';
 import { IPattern, isPattern, isPatternArray } from '../../patterns/Pattern';
 import { AuthorisedRequest } from './common';
 
@@ -79,4 +80,14 @@ export class SetAnimationsRequest implements AuthorisedRequest {
   public authToken: string;
   public action: 'set';
   public animations: Array<[number, IPattern[]]>;
+}
+
+export class SetMoodRequest implements AuthorisedRequest {
+  public static is(x: any): x is SetMoodRequest {
+    return x.action === 'set' && Object.values(Moods).includes(x.mood) && AuthorisedRequest.is(x);
+  }
+
+  public authToken: string;
+  public action: 'set';
+  public mood: Moods;
 }

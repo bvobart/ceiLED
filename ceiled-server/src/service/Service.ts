@@ -1,4 +1,5 @@
 import { Animation } from '../patterns/Animation';
+import { Moods } from '../patterns/moods';
 import { Pattern } from '../patterns/Pattern';
 
 export interface Service {
@@ -17,6 +18,7 @@ export interface Service {
   setPattern(channel: number | 'all', pattern: Pattern): Promise<void>;
   setPatterns(patterns: Map<number, Pattern>): Promise<void>;
   setAnimations(animations: Map<number, Animation>): Promise<void>;
+  setMood(mood: Moods): Promise<void>;
 
   getSpeed(): Promise<number>;
   setSpeed(speed: number): Promise<void>;

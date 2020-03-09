@@ -10,6 +10,7 @@ import {
   GetPatternRequest,
   OffRequest,
   SetAnimationsRequest,
+  SetMoodRequest,
   SetPatternRequest,
   SetPatternsRequest,
 } from './messages/ceiled-requests';
@@ -265,6 +266,11 @@ export class APIServer {
       await this.service.setAnimations(animations);
       const res: AnimationsResponse = { animations: message.animations };
       socket.broadcast.emit(Events.CEILED, res);
+
+      // set mood
+    } else if (SetMoodRequest.is(message)) {
+      // TODO: perhaps broadcast that a new mood was set?
+      await this.service.setMood(message.mood);
 
       // invalid request
     } else {
