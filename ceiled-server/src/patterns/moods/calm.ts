@@ -3,6 +3,9 @@ import { Animation } from '../Animation';
 import { FadePattern } from '../FadePattern';
 import { PatternType } from '../Pattern';
 
+/**
+ * Calm: primarily roomlight, but with nuanced warm colour accents
+ */
 export default new Animation([
   new FadePattern(PatternType.FADE_LINEAR, 5, [
     Color.ROOMLIGHT,

@@ -80,6 +80,33 @@ export class HSVColor implements IHSVColor {
  * RGBColor defines a colour by its red, green and blue components.
  */
 export class RGBColor implements IRGBColor {
+  /** The colour black. */
+  public static BLACK: RGBColor = new RGBColor({ red: 0, green: 0, blue: 0 });
+  /** The colour white */
+  public static WHITE: RGBColor = new RGBColor({ red: 255, green: 255, blue: 255 });
+  /** The colour red */
+  public static RED: RGBColor = new RGBColor({ red: 255, green: 0, blue: 0 });
+  /** The colour orange */
+  public static ORANGE: RGBColor = new RGBColor({ red: 255, green: 127, blue: 0 });
+  /** The colour yellow */
+  public static YELLOW: RGBColor = new RGBColor({ red: 255, green: 255, blue: 0 });
+  /** The colour lime */
+  public static LIME: RGBColor = new RGBColor({ red: 172, green: 255, blue: 0 });
+  /** The colour green */
+  public static GREEN: RGBColor = new RGBColor({ red: 0, green: 255, blue: 0 });
+  /** The color turquoise */
+  public static TURQUOISE: RGBColor = new RGBColor({ red: 0, green: 164, blue: 255 });
+  /** The colour light blue */
+  public static LIGHTBLUE: RGBColor = new RGBColor({ red: 0, green: 255, blue: 255 });
+  /** The colour blue */
+  public static BLUE: RGBColor = new RGBColor({ red: 0, green: 0, blue: 255 });
+  /** The colour purple */
+  public static PURPLE: RGBColor = new RGBColor({ red: 200, green: 0, blue: 255 });
+  /** The colour pink */
+  public static PINK: RGBColor = new RGBColor({ red: 255, green: 0, blue: 200 });
+  /** The colour of standard room lighting */
+  public static ROOMLIGHT: RGBColor = new RGBColor({ red: 255, green: 132, blue: 24 });
+
   red: number;
   green: number;
   blue: number;

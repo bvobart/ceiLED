@@ -93,7 +93,7 @@ export const PatternTile: FunctionComponent<PatternTileProps> = (props) => {
 
 //----------------------------------------------------------------------------------------
 
-export interface SolidTileProps {
+export interface SolidTileProps extends PatternTileProps {
   pattern: SolidPattern;
 } 
 
@@ -107,14 +107,16 @@ export const SolidTile: FunctionComponent<SolidTileProps> = (props) => {
 
 //----------------------------------------------------------------------------------------
 
-export interface FadeTileProps {
+export interface FadeTileProps extends PatternTileProps {
   pattern: FadePattern;
+  // direction of the gradient
+  direction?: string;
 }
 
 export const FadeTile: FunctionComponent<FadeTileProps> = (props) => {
-  const { pattern } = props;
+  const { pattern, direction } = props;
   const classes = useStyles();
-  const background = pattern.toCSS();
+  const background = pattern.toCSS(direction);
   // minimum height is the pattern's length times the height of one block, plus the padding normally found in between the blocks.
   const minHeight = 48 * pattern.length + 8 * (pattern.length - 1);
   // TODO: show some distinction between linear and sigmoid, possibly also a switch to swap between the two
