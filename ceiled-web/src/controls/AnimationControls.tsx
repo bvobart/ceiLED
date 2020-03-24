@@ -1,12 +1,13 @@
-import React, { useState, Dispatch, SetStateAction } from 'react';
-import { makeStyles, ExpansionPanel, ExpansionPanelSummary, Typography, Grid, Button } from '@material-ui/core';
-import AnimationComposer from '../components/animations/AnimationComposer';
+import React, { useState, Dispatch, SetStateAction, useEffect } from 'react';
+import { makeStyles, ExpansionPanel, ExpansionPanelSummary, Typography, Grid, Button, Collapse } from '@material-ui/core';
+import { ControlsProps } from '.';
 import { CeiledState } from '../api';
 import { Animation } from '../api/patterns';
+import AnimationComposer from '../components/animations/AnimationComposer';
+import SpeedSlider from '../components/animations/SpeedSlider';
 import useAnimations from '../hooks/animations/useAnimations';
 import useCeiledAPI from '../hooks/api/useCeiledAPI';
 import { AnimationsProvider } from '../hooks/context/AnimationsContext';
-import SpeedSlider from '../components/animations/SpeedSlider';
 
 const useStyles = makeStyles({
   panel: {
@@ -17,10 +18,11 @@ const useStyles = makeStyles({
   },
 });
 
-const AnimationControls = () => {
+const AnimationControls = (props: ControlsProps) => {
   const classes = useStyles();
   const [syncCount] = useSyncCount();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(props.expanded);
+  useEffect(() => setExpanded(props.expanded), [props.expanded]);
 
   return (
     <ExpansionPanel expanded={expanded} className={classes.panel}>
@@ -35,7 +37,9 @@ const AnimationControls = () => {
           </Grid>
         </ExpansionPanelSummary>
         <SpeedSlider className={classes.speed} />
-        <AnimationComposer key={`animation-composer-${syncCount}`} />
+        <Collapse in={expanded}>
+          <AnimationComposer key={`animation-composer-${syncCount}`} />
+        </Collapse>
       </AnimationsProvider>
     </ExpansionPanel>
   )

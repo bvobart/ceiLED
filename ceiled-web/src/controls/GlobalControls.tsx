@@ -8,13 +8,14 @@ const useStyles = makeStyles({
   card: {
     minWidth: '360px', // 400 - padding-left - padding-right
     padding: '8px 24px 16px 16px',
+    borderRadius: '0px 0px 4px 4px',
   },
 });
 
 const GlobalControls = () => {
   const classes = useStyles();
   return (
-    <Card square className={classes.card}>
+    <Card className={classes.card}>
       <Grid container justify='space-between' alignItems='center' spacing={1}>
         <BrightnessSlider />
         <RoomlightSlider />

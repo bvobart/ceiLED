@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import { ExpansionPanel, ExpansionPanelSummary, Grid, Typography, makeStyles, Button, GridList, GridListTile, useTheme, useMediaQuery } from '@material-ui/core';
+import React, { useState, useCallback, useEffect } from 'react';
+import { ExpansionPanel, ExpansionPanelSummary, Grid, Typography, makeStyles, Button, GridList, GridListTile, useMediaQuery, Theme } from '@material-ui/core';
+import { ControlsProps } from '.';
 import { CeiledState } from '../api';
 import { SolidPattern } from '../api/patterns';
 import ColorPicker from '../components/color-picking/ColorPicker';
@@ -35,14 +36,15 @@ const key = 'solids-state';
  * random colours are chosen. The 'Sync' button synchronises the displayed colours with those that are
  * currently actually being displayed on the server.
  */
-const SolidControls = () => {
+const SolidControls = (props: ControlsProps) => {
   const classes = useStyles();
   const [ceiledState, api] = useCeiledAPI();
   const [solidsState, setSolidsState] = useSolidsState();
   const [syncCount, setSyncCount] = useState(0);
-  const [expanded, setExpanded] = useState(false);
-  const theme = useTheme();
-  const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
+  const [expanded, setExpanded] = useState(props.expanded);
+  useEffect(() => setExpanded(props.expanded), [props.expanded]);
+
+  const isNotMobile = useMediaQuery<Theme>(theme => theme.breakpoints.up('sm'));
 
   const onChangeColor = useCallback((channel: number, newColor: HSVColor) => {
     setSolidsState(new Map(solidsState.set(channel, newColor)));

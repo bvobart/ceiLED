@@ -5,22 +5,23 @@ import About from './About';
 import useCeiled from '../hooks/api/useCeiled';
 
 const useStyles = makeStyles({
-  card: {
-    minWidth: '400px',
-  },
   about: {
     padding: '16px 0px 0px 0px',
   },
 });
 
-const Footer = () => {
+export interface FooterProps {
+  className?: string;
+}
+
+const Footer = (props: FooterProps) => {
   const classes = useStyles();
   const ref = useRef<HTMLDivElement>(null);
   const [showAbout, setShowAbout] = useState(false);
   const [status] = useCeiled();
 
   return (
-    <Card ref={ref} square={true} className={classes.card}>
+    <Card ref={ref} className={props.className}>
       <CardContent>
         <Grid container justify='space-between' alignItems='center'>
           <Button variant='text' onClick={() => setShowAbout(!showAbout)}>About</Button>

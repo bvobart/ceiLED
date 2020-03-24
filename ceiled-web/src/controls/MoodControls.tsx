@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Typography, ExpansionPanel, ExpansionPanelSummary, makeStyles, Grid, Button } from '@material-ui/core';
-import SpeedSlider from '../components/animations/SpeedSlider';
+import { ControlsProps } from '.';
 import { Moods } from '../api/moods';
+import SpeedSlider from '../components/animations/SpeedSlider';
 import { MoodTile } from '../components/tiles/moods';
 
 const useStyles = makeStyles({
@@ -21,8 +22,10 @@ const useStyles = makeStyles({
   }
 });
 
-const MoodControls = () => {
+const MoodControls = (props: ControlsProps) => {
   const classes = useStyles();
+  const [expanded, setExpanded] = useState(props.expanded);
+  useEffect(() => setExpanded(props.expanded), [props.expanded]);
 
   const onClickMood = () => {
     // TODO: implement sending set mood request
@@ -30,9 +33,12 @@ const MoodControls = () => {
   }
 
   return (
-    <ExpansionPanel className={classes.panel}>
-      <ExpansionPanelSummary>
-        <Typography variant='h6'>Mood</Typography>
+    <ExpansionPanel className={classes.panel} expanded={expanded}>
+      <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
+        <Grid container justify='space-between'>
+          <Typography variant='h6'>Moods</Typography>
+          <SyncButton disabled={!expanded} />
+        </Grid>
       </ExpansionPanelSummary>
       <SpeedSlider className={classes.speed} />
       <Grid className={classes.tiles} container spacing={1}>
@@ -46,6 +52,19 @@ const MoodControls = () => {
       </Grid>
     </ExpansionPanel>
   )
+}
+
+const SyncButton = (props: { disabled?: boolean }) => {
+  const [syncCount, setSyncCount] = useState(0);
+
+  const onSync = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.stopPropagation();
+    setSyncCount(syncCount + 1);
+  }
+
+  // TODO: actually sync something here
+  
+  return <Button variant='outlined' onClick={onSync} disabled={props.disabled}>Sync</Button>
 }
 
 export default MoodControls;
