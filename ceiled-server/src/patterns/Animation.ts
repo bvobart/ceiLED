@@ -9,6 +9,10 @@ export class Animation implements IterableIterator<Pattern> {
     this.patterns = patterns;
   }
 
+  public clone(): Animation {
+    return new Animation(this.patterns.map(p => Object.create(p)));
+  }
+
   public next(): IteratorResult<Pattern, null> {
     if (!this.patterns || this.patterns.length === 0) return { done: true, value: null };
 

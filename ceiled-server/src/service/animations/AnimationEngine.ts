@@ -36,10 +36,10 @@ export class AnimationEngine {
   }
 
   public play(animations: Map<number, Animation>): void {
+    this.pause();
     this.animations = animations;
-    this.activePatterns = new Map();
-    this.running = true;
-    this.run().catch(this.onError);
+    this.activePatterns = new Map(); // TODO: activePatterns is not being used.
+    this.continue();
   }
 
   public pause(): void {

@@ -148,16 +148,9 @@ export class CeiledService implements Service {
     const animation = fromMood(mood);
     const animations = new Map<number, Animation>();
 
-    // set the animation for every channel, alternating between the original mood pattern
-    // and a mood pattern that was shifted by one pattern.
+    // set the animation for every channel
     for (const channel of range(this.driver.channels)) {
-      if (channel % 2 === 0) {
-        animations.set(channel, animation);
-      } else {
-        const firstPattern = animation.patterns.shift()!;
-        const shifted = new Animation([...animation.patterns, firstPattern]);
-        animations.set(channel, shifted);
-      }
+      animations.set(channel, animation.clone());
     }
 
     this.animationEngine.play(animations);
