@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, ExpansionPanel, ExpansionPanelSummary, makeStyles, Grid, Button, Slide } from '@material-ui/core';
+import { Typography, ExpansionPanel, ExpansionPanelSummary, makeStyles, Grid, Button } from '@material-ui/core';
 import { ControlsProps } from '.';
 import { Moods } from '../api/moods';
 import SpeedSlider from '../components/animations/SpeedSlider';
@@ -7,7 +7,7 @@ import { MoodTile } from '../components/tiles/moods';
 import useCeiledAPI from '../hooks/api/useCeiledAPI';
 import useCeiled from '../hooks/api/useCeiled';
 import { CeiledStatus } from '../api';
-import PowerButton from '../components/global/PowerButton';
+import { SlidingPowerButton } from '../components/global/SlidingPowerButton';
 
 const useStyles = makeStyles({
   panel: {
@@ -37,16 +37,8 @@ const MoodControls = (props: ControlsProps) => {
   const [expanded, setExpanded] = useState(props.expanded);
   useEffect(() => setExpanded(props.expanded), [props.expanded]);
   const [showPowerButton, setShowPowerButton ] = useState(false);
-  const [hidePowerButtonTimeout, setHidePBTimeout] = useState<NodeJS.Timeout | null>(null);
   
   const [status] = useCeiled();
-  useEffect(() => {
-    if (status === CeiledStatus.CONNECTED) {
-      setShowPowerButton(false);
-    } else if (status === CeiledStatus.TIMEOUT || status) {
-      setTimeout(() => setShowPowerButton(false), 1500);
-    }
-  }, [status]);
   const [, api] = useCeiledAPI();
   const [currentMood, setCurrentMood] = useState<Moods | null>(null);
 
@@ -55,20 +47,8 @@ const MoodControls = (props: ControlsProps) => {
       await api.setMood(mood);
       setCurrentMood(mood);
     } catch (reason) {
-      if (hidePowerButtonTimeout) {
-        clearTimeout(hidePowerButtonTimeout);
-      }
       setShowPowerButton(true);
-      setHidePBTimeout(setTimeout(() => setShowPowerButton(false), 2000));
     }
-  }
-
-  const onClickPower = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.stopPropagation();
-    if (hidePowerButtonTimeout) {
-      clearTimeout(hidePowerButtonTimeout);
-    }
-    setHidePBTimeout(null);
   }
 
   return (
@@ -76,9 +56,12 @@ const MoodControls = (props: ControlsProps) => {
       <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
         <Grid container justify='space-between'>
           <Typography variant='h6'>Moods</Typography>
-          <Slide direction='down' in={showPowerButton} mountOnEnter unmountOnExit>
-            <PowerButton className={classes.power} size='small' onClick={onClickPower} />
-          </Slide>
+          <SlidingPowerButton 
+            className={classes.power} 
+            in={showPowerButton}
+            size='small'
+            onClick={event => event.stopPropagation()} 
+          />
           <SyncButton disabled={!expanded || status !== CeiledStatus.CONNECTED} />
         </Grid>
       </ExpansionPanelSummary>

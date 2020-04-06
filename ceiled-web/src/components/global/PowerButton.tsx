@@ -20,7 +20,12 @@ const useStyles = makeStyles({
 });
 
 
-// TODO: implement showing 'connecting' as orange or so
+/**
+ * The power button at the top right of the header.
+ * When clicked, connects to the server at address `config.serverAddress`
+ * 
+ * TODO: implement showing 'connecting' as orange or so
+ */
 const PowerButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
   const classes = useStyles();
   const [status, connect, off] = useCeiled();

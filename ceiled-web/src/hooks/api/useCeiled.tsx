@@ -1,12 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import socketIO from 'socket.io-client';
 import { CeiledStatus, Events } from '../../api';
 import useAuthToken from './useAuthToken';
 import useCeiledSocket, { isConnected } from './useCeiledSocket';
+import useCeiledStatus from './useCeiledStatus';
 
 const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => Promise<void>] => {
   const [socket, setSocket] = useCeiledSocket();
-  const [status, setStatus] = useState(CeiledStatus.DISCONNECTED);
+  const [status, setStatus] = useCeiledStatus();
   const authToken = useAuthToken();
 
   const connect = useCallback((address: string): Promise<void> => {
@@ -43,7 +44,7 @@ const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => P
     setSocket(newSocket);
     setStatus(CeiledStatus.CONNECTING);
     return Promise.resolve();
-  }, [status, socket, setSocket]);
+  }, [status, socket, setSocket, setStatus]);
 
   const off = useCallback((): Promise<void> => {
     if (isConnected(socket)) {
@@ -54,7 +55,7 @@ const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => P
     setStatus(CeiledStatus.DISCONNECTED);
     setSocket(null);
     return Promise.resolve();
-  }, [authToken, socket, setSocket]);
+  }, [authToken, socket, setSocket, setStatus]);
 
   return [status, connect, off];
 }

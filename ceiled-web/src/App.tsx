@@ -8,7 +8,8 @@ import GlobalControls from './controls/GlobalControls';
 import MoodControls from './controls/MoodControls';
 import SolidControls from './controls/SolidControls';
 import AnimationControls from './controls/AnimationControls';
-import { CeiledProvider } from './hooks/context/CeiledContext';
+import { SocketProvider } from './hooks/context/SocketContext';
+import { StatusProvider } from './hooks/context/StatusContext';
 
 const useStyles = makeStyles<Theme>(theme => ({
   root: {
@@ -60,30 +61,32 @@ const App = () => {
   const isLarge = useMediaQuery<Theme>(theme => theme.breakpoints.up('lg'));
 
   return (
-    <CeiledProvider>
-      <Container className={classes.root} disableGutters maxWidth={isMedium && !isLarge ? 'md' : false}>
-        <ErrorDialog />
+    <SocketProvider>
+      <StatusProvider>
+        <Container className={classes.root} disableGutters maxWidth={isMedium && !isLarge ? 'md' : false}>
+          <ErrorDialog />
 
-        <Grid className={classes.main} container>
-          <Grid container item xs={12} lg={6} alignContent='flex-start'>
-            <Grid item xs={12} className={classes.header}>
-              <Header />
-              <GlobalControls />
+          <Grid className={classes.main} container>
+            <Grid container item xs={12} lg={6} alignContent='flex-start'>
+              <Grid item xs={12} className={classes.header}>
+                <Header />
+                <GlobalControls />
+              </Grid>
+              <Grid className={classes.solids} item xs={12}><SolidControls expanded={isLarge} /></Grid>
+              {isLarge && <Grid item xs={12}><Footer className={classes.footer}/></Grid>}
             </Grid>
-            <Grid className={classes.solids} item xs={12}><SolidControls expanded={isLarge} /></Grid>
-            {isLarge && <Grid item xs={12}><Footer className={classes.footer}/></Grid>}
-          </Grid>
 
-          <Grid container item xs={12} lg={6} alignContent='flex-start'>
-            <Grid className={classes.moods} item xs={12}><MoodControls expanded={isLarge} /></Grid>
-            <Grid className={classes.animations} item xs={12}><AnimationControls expanded={isLarge} /></Grid>
-          </Grid>
+            <Grid container item xs={12} lg={6} alignContent='flex-start'>
+              <Grid className={classes.moods} item xs={12}><MoodControls expanded={isLarge} /></Grid>
+              <Grid className={classes.animations} item xs={12}><AnimationControls expanded={isLarge} /></Grid>
+            </Grid>
 
-          {!isLarge && <Grid item xs={12}><Footer className={classes.footer}/></Grid>}
-        </Grid>
-        
-      </Container>
-    </CeiledProvider>
+            {!isLarge && <Grid item xs={12}><Footer className={classes.footer}/></Grid>}
+          </Grid>
+          
+        </Container>
+      </StatusProvider>
+    </SocketProvider>
   );
 }
 
