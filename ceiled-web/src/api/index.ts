@@ -1,4 +1,5 @@
 import { Animation, Pattern } from "./patterns";
+import { Moods } from './moods';
 
 export enum CeiledStatus {
   DISCONNECTED = 'disconnected',
@@ -22,10 +23,11 @@ export enum Events {
 
 // TODO: possibly make all CeiledAPI method return some form of error object if there is a client-side error in sending the request (e.g. not connected)
 export interface CeiledAPI {
-  getPattern(channel: number | 'all'): void;
-  setPattern(channel: number | 'all', pattern: Pattern): void;
-  setPatterns(patterns: Map<number, Pattern>): void;
-  setAnimations(animations: Map<number, Animation>): void;
+  getPattern(channel: number | 'all'): Promise<void>;
+  setPattern(channel: number | 'all', pattern: Pattern): Promise<void>;
+  setPatterns(patterns: Map<number, Pattern>): Promise<void>;
+  setAnimations(animations: Map<number, Animation>): Promise<void>;
+  setMood(mood: Moods): Promise<void>;
 }
 
 export type CeiledState = Map<number, Pattern | Animation>;

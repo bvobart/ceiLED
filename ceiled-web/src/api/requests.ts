@@ -1,3 +1,4 @@
+import { Moods } from './moods';
 import { IPattern } from "./patterns";
 
 export interface AuthorisedRequest {
@@ -38,4 +39,10 @@ export interface SetAnimationsRequest extends AuthorisedRequest {
   authToken: string;
   action: 'set';
   animations: Array<[number, IPattern[]]>;
+}
+
+export interface SetMoodRequest extends AuthorisedRequest {
+  authToken: string;
+  action: 'set';
+  mood: Moods;
 }

@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, ExpansionPanel, ExpansionPanelSummary, makeStyles, Grid, Button } from '@material-ui/core';
+import { Typography, ExpansionPanel, ExpansionPanelSummary, makeStyles, Grid, Button, Slide } from '@material-ui/core';
 import { ControlsProps } from '.';
 import { Moods } from '../api/moods';
 import SpeedSlider from '../components/animations/SpeedSlider';
 import { MoodTile } from '../components/tiles/moods';
+import useCeiledAPI from '../hooks/api/useCeiledAPI';
+import useCeiled from '../hooks/api/useCeiled';
+import { CeiledStatus } from '../api';
+import PowerButton from '../components/global/PowerButton';
 
 const useStyles = makeStyles({
   panel: {
@@ -16,9 +20,15 @@ const useStyles = makeStyles({
     padding: '8px',
   },
   button: {
-    width: '100%',
     minHeight: '104px',
-    background: 'rgba(16, 16, 16, 0.3)'
+    background: 'rgba(16, 16, 16, 0.3)',
+  },
+  current: {
+    minHeight: '104px',
+    background: 'rgba(255, 255, 255, 0)',
+  },
+  power: {
+    maxWidth: '48px',
   }
 });
 
@@ -26,10 +36,39 @@ const MoodControls = (props: ControlsProps) => {
   const classes = useStyles();
   const [expanded, setExpanded] = useState(props.expanded);
   useEffect(() => setExpanded(props.expanded), [props.expanded]);
+  const [showPowerButton, setShowPowerButton ] = useState(false);
+  const [hidePowerButtonTimeout, setHidePBTimeout] = useState<NodeJS.Timeout | null>(null);
+  
+  const [status] = useCeiled();
+  useEffect(() => {
+    if (status === CeiledStatus.CONNECTED) {
+      setShowPowerButton(false);
+    } else if (status === CeiledStatus.TIMEOUT || status) {
+      setTimeout(() => setShowPowerButton(false), 1500);
+    }
+  }, [status]);
+  const [, api] = useCeiledAPI();
+  const [currentMood, setCurrentMood] = useState<Moods | null>(null);
 
-  const onClickMood = () => {
-    // TODO: implement sending set mood request
-    // TODO: implement client side function / hook to issue set mood request.
+  const onClickMood = async (mood: Moods) => {
+    try {
+      await api.setMood(mood);
+      setCurrentMood(mood);
+    } catch (reason) {
+      if (hidePowerButtonTimeout) {
+        clearTimeout(hidePowerButtonTimeout);
+      }
+      setShowPowerButton(true);
+      setHidePBTimeout(setTimeout(() => setShowPowerButton(false), 2000));
+    }
+  }
+
+  const onClickPower = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.stopPropagation();
+    if (hidePowerButtonTimeout) {
+      clearTimeout(hidePowerButtonTimeout);
+    }
+    setHidePBTimeout(null);
   }
 
   return (
@@ -37,7 +76,10 @@ const MoodControls = (props: ControlsProps) => {
       <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
         <Grid container justify='space-between'>
           <Typography variant='h6'>Moods</Typography>
-          <SyncButton disabled={!expanded} />
+          <Slide direction='down' in={showPowerButton} mountOnEnter unmountOnExit>
+            <PowerButton className={classes.power} size='small' onClick={onClickPower} />
+          </Slide>
+          <SyncButton disabled={!expanded || status !== CeiledStatus.CONNECTED} />
         </Grid>
       </ExpansionPanelSummary>
       <SpeedSlider className={classes.speed} />
@@ -45,7 +87,11 @@ const MoodControls = (props: ControlsProps) => {
         { Object.values(Moods).map(mood => 
           <Grid key={'moodtile-' + mood} item xs={12} sm={6} md={4}>
             <MoodTile mood={mood}>
-              <Button className={classes.button} variant='text' onClick={onClickMood}>{mood}</Button>
+              <Button 
+                fullWidth variant='text' 
+                className={mood === currentMood ? classes.current : classes.button} 
+                onClick={() => onClickMood(mood)}
+              >{mood}</Button>
             </MoodTile>
           </Grid>
         ) }

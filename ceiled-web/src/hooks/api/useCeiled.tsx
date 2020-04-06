@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import socketIO from 'socket.io-client';
 import { CeiledStatus, Events } from '../../api';
 import useAuthToken from './useAuthToken';
-import useCeiledSocket from './useCeiledSocket';
+import useCeiledSocket, { isConnected } from './useCeiledSocket';
 
 const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => Promise<void>] => {
   const [socket, setSocket] = useCeiledSocket();
@@ -17,21 +17,25 @@ const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => P
     const newSocket = socketIO(address, { reconnectionAttempts: 5 });
     newSocket.on(Events.CONNECT, () => {
       console.log('connected');
+      if (socket) socket.close();
       setSocket(newSocket);
       setStatus(CeiledStatus.CONNECTED);
     });
     newSocket.on(Events.CONNECT_TIMEOUT, () => {
       console.log('timeout');
+      if (socket) socket.close();
       setStatus(CeiledStatus.TIMEOUT);
       setSocket(null);
     });
     newSocket.on(Events.RECONNECT_FAILED, () => {
       console.log('reconnect timeout');
+      if (socket) socket.close();
       setStatus(CeiledStatus.TIMEOUT);
       setSocket(null);
     });
     newSocket.on(Events.DISCONNECT, () => {
       console.log('disconnected');
+      if (socket) socket.close();
       setStatus(CeiledStatus.DISCONNECTED);
       setSocket(null);
     });
@@ -39,17 +43,18 @@ const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => P
     setSocket(newSocket);
     setStatus(CeiledStatus.CONNECTING);
     return Promise.resolve();
-  }, [status, setSocket]);
+  }, [status, socket, setSocket]);
 
   const off = useCallback((): Promise<void> => {
-    if (status !== CeiledStatus.CONNECTED || !socket || !socket.connected) {
-      return Promise.reject('ceiled is not connected');
+    if (isConnected(socket)) {
+      socket.emit(Events.CEILED, { action: 'off', authToken });
+      socket.close();
     }
 
-    socket.emit(Events.CEILED, { action: 'off', authToken });
-    socket.close();
+    setStatus(CeiledStatus.DISCONNECTED);
+    setSocket(null);
     return Promise.resolve();
-  }, [socket, status, authToken]);
+  }, [authToken, socket, setSocket]);
 
   return [status, connect, off];
 }
