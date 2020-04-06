@@ -7,8 +7,7 @@ import PowerButton from './PowerButton';
 /**
  * A version of the PowerButton that comes sliding in from the edge of the screen upon setting the `in` prop to true,
  * and slides back out again when setting `in` to false. When the button is clicked when it is in, it will stay in
- * until it is connected, or until the attempt at establishing a connection times out. If it is not clicked, then
- * it simply goes away after three seconds.
+ * until it is connected, or until the attempt at establishing a connection times out.
  */
 export const SlidingPowerButton = forwardRef<HTMLButtonElement, IconButtonProps & { in: boolean }>((props, ref) => {
   const [show, setShow] = useState(props.in);
@@ -32,9 +31,10 @@ export const SlidingPowerButton = forwardRef<HTMLButtonElement, IconButtonProps 
     props.onClick && props.onClick(event);
   }
 
+  const { in: _, ...buttonProps } = props;
   return (
     <Slide ref={ref} direction='down' in={show} mountOnEnter unmountOnExit>
-      <PowerButton {...props} onClick={onClickPower} />
+      <PowerButton {...buttonProps} onClick={onClickPower} />
     </Slide>
   );
 }); 

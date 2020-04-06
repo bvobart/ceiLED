@@ -48,6 +48,7 @@ const MoodControls = (props: ControlsProps) => {
       setCurrentMood(mood);
     } catch (reason) {
       setShowPowerButton(true);
+      setTimeout(() => setShowPowerButton(false), 3000);
     }
   }
 
