@@ -1,4 +1,4 @@
-import { Moods } from '../../patterns/moods';
+import { Moods } from '../../moods';
 import { IPattern, isPattern, isPatternArray } from '../../patterns/Pattern';
 import { AuthorisedRequest } from './common';
 

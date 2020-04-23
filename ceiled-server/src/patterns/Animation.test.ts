@@ -1,7 +1,7 @@
 import Color from '../common/Color';
 import { Animation } from './Animation';
-import { MoodPattern } from './MoodPattern';
-import { Moods } from './moods';
+import { FadePattern } from './FadePattern';
+import { PatternType } from './Pattern';
 import { SolidPattern } from './SolidPattern';
 
 describe('Animation', () => {
@@ -9,8 +9,8 @@ describe('Animation', () => {
     it('loops continuously over list of patterns with length 1', () => {
       const patterns = [
         new SolidPattern(1, Color.BLACK),
-        new MoodPattern(1, Moods.CALM),
-        new MoodPattern(1, Moods.RAINBOW),
+        new FadePattern(PatternType.FADE_SIGMOID, 1, [Color.BLUE]),
+        new SolidPattern(1, Color.RED),
       ];
       const anim = new Animation(patterns);
       let index = 0;
@@ -24,8 +24,8 @@ describe('Animation', () => {
     it('loops over list of patterns with differing lengths', () => {
       const patterns = [
         new SolidPattern(2, Color.BLACK),
-        new MoodPattern(3, Moods.CALM),
-        new MoodPattern(1, Moods.RAINBOW),
+        new SolidPattern(3, Color.RED),
+        new FadePattern(PatternType.FADE_SIGMOID, 1, [Color.GREEN]),
       ];
       const anim = new Animation(patterns);
       expect(anim.next().value).toEqual(patterns[0]);

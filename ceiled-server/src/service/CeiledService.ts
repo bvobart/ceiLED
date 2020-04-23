@@ -1,8 +1,8 @@
 import Color from '../common/Color';
 import { currentFluxLevel, millisUntilNextFluxChange } from '../common/flux';
 import { Driver } from '../hardware/Driver';
+import moods, { Moods } from '../moods';
 import { Animation } from '../patterns/Animation';
-import { fromMood, Moods } from '../patterns/moods';
 import { Pattern } from '../patterns/Pattern';
 import { SolidPattern } from '../patterns/SolidPattern';
 import { inRange, range } from '../patterns/utils';
@@ -133,26 +133,14 @@ export class CeiledService implements Service {
   }
 
   /**
-   * Sets a mood, see the Moods class for the configured moods.
-   *
-   * TODO: Moods are currently implemented as just an animation, i.e. a list of other patterns,
-   * primarily just one FadePattern.
-   * However, a mood might also entail setting a particular level of brightness, roomlight, flux,
-   * which is currently not very well supported. Also, more complex animations across multiple channels,
-   * possibly including some randomly generated colour patterns, are currently difficult or ugly to
-   * implement, so the implementation of moods may change sometime soon.
-   *
+   * Sets a mood, see the `ceiled-server/moods` folder for the configured moods.
    * @param mood the mood to be set
    */
   public async setMood(mood: Moods): Promise<void> {
-    const animation = fromMood(mood);
-    const animations = new Map<number, Animation>();
-
-    // set the animation for every channel
-    for (const channel of range(this.driver.channels)) {
-      animations.set(channel, animation.clone());
-    }
-
+    const animations = moods
+      .builder(mood)
+      .channels(this.driver.channels)
+      .generate();
     this.animationEngine.play(animations);
   }
 

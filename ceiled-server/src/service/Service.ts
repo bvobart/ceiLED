@@ -1,5 +1,5 @@
+import { Moods } from '../moods';
 import { Animation } from '../patterns/Animation';
-import { Moods } from '../patterns/moods';
 import { Pattern } from '../patterns/Pattern';
 
 export interface Service {
