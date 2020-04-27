@@ -1,6 +1,6 @@
 import determineCurrentFlux from './flux';
 
-interface IColor {
+export interface IColor {
   red: number;
   green: number;
   blue: number;
@@ -13,19 +13,32 @@ interface IColor {
  *
  * Source for colour temperature to RGB values: https://academo.org/demos/colour-temperature-relationship/
  */
-class Color implements IColor {
+export class Color implements IColor {
   /** The colour black. */
   public static BLACK: Color = new Color({ red: 0, green: 0, blue: 0 });
-  /** The colour blue */
-  public static BLUE: Color = new Color({ red: 0, green: 0, blue: 255 });
-  /** The colour green */
-  public static GREEN: Color = new Color({ red: 0, green: 255, blue: 0 });
-  /** The colour purple */
-  public static PURPLE: Color = new Color({ red: 255, green: 0, blue: 255 });
-  /** The colour red */
-  public static RED: Color = new Color({ red: 255, green: 0, blue: 0 });
   /** The colour white */
   public static WHITE: Color = new Color({ red: 255, green: 255, blue: 255 });
+
+  /** The colour red */
+  public static RED: Color = new Color({ red: 255, green: 0, blue: 0 });
+  /** The colour orange */
+  public static ORANGE: Color = new Color({ red: 255, green: 127, blue: 0 });
+  /** The colour yellow */
+  public static YELLOW: Color = new Color({ red: 255, green: 255, blue: 0 });
+  /** The colour lime */
+  public static LIME: Color = new Color({ red: 172, green: 255, blue: 0 });
+  /** The colour green */
+  public static GREEN: Color = new Color({ red: 0, green: 255, blue: 0 });
+  /** The color turquoise */
+  public static TURQUOISE: Color = new Color({ red: 0, green: 164, blue: 255 });
+  /** The colour light blue */
+  public static LIGHTBLUE: Color = new Color({ red: 0, green: 255, blue: 255 });
+  /** The colour blue */
+  public static BLUE: Color = new Color({ red: 0, green: 0, blue: 255 });
+  /** The colour purple */
+  public static PURPLE: Color = new Color({ red: 200, green: 0, blue: 255 });
+  /** The colour pink */
+  public static PINK: Color = new Color({ red: 255, green: 0, blue: 200 });
 
   /** The colour of standard room lighting */
   public static ROOMLIGHT: Color = new Color({ red: 255, green: 132, blue: 24 });
@@ -40,11 +53,12 @@ class Color implements IColor {
   /** The colour used for flux setting 5, i.e. 4000K */
   public static FLUX5: Color = new Color({ red: 255, green: 206, blue: 166 });
 
-  public static isColor(x: any): x is Color {
-    if (typeof x.red !== 'number' || typeof x.green !== 'number' || typeof x.blue !== 'number') {
-      return false;
-    }
-    return true;
+  public static is(x: any): x is IColor {
+    return typeof x.red === 'number' && typeof x.green === 'number' && typeof x.blue === 'number';
+  }
+
+  public static isList(xs: any): xs is IColor[] {
+    return Array.isArray(xs) && !xs.some(c => !Color.is(c));
   }
 
   public static random(): Color {

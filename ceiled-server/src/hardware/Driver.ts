@@ -1,5 +1,5 @@
 import Color from '../common/Color';
-import { InterpolationType } from '../patterns/options/FadePatternOptions';
+import { InterpolationType } from './interpolate';
 
 /**
  * A class that implements the Driver interface can be used as a driver for this controller.

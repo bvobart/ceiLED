@@ -1,6 +1,6 @@
 {
   "name": "ceiled-server",
-  "version": "2.1.0",
+  "version": "3.0.0-beta",
   "description": "TypeScript NodeJS WebSocket server for displaying patterns on LED devices connected through ceiled-driver.",
   "main": "src/server.ts",
   "typings": "src/typings.d.ts",
@@ -22,26 +22,26 @@
     "addUser": "node ./src/auth/scripts/addToken.js"
   },
   "dependencies": {
-    "bluebird": "3.5.5",
+    "bluebird": "3.7.2",
     "duration": "0.2.2",
-    "mongodb": "3.3.2",
-    "typescript": "3.6.3",
-    "ws": "7.1.2"
+    "mongodb": "3.5.6",
+    "socket.io": "2.3.0",
+    "typescript": "3.8.3"
   },
   "devDependencies": {
-    "@types/bluebird": "3.5.27",
+    "@types/bluebird": "3.5.30",
     "@types/bluebird-global": "3.5.12",
-    "@types/jest": "24.0.18",
-    "@types/mongodb": "3.3.5",
-    "@types/node": "12.7.11",
-    "@types/ws": "6.0.3",
+    "@types/jest": "25.2.1",
+    "@types/mongodb": "3.5.14",
+    "@types/node": "12.12.5",
+    "@types/socket.io": "2.1.4",
     "husky": "2.3.0",
-    "jest": "24.9.0",
+    "jest": "25.4.0",
     "lint-staged": "8.1.7",
     "nodemon": "1.19.3",
-    "prettier": "1.18.2",
-    "ts-jest": "24.1.0",
-    "ts-node": "8.4.1",
+    "prettier": "1.19.1",
+    "ts-jest": "25.4.0",
+    "ts-node": "8.9.1",
     "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0"
   },

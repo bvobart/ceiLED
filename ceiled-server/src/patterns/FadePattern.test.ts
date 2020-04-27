@@ -1,46 +1,41 @@
+import { mocked } from 'ts-jest/utils';
 import Color from '../common/Color';
-import { CeiledDriver } from '../hardware/CeiledDriver';
-import FadePattern from './FadePattern';
-import { FadePatternOptions, FadeType, InterpolationType } from './options/FadePatternOptions';
+import { InterpolationType } from '../hardware/interpolate';
+import { FadePattern } from './FadePattern';
+import { PatternType } from './Pattern';
+import { range } from './utils';
 
-jest.useFakeTimers();
-jest.mock('../hardware/CeiledDriver');
+import { CeiledDriver } from '../hardware/CeiledDriver';
+jest.mock('../hardware/CeiledDriver.ts');
 
 describe('FadePattern', () => {
-  describe('normal fade', () => {
-    it('shows continuously, stops correctly', async done => {
-      const driver = new CeiledDriver(null, 3);
-      const colors: Color[] = [Color.RED, Color.GREEN, Color.BLUE];
-      const pattern: FadePattern = new FadePattern(
-        colors,
-        new FadePatternOptions({
-          speed: 120,
-          channels: 1,
-          fadeType: FadeType.NORMAL,
-          interpolation: InterpolationType.LINEAR,
-        }),
-      );
+  it('show() sets the right fades on the driver', async done => {
+    const driver = mocked(new CeiledDriver('mocked', 1), true);
+    const colors = [Color.PURPLE, Color.RED, Color.BLUE];
+    const length = 3;
+    const pattern = new FadePattern(PatternType.FADE_LINEAR, length, colors);
 
-      await pattern.show(driver);
+    // expected behaviour: call setFades with purple, then red, then blue
+    for (const i of range(length)) {
+      await pattern.show(0, driver, 120);
+      const fades = new Map().set(0, colors[i]);
+      expect(driver.setFades).toHaveBeenCalledWith(fades, 500, InterpolationType.LINEAR);
+      driver.setFades.mockClear();
+    }
 
-      const colors1 = new Map<number, Color>();
-      colors1.set(0, Color.RED);
-      colors1.set(1, Color.RED);
-      colors1.set(2, Color.RED);
-      expect(driver.setFades).toHaveBeenCalledWith(colors1, 500, InterpolationType.LINEAR);
-      expect(setInterval).toHaveBeenCalled();
+    // when the pattern completes one cycle, expect it to reset and start over from the beginning
+    // doing exactly the same thing. Split so it is clearer where bug happens if this test fails.
+    for (const rep of [0, 1]) {
+      for (const i of range(length)) {
+        await pattern.show(0, driver, 120);
+        const fades = new Map().set(0, colors[i]);
+        expect(driver.setFades).toHaveBeenCalledWith(fades, 500, InterpolationType.LINEAR);
+        driver.setFades.mockClear();
+      }
+    }
 
-      jest.advanceTimersByTime(500);
-
-      const colors2 = new Map<number, Color>();
-      colors2.set(0, Color.GREEN);
-      colors2.set(1, Color.GREEN);
-      colors2.set(2, Color.GREEN);
-      expect(driver.setFades).toHaveBeenLastCalledWith(colors2, 500, InterpolationType.LINEAR);
-      expect(setInterval).toHaveBeenCalled();
-
-      await pattern.stop();
-      done();
-    });
+    done();
   });
 });
+
+// TODO: expand this test?
