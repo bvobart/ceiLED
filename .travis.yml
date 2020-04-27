@@ -19,7 +19,7 @@ jobs:
     # ceiled-server: build, test
     - language: node_js
       node_js:
-        - 10
+        - 12
       cache: yarn
       name: Build & Test - ceiled-server
       stage: build
@@ -34,7 +34,7 @@ jobs:
     # ceiled-web, build
     - language: node_js
       node_js:
-        - 10
+        - 12
       cache: yarn
       name: Build ceiled-web
       stage: build
@@ -45,7 +45,7 @@ jobs:
     # deploy to staging, a.k.a. next.bart.vanoort.is
     - language: node_js
       node_js:
-        - 10
+        - 12
       cache: yarn
       name: Deploy ceiled-driver, ceiled-server and ceiled-web to staging
       stage: deploy
@@ -67,7 +67,7 @@ jobs:
     # deploy to production, a.k.a. bart.vanoort.is
     - language: node_js
       node_js:
-        - 10
+        - 12
       cache: yarn
       name: Deploy ceiled-driver, ceiled-server and ceiled-web to production
       stage: deploy
