@@ -8,8 +8,8 @@
 # testing
 /coverage
 
-# production
-/build
+# build folders are ignored in top-level .gitignore
+# /build
 
 # misc
 .DS_Store
