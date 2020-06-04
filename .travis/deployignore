@@ -3,3 +3,4 @@ coverage
 
 # SSL Certificate files
 *.pem
+*.crt

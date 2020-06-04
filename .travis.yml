@@ -42,6 +42,8 @@ jobs:
       install: yarn install --frozen-lockfile
       script: yarn build
 
+    # TODO: Fix these deploy scripts.
+    
     # deploy to staging, a.k.a. next.bart.vanoort.is
     - language: node_js
       node_js:

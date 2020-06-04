@@ -3,7 +3,6 @@ version: "3.7"
 #####################################################
 # Environment variables
 # --------------------------
-# DEV_PCA9685 - Default: '/dev/i2c-5' - i2c device file of a PCA9685 controller
 # HTTP_PORT - Default: 80
 # HTTPS_PORT - Default: 443
 # SITE_ADDRESS - Default: 'localhost' - Hostname on which ceiled-web will be hosted. Append ':80' to explicitly disable HTTPS.
@@ -16,10 +15,8 @@ services:
     image: ceiled-driver:latest
     build: ./ceiled-driver
     restart: unless-stopped
-    devices:
-      - "/dev/i2c-5:/dev/i2c-5"
     environment:
-      ARGS: --pca9685 /dev/i2c-5 --socketFile /app/socket/ceiled.sock 
+      ARGS: --debug --socketFile /app/socket/ceiled.sock
     stdin_open: true
     tty: true
     volumes:
@@ -40,8 +37,8 @@ services:
     depends_on:
       - driver
       - mongodb
-    expose:
-      - 6565
+    ports: # TODO: only expose to host if API_ADDRESS specifies a port.
+      - 6565:6565
     volumes:
       - ceiled-driver:/app/ceiled-driver
     environment:
@@ -55,6 +52,8 @@ services:
     build: 
       context: ./ceiled-web
       args: 
+        # TODO: make this default to 'api.' + SITE_ADDRESS if SITE_ADDRESS is localhost or a domain name,
+        # and SITE_ADDRESS + ':6565' if SITE_ADDRESS is an IP.
         api_address: ${API_ADDRESS:-api.localhost}
     
     restart: unless-stopped

@@ -5,6 +5,7 @@ coverage
 # SSL Certificate files
 ./https
 *.pem
+*.crt
 .env
 
 .vscode/ipch
