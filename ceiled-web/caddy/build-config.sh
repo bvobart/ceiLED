@@ -61,9 +61,9 @@ elif [[ "${API_PORT}" == "" ]]; then
 fi
 
 # Set CORS header
-export API_CORS="https://${SITE_ADDRESS}"
+export API_CORS="https://${SITE_HOST}"
 if [[ "$autoHttps" == "off" ]]; then
-  export API_CORS="http://${SITE_ADDRESS}"
+  export API_CORS="http://${SITE_HOST}"
 fi
 
 # if SITE_PORT == API_PORT, then use the template-same-port.json. 

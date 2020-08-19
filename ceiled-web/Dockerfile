@@ -18,7 +18,6 @@ RUN REACT_APP_API_ADDRESS=${api_address} yarn build
 # Caddy server as deployment image
 FROM caddy:2.1.1-alpine
 WORKDIR /app
-ARG api_address
 
 RUN apk --no-cache add jq gettext
 COPY caddy ./caddy
@@ -38,6 +37,7 @@ ENV SITE_ADDRESS='localhost:80'
 # API_ADDRESS is a single address on which the API will be hosted. Caddy will also try to get an SSL certificate for this domain
 # ceiled-web by default assumes 'api.' + window.location.host, i.e. 'api.' + SITE_ADDRESS
 # Must be a domain that your clients can access. Caddy will limit access to only clients coming from within your LAN. 
+ARG api_address
 ENV API_ADDRESS=${api_address}
 
 # SERVER_ADDRESS is an address pointing to a running ceiled-server instance. Must be reachable from within this Docker container.
