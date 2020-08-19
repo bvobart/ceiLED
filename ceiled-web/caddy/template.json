@@ -1,0 +1,189 @@
+{
+  "admin": {
+    "disabled": true
+  },
+  "logging": {
+    "logs": {
+      "default": {
+        "exclude": [
+          "http.log.access.log0"
+        ]
+      },
+      "log0": {
+        "writer": {
+          "output": "stdout"
+        },
+        "encoder": {
+          "format": "console"
+        },
+        "include": [
+          "http.log.access.log0"
+        ]
+      }
+    }
+  },
+  "apps": {
+    "http": {
+      "servers": {
+        "srv0": {
+          "listen": [
+            ":${SITE_PORT}"
+          ],
+          "routes": [
+            {
+              "match": [
+                {
+                  "host": [
+                    "${SITE_HOST}"
+                  ]
+                }
+              ],
+              "handle": [
+                {
+                  "handler": "subroute",
+                  "routes": [
+                    {
+                      "handle": [
+                        {
+                          "handler": "static_response",
+                          "status_code": 403
+                        }
+                      ],
+                      "match": [
+                        {
+                          "not": [
+                            {
+                              "remote_ip": {
+                                "ranges": [
+                                  "127.0.0.1",
+                                  "127.0.1.1",
+                                  "192.168.0.0/16",
+                                  "172.16.0.0/12",
+                                  "10.0.0.0/8"
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "handle": [
+                        {
+                          "encodings": {
+                            "gzip": {},
+                            "zstd": {}
+                          },
+                          "handler": "encode"
+                        },
+                        {
+                          "handler": "file_server",
+                          "hide": [
+                            "Caddyfile"
+                          ],
+                          "root": "/app/public"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "terminal": true
+            }
+          ]
+        },
+        "srv1": {
+          "listen": [
+            ":${API_PORT}"
+          ],
+          "routes": [
+            {
+              "match": [
+                {
+                  "host": [
+                    "${API_HOST}"
+                  ]
+                }
+              ],
+              "handle": [
+                {
+                  "handler": "subroute",
+                  "routes": [
+                    {
+                      "handle": [
+                        {
+                          "handler": "static_response",
+                          "status_code": 403
+                        }
+                      ],
+                      "match": [
+                        {
+                          "not": [
+                            {
+                              "remote_ip": {
+                                "ranges": [
+                                  "127.0.0.1",
+                                  "127.0.1.1",
+                                  "192.168.0.0/16",
+                                  "172.16.0.0/12",
+                                  "10.0.0.0/8"
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "handle": [
+                        {
+                          "handler": "reverse_proxy",
+                          "headers": {
+                            "request": {
+                              "set": {
+                                "Host": [
+                                  "{http.request.host}"
+                                ],
+                                "X-Forwarded-For": [
+                                  "{http.request.remote.host}"
+                                ],
+                                "X-Forwarded-Proto": [
+                                  "{http.request.scheme}"
+                                ],
+                                "X-Real-Ip": [
+                                  "{http.request.remote.host}"
+                                ]
+                              }
+                            },
+                            "response": {
+                              "set": {
+                                "Access-Control-Allow-Origin": [
+                                  "${API_CORS}"
+                                ]
+                              }
+                            }
+                          },
+                          "upstreams": [
+                            {
+                              "dial": "${SERVER_ADDRESS}"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "terminal": true
+            }
+          ],
+          "logs": {
+            "logger_names": {
+              "$API_ADDRESS": "log0"
+            }
+          }
+        }
+      }
+    }
+  }
+}

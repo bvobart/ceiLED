@@ -1,7 +1,6 @@
 # NodeJS builder image
 FROM node:lts-alpine AS builder
 WORKDIR /app
-ARG api_address
 
 # Install dependencies
 COPY package.json yarn.lock ./
@@ -10,14 +9,20 @@ RUN yarn install --frozen-lockfile
 COPY tsconfig.json README.md ./
 COPY public ./public
 COPY src ./src
+
+ARG api_address
 RUN REACT_APP_API_ADDRESS=${api_address} yarn build
 
 # ---
 
 # Caddy server as deployment image
-FROM caddy:2.0.0-alpine
+FROM caddy:2.1.1-alpine
 WORKDIR /app
 ARG api_address
+
+RUN apk --no-cache add jq gettext
+COPY caddy ./caddy
+COPY --from=builder /app/build ./public
 
 # -----------------------
 # Environment Variables
@@ -40,11 +45,5 @@ ENV SERVER_ADDRESS='localhost:6565'
 
 # -----------------------
 
-# TODO: generate Caddy configuration in JSON format instead of Caddyfile
-# This would allow for explicitly disabling automatic HTTPS on addresses that are LAN IPs
-# as well as mDNS domains (especially if they specify a port at the end)
-# Caddy still tries to do automatic HTTPS with them, but that doesn't work as expected.
 
-COPY Caddyfile .
-COPY --from=builder /app/build /app/public
-CMD caddy run --environ --config Caddyfile
+CMD ./caddy/build-config.sh > caddy-config.json && caddy run --environ --config caddy-config.json

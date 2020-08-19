@@ -7,6 +7,8 @@ version: "3.7"
 # HTTPS_PORT - Default: 443
 # SITE_ADDRESS - Default: 'localhost' - Hostname on which ceiled-web will be hosted. Append ':80' to explicitly disable HTTPS.
 # API_ADDRESS - Default: 'api.localhost' - Hostname on which the ceiled API will be hosted. Append ':80' to explicitly disable HTTPS.
+# API_PORT - Default: 6565 - If the API_ADDRESS is on the same host as SITE_ADDRESS, but has a different port, 
+#                          - specify that port here, so that it will be exposed to the host.
 #####################################################
 
 services:
@@ -37,8 +39,8 @@ services:
     depends_on:
       - driver
       - mongodb
-    ports: # TODO: only expose to host if API_ADDRESS specifies a port.
-      - 6565:6565
+    expose:
+      - 6565
     volumes:
       - ceiled-driver:/app/ceiled-driver
     environment:
@@ -52,18 +54,17 @@ services:
     build: 
       context: ./ceiled-web
       args: 
-        # TODO: make this default to 'api.' + SITE_ADDRESS if SITE_ADDRESS is localhost or a domain name,
-        # and SITE_ADDRESS + ':6565' if SITE_ADDRESS is an IP.
         api_address: ${API_ADDRESS:-api.localhost}
     
     restart: unless-stopped
     ports:
       - ${HTTP_PORT:-80}:80
       - ${HTTPS_PORT:-443}:443
+      - ${API_PORT:-6565}:${API_PORT:-6565}
     volumes:
       - caddy-data:/data
     environment:
-      SERVER_ADDRESS: http://server:6565
+      SERVER_ADDRESS: server:6565
       SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
     
 
