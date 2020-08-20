@@ -28,10 +28,8 @@ docker-compose up # -d to run in background
 
 You can also add the option `-f docker-compose.debug.yml` to both of those `docker-compose` commands to run `ceiled-driver` with its debug driver. A PCA9685 controller will not be necessary in this case.
 
-Per default, CeiLED binds to both port `80` as well as `443` and will also try to acquire SSL certificates using LetsEncrypt for the configured `SITE_ADDRESS` and `API_ADDRESS`.
-If these are `localhost` or some other local address, then CeiLED will act as its own root CA and generate a SSL certificate instead.
-However, browsers do not trust this root CA by default and will not allow you to connect to the API, so in order for CeiLED to work on your devices,
-you must install the root CA certificate into your browser. Once CeiLED is running, this certificate can be extracted using the upcoming `ceiled-cli` tool. Then, Google how to import it into your browser. TODO: explain how to do this for some major browsers.
+Per default, CeiLED binds to both port `80`, `443` and `6565`. CeiLED will also try to acquire SSL certificates using LetsEncrypt for the configured `SITE_ADDRESS` and `API_ADDRESS`,
+as long as they are not `localhost` or addresses on LAN, including `.local` addresses.
 
 ## Environment variables
 
@@ -43,12 +41,15 @@ Variable Name   | Default value     | Description
 `DEV_PCA9685`   | `/dev/i2c-5`      | i2c device file of a PCA9685 controller. Not supported if using debug driver
 `HTTP_PORT`     | `80`              | Host machine port on which to listen for HTTP requests
 `HTTPS_PORT`    | `443`             | Host machine port on which to listen for HTTPS requests
+`API_PORT`      | `6565`            | Host machine port for when the API is not hosted through the same port as HTTP or HTTPS.
 `SITE_ADDRESS`  | `localhost`       | Hostname on which ceiled-web will be hosted. Append `:80` to explicitly disable HTTPS.
 `API_ADDRESS`   | `api.localhost`   | Hostname on which the ceiled API will be hosted. Append `:80` to explicitly disable HTTPS.
+`SITE_ACCESS_POLICY` | `lan`        | By default, CeiLED only allows you to connect to the website from devices on your LAN. Set this to `public` to allow public access to CeiLED's website.
+`API_ACCESS_POLICY` | `lan`         | By default, CeiLED only allows you to connect to the API from devices on your LAN. Set this to `public` to allow public access to CeiLED's API.
 
 ## Quick start for development
 
-For a quickstart, open three terminals and run the following commands. By default, everything should be set up to "just work"&trade; See the individual ReadMe's if there's something wrong.
+For a quickstart, open three terminals and run the following commands. By default, everything should be set up to "just work"&trade; See the individual ReadMe's if there's something wrong, or if you want to set a custom environment variable.
 
 #### ceiled-driver
 - `cd ceiled-driver`
