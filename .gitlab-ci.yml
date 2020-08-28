@@ -30,16 +30,18 @@ build - ceiled-driver:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     # Build container with inline cache
-    - docker pull $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG || true
-    - docker build 
+    - docker build
+      --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --target builder
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t $DRIVER_CONTAINER_GITLAB
+      -t $DRIVER_CONTAINER_GITLAB:builder
       .
     # Run tests
-    - docker run $DRIVER_CONTAINER_GITLAB cargo test
+    - docker run $DRIVER_CONTAINER_GITLAB:builder cargo test
     # Build production container with inline cache
     - docker build -t $DRIVER_CONTAINER_GITLAB
+      --cache-from $DRIVER_CONTAINER_GITLAB:builder
+      --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
@@ -56,17 +58,19 @@ build - ceiled-server:
     - cd ceiled-server
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - docker pull $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG || true
     # Build container with inline cache
     - docker build 
+      --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --target builder
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t $SERVER_CONTAINER_GITLAB
+      -t $SERVER_CONTAINER_GITLAB:builder
       .
     # Run tests
-    - docker run $SERVER_CONTAINER_GITLAB yarn test
+    - docker run $SERVER_CONTAINER_GITLAB:builder yarn test
     # Build production container with inline cache
     - docker build -t $SERVER_CONTAINER_GITLAB
+      --cache-from $SERVER_CONTAINER_GITLAB:builder
+      --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
@@ -84,16 +88,18 @@ build - ceiled-web:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     # Build container with inline cache
-    - docker pull $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG || true
     - docker build 
       --target builder
+      --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t $WEB_CONTAINER_GITLAB
+      -t $WEB_CONTAINER_GITLAB:builder
       .
     # Run tests (no tests for ceiled-web, future)
-    # - docker run $WEB_CONTAINER_GITLAB yarn test
+    # - docker run $WEB_CONTAINER_GITLAB:builder yarn test
     # Build production container with inline cache
     - docker build -t $WEB_CONTAINER_GITLAB
+      --cache-from $WEB_CONTAINER_GITLAB:builder
+      --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_SHA
