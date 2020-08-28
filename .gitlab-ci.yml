@@ -44,11 +44,10 @@ build - ceiled-server:
     # Build production container with inline cache
     - docker build -t $SERVER_CONTAINER
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t $CONTAINER_IMAGE:$CI_COMMIT_REF_SLUG
-      -t $CONTAINER_IMAGE:$CI_COMMIT_SHA
-      -t $CONTAINER_IMAGE:latest
+      -t $SERVER_CONTAINER:$CI_COMMIT_REF_SLUG
+      -t $SERVER_CONTAINER:$CI_COMMIT_SHA
+      -t $SERVER_CONTAINER:latest
       .
-  after_script:
     # Push container and tags to Gitlab internal registry
     - docker push $SERVER_CONTAINER:$CI_COMMIT_REF_SLUG
     - docker push $SERVER_CONTAINER:$CI_COMMIT_SHA
