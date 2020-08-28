@@ -134,6 +134,7 @@ build - ceiled-web:
   only:
     - master
     - develop
+    - easy-deploy-setup
 
 publish - ceiled-driver:
   extends: .publish
