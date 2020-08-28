@@ -2,6 +2,8 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_BUILDKIT: 1
 
+  UTILS: .gitlab-ci/utils.sh
+
   DRIVER_CONTAINER_GITLAB: registry.gitlab.com/bvobart/ceiled/ceiled-driver
   SERVER_CONTAINER_GITLAB: registry.gitlab.com/bvobart/ceiled/ceiled-server
   WEB_CONTAINER_GITLAB: registry.gitlab.com/bvobart/ceiled/ceiled-web
@@ -26,13 +28,13 @@ services:
 build - ceiled-driver:
   stage: build
   before_script:
+    - source $UTILS
     - cd ceiled-driver
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - login_to_gitlab_registry
   variables:
-    TEST_ENV: RUSTFLAGS=-Clinker=musl-gcc
-    TEST_COMMAND: cargo test --release --target=x86_64-unknown-linux-musl
+    TEST_COMMAND: cargo test --release
   script:
-    # Build container with inline cache
+    # Build builder container with inline cache
     - docker build
       --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --target builder
@@ -40,7 +42,7 @@ build - ceiled-driver:
       -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       .
     # Run tests
-    - docker run -e $TEST_ENV $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder $TEST_COMMAND
+    - docker run $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder $TEST_COMMAND
     # Build production container with inline cache
     - docker build -t $DRIVER_CONTAINER_GITLAB
       --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
@@ -59,12 +61,13 @@ build - ceiled-driver:
 build - ceiled-server:
   stage: build
   before_script:
+    - source $UTILS
     - cd ceiled-server
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - login_to_gitlab_registry
   variables:
     TEST_COMMAND: yarn test
   script:
-    # Build container with inline cache
+    # Build builder container with inline cache
     - docker build 
       --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --target builder
@@ -91,10 +94,11 @@ build - ceiled-server:
 build - ceiled-web:
   stage: build
   before_script:
+    - source $UTILS
     - cd ceiled-server
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - login_to_gitlab_registry
   script:
-    # Build container with inline cache
+    # Build builder container with inline cache
     - docker build 
       --target builder
       --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
@@ -121,36 +125,42 @@ build - ceiled-web:
 #----------------------------------------------------------
 # Publish
 #----------------------------------------------------------
-publish - ceiled-driver:
+.publish:
   stage: publish
+  before_script:
+    - source $UTILS
+    - login_to_gitlab_registry
+    - login_to_docker_registry
+  only:
+    - master
+    - develop
+
+publish - ceiled-driver:
+  extends: .publish
   needs:
     - build - ceiled-driver
   script:
-    - echo "TODO - push ceiled-driver image from Gitlab Docker registry to Docker Hub"
-  only:
-    - master
-    - develop
-
+    - docker pull $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker tag $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG $DRIVER_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+    - docker push $DRIVER_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+  
 publish - ceiled-server:
-  stage: publish
+  extends: .publish
   needs:
     - build - ceiled-server
   script:
-    - echo "TODO - push ceiled-driver image from Gitlab Docker registry to Docker Hub"
-  only:
-    - master
-    - develop
+    - docker pull $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker tag $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG $SERVER_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+    - docker push $SERVER_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
 
 publish - ceiled-web:
-  stage: publish
+  extends: .publish
   needs:
     - build - ceiled-web
   script:
-    - echo "TODO - push ceiled-driver image from Gitlab Docker registry to Docker Hub"
-  only:
-    - master
-    - develop
-
+    - docker pull $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker tag $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG $WEB_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+    - docker push $WEB_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
 
 #----------------------------------------------------------
 # Deploy
