@@ -1,0 +1,109 @@
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_BUILDKIT: 1
+
+  DRIVER_CONTAINER: ceiled-driver
+  SERVER_CONTAINER: ceiled-server
+  WEB_CONTAINER: ceiled-web
+
+stages:
+  - build
+  - publish
+  - deploy
+
+image: docker:latest
+services:
+  - docker-dind
+
+#----------------------------------------------------------
+# Build
+#----------------------------------------------------------
+build - ceiled-driver:
+  stage: build
+  script:
+    - echo "TODO - build ceiled-driver testing container"
+    - echo "TODO - run tests"
+    - echo "TODO - build production docker container based on dev"
+    - echo "TODO - push to Gitlab Docker registry"
+
+
+build - ceiled-server:
+  stage: build
+  before_script:
+    - cd ceiled-server
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    # Build container with inline cache
+    - docker build 
+      --target builder
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $SERVER_CONTAINER 
+      .
+    # Run tests
+    - docker run $SERVER_CONTAINER yarn test
+    # Build production container with inline cache
+    - docker build -t $SERVER_CONTAINER
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $CONTAINER_IMAGE:$CI_COMMIT_REF_SLUG
+      -t $CONTAINER_IMAGE:$CI_COMMIT_SHA
+      -t $CONTAINER_IMAGE:latest
+      .
+  after_script:
+    # Push container and tags to Gitlab internal registry
+    - docker push $SERVER_CONTAINER:$CI_COMMIT_REF_SLUG
+    - docker push $SERVER_CONTAINER:$CI_COMMIT_SHA
+    - docker push $SERVER_CONTAINER:latest
+
+build - ceiled-web:
+  stage: build
+  script:
+    - echo "TODO - build ceiled-web"
+    - echo "TODO - run tests (there aren't any)"
+    - echo "TODO - build production docker container based on dev"
+    - echo "TODO - push to Gitlab Docker registry"
+
+#----------------------------------------------------------
+# Publish
+#----------------------------------------------------------
+publish - ceiled-driver:
+  stage: publish
+  needs:
+    - build - ceiled-driver
+  script:
+    - echo "TODO - push ceiled-driver image from Gitlab Docker registry to Docker Hub"
+  only:
+    - master
+    - develop
+
+publish - ceiled-server:
+  stage: publish
+  needs:
+    - build - ceiled-server
+  script:
+    - echo "TODO - push ceiled-driver image from Gitlab Docker registry to Docker Hub"
+  only:
+    - master
+    - develop
+
+publish - ceiled-web:
+  stage: publish
+  needs:
+    - build - ceiled-web
+  script:
+    - echo "TODO - push ceiled-driver image from Gitlab Docker registry to Docker Hub"
+  only:
+    - master
+    - develop
+
+
+#----------------------------------------------------------
+# Deploy
+#----------------------------------------------------------
+deploy:
+  stage: deploy
+  script:
+    - echo "TODO - SSH to pacbot"
+    - echo "TODO - run ceiled update"
+  only:
+    - master
+    - develop
