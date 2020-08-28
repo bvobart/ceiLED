@@ -1,4 +1,4 @@
-FROM rust:latest as build
+FROM rust:latest as builder
 
 RUN apt-get update && apt-get install musl-tools -y
 RUN rustup target add x86_64-unknown-linux-musl
@@ -20,6 +20,6 @@ RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-li
 FROM alpine:latest
 WORKDIR /app
 
-COPY --from=build /usr/src/ceiled-driver/target/x86_64-unknown-linux-musl/release/ceiled-driver ./ceiled-driver
+COPY --from=builder /usr/src/ceiled-driver/target/x86_64-unknown-linux-musl/release/ceiled-driver ./ceiled-driver
 
 CMD ./ceiled-driver $ARGS
