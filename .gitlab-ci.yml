@@ -13,7 +13,7 @@ stages:
 
 image: docker:latest
 services:
-  - docker-dind
+  - docker:dind
 
 #----------------------------------------------------------
 # Build
