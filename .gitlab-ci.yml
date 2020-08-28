@@ -25,12 +25,29 @@ services:
 #----------------------------------------------------------
 build - ceiled-driver:
   stage: build
+  before_script:
+    - cd ceiled-driver
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - echo "TODO - build ceiled-driver testing container"
-    - echo "TODO - run tests"
-    - echo "TODO - build production docker container based on dev"
-    - echo "TODO - push to Gitlab Docker registry"
-
+    # Build container with inline cache
+    - docker build 
+      --target builder
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $DRIVER_CONTAINER_GITLAB
+      .
+    # Run tests
+    - docker run $DRIVER_CONTAINER_GITLAB cargo test
+    # Build production container with inline cache
+    - docker build -t $DRIVER_CONTAINER_GITLAB
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
+      -t $DRIVER_CONTAINER_GITLAB:latest
+      .
+    # Push container and tags to Gitlab internal registry
+    - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
+    - docker push $DRIVER_CONTAINER_GITLAB:latest
 
 build - ceiled-server:
   stage: build
@@ -60,11 +77,29 @@ build - ceiled-server:
 
 build - ceiled-web:
   stage: build
+  before_script:
+    - cd ceiled-server
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - echo "TODO - build ceiled-web"
-    - echo "TODO - run tests (there aren't any)"
-    - echo "TODO - build production docker container based on dev"
-    - echo "TODO - push to Gitlab Docker registry"
+    # Build container with inline cache
+    - docker build 
+      --target builder
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $WEB_CONTAINER_GITLAB
+      .
+    # Run tests (no tests for ceiled-web, future)
+    # - docker run $WEB_CONTAINER_GITLAB yarn test
+    # Build production container with inline cache
+    - docker build -t $WEB_CONTAINER_GITLAB
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_SHA
+      -t $WEB_CONTAINER_GITLAB:latest
+      .
+    # Push container and tags to Gitlab internal registry
+    - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_SHA
+    - docker push $WEB_CONTAINER_GITLAB:latest
 
 #----------------------------------------------------------
 # Publish
