@@ -29,7 +29,8 @@ build - ceiled-driver:
     - cd ceiled-driver
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   variables:
-    TEST_COMMAND: RUSTFLAGS=-Clinker=musl-gcc cargo test --release --target=x86_64-unknown-linux-musl
+    TEST_ENV: RUSTFLAGS=-Clinker=musl-gcc
+    TEST_COMMAND: cargo test --release --target=x86_64-unknown-linux-musl
   script:
     # Build container with inline cache
     - docker build
@@ -39,7 +40,7 @@ build - ceiled-driver:
       -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       .
     # Run tests
-    - docker run $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder $TEST_COMMAND
+    - docker run -e $TEST_ENV $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder $TEST_COMMAND
     # Build production container with inline cache
     - docker build -t $DRIVER_CONTAINER_GITLAB
       --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
