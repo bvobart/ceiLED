@@ -31,16 +31,16 @@ build - ceiled-driver:
   script:
     # Build container with inline cache
     - docker build
-      --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --target builder
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t $DRIVER_CONTAINER_GITLAB:builder
+      -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       .
     # Run tests
-    - docker run $DRIVER_CONTAINER_GITLAB:builder cargo test
+    - docker run $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder cargo test
     # Build production container with inline cache
     - docker build -t $DRIVER_CONTAINER_GITLAB
-      --cache-from $DRIVER_CONTAINER_GITLAB:builder
+      --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
@@ -48,6 +48,7 @@ build - ceiled-driver:
       -t $DRIVER_CONTAINER_GITLAB:latest
       .
     # Push container and tags to Gitlab internal registry
+    - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
     - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
     - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
     - docker push $DRIVER_CONTAINER_GITLAB:latest
@@ -60,16 +61,16 @@ build - ceiled-server:
   script:
     # Build container with inline cache
     - docker build 
-      --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --target builder
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t $SERVER_CONTAINER_GITLAB:builder
+      -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       .
     # Run tests
-    - docker run $SERVER_CONTAINER_GITLAB:builder yarn test
+    - docker run $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder yarn test
     # Build production container with inline cache
     - docker build -t $SERVER_CONTAINER_GITLAB
-      --cache-from $SERVER_CONTAINER_GITLAB:builder
+      --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
@@ -77,6 +78,7 @@ build - ceiled-server:
       -t $SERVER_CONTAINER_GITLAB:latest
       .
     # Push container and tags to Gitlab internal registry
+    - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
     - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
     - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
     - docker push $SERVER_CONTAINER_GITLAB:latest
@@ -90,15 +92,15 @@ build - ceiled-web:
     # Build container with inline cache
     - docker build 
       --target builder
-      --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t $WEB_CONTAINER_GITLAB:builder
+      -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       .
     # Run tests (no tests for ceiled-web, future)
     # - docker run $WEB_CONTAINER_GITLAB:builder yarn test
     # Build production container with inline cache
     - docker build -t $WEB_CONTAINER_GITLAB
-      --cache-from $WEB_CONTAINER_GITLAB:builder
+      --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
@@ -106,6 +108,7 @@ build - ceiled-web:
       -t $WEB_CONTAINER_GITLAB:latest
       .
     # Push container and tags to Gitlab internal registry
+    - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
     - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
     - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_SHA
     - docker push $WEB_CONTAINER_GITLAB:latest
