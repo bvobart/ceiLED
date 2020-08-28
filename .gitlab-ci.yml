@@ -30,6 +30,7 @@ build - ceiled-driver:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     # Build container with inline cache
+    - docker pull $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
     - docker build 
       --target builder
       --build-arg BUILDKIT_INLINE_CACHE=1
@@ -55,6 +56,7 @@ build - ceiled-server:
     - cd ceiled-server
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
+    - docker pull $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
     # Build container with inline cache
     - docker build 
       --target builder
@@ -82,6 +84,7 @@ build - ceiled-web:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     # Build container with inline cache
+    - docker pull $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
     - docker build 
       --target builder
       --build-arg BUILDKIT_INLINE_CACHE=1

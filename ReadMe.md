@@ -8,8 +8,8 @@ Repository for the software written in order to control the LED strips on my roo
 
 Branch  | Build status
 --------|--------
-master  | [![Build Status](https://travis-ci.com/bvobart/ceiLED.svg?branch=master)](https://travis-ci.com/bvobart/ceiLED)
-develop | [![Build Status](https://travis-ci.com/bvobart/ceiLED.svg?branch=develop)](https://travis-ci.com/bvobart/ceiLED)
+master  | [![pipeline status](https://gitlab.com/bvobart/ceiled/badges/master/pipeline.svg)](https://gitlab.com/bvobart/ceiled/-/commits/master)
+develop | [![pipeline status](https://gitlab.com/bvobart/ceiled/badges/develop/pipeline.svg)](https://gitlab.com/bvobart/ceiled/-/commits/develop)
 
 ## Quick start for production
 
