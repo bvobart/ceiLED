@@ -2,9 +2,14 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_BUILDKIT: 1
 
-  DRIVER_CONTAINER: ceiled-driver
-  SERVER_CONTAINER: ceiled-server
-  WEB_CONTAINER: ceiled-web
+  DRIVER_CONTAINER_GITLAB: registry.gitlab.com/bvobart/ceiled/ceiled-driver
+  SERVER_CONTAINER_GITLAB: registry.gitlab.com/bvobart/ceiled/ceiled-server
+  WEB_CONTAINER_GITLAB: registry.gitlab.com/bvobart/ceiled/ceiled-web
+  
+  DRIVER_CONTAINER_DOCKER: bvobart/ceiled-driver
+  SERVER_CONTAINER_DOCKER: bvobart/ceiled-server
+  WEB_CONTAINER_DOCKER: bvobart/ceiled-web
+
 
 stages:
   - build
@@ -37,21 +42,21 @@ build - ceiled-server:
     - docker build 
       --target builder
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t $SERVER_CONTAINER 
+      -t $SERVER_CONTAINER_GITLAB
       .
     # Run tests
-    - docker run $SERVER_CONTAINER yarn test
+    - docker run $SERVER_CONTAINER_GITLAB yarn test
     # Build production container with inline cache
-    - docker build -t $SERVER_CONTAINER
+    - docker build -t $SERVER_CONTAINER_GITLAB
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t $SERVER_CONTAINER:$CI_COMMIT_REF_SLUG
-      -t $SERVER_CONTAINER:$CI_COMMIT_SHA
-      -t $SERVER_CONTAINER:latest
+      -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
+      -t $SERVER_CONTAINER_GITLAB:latest
       .
     # Push container and tags to Gitlab internal registry
-    - docker push $SERVER_CONTAINER:$CI_COMMIT_REF_SLUG
-    - docker push $SERVER_CONTAINER:$CI_COMMIT_SHA
-    - docker push $SERVER_CONTAINER:latest
+    - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
+    - docker push $SERVER_CONTAINER_GITLAB:latest
 
 build - ceiled-web:
   stage: build
