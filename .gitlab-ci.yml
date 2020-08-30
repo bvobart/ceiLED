@@ -49,13 +49,11 @@ build - ceiled-driver:
       --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
-      -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
       -t $DRIVER_CONTAINER_GITLAB:latest
       .
     # Push container and tags to Gitlab internal registry
     - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
     - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
-    - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
     - docker push $DRIVER_CONTAINER_GITLAB:latest
 
 build - ceiled-server:
@@ -82,13 +80,11 @@ build - ceiled-server:
       --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
-      -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
       -t $SERVER_CONTAINER_GITLAB:latest
       .
     # Push container and tags to Gitlab internal registry
     - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
     - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
-    - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_SHA
     - docker push $SERVER_CONTAINER_GITLAB:latest
 
 build - ceiled-web:
@@ -113,13 +109,11 @@ build - ceiled-web:
       --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
-      -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_SHA
       -t $WEB_CONTAINER_GITLAB:latest
       .
     # Push container and tags to Gitlab internal registry
     - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
     - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
-    - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_SHA
     - docker push $WEB_CONTAINER_GITLAB:latest
 
 #----------------------------------------------------------
@@ -134,7 +128,6 @@ build - ceiled-web:
   only:
     - master
     - develop
-    - easy-deploy-setup
 
 publish - ceiled-driver:
   extends: .publish
