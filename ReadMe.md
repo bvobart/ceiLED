@@ -19,14 +19,21 @@ To get this system running in production, you'll need:
 - Docker Compose
 - Preferred: a PCA9685 controller on `/dev/i2c-5`
 
-Set up a `.env` file with any custom environment variables if you need them, then run the following commands in this directory:
+Set up a `.env` file with any custom environment variables if you need them, then run one of the following commands in this directory:
 
 ```sh
-docker-compose build
-docker-compose up # -d to run in background
-```
+# If you have a PCA9685 controller on `/dev/i2c-5`
+docker-compose up
 
-You can also add the option `-f docker-compose.debug.yml` to both of those `docker-compose` commands to run `ceiled-driver` with its debug driver. A PCA9685 controller will not be necessary in this case.
+# If you don't have such a controller, use the debug driver:
+docker-compose -f docker-compose.yml -f docker-compose.debug.yml up
+
+# If you want to build CeiLED from source
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+# If you want to build CeiLED from source AND want to use the debug driver:
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.debug.yml up
+```
 
 Per default, CeiLED binds to both port `80`, `443` and `6565`. CeiLED will also try to acquire SSL certificates using LetsEncrypt for the configured `SITE_ADDRESS` and `API_ADDRESS`,
 as long as they are not `localhost` or addresses on LAN, including `.local` addresses.

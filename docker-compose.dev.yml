@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+
+  driver:
+    image: bvobart/ceiled-driver:latest
+    build: ./ceiled-driver
+
+  server:
+    image: bvobart/ceiled-server:latest
+    build: ./ceiled-server
+      
+  web:
+    image: bvobart/ceiled-web:latest
+    build: ./ceiled-web
