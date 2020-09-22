@@ -1,0 +1,81 @@
+#!/bin/bash
+set -e
+export CEILED_DIR=$(cd $(dirname $0) && cd .. && pwd)
+export CEILED_CLI_DIR=$(cd $(dirname $0) && pwd)
+export DEBUG="false"
+
+function help {
+  cli_name=${0##*/}
+  echo "CeiLED CLI - version $(cat $CEILED_CLI_DIR/version)
+
+Usage: $cli_name [--debug] COMMAND
+
+Options:
+  --debug        Use CeiLED with the debug driver instead of the actual driver.
+
+Commands:
+  env            Edit the .env file for docker-compose.
+  install DIR    Install CeiLED to directory DIR. Will be created if it doesn't exist.
+  start          Starts CeiLED in the background by calling 'docker-compose up -d'. Uses the docker-compose.debug.yml file when using --debug
+  stop           Stops CeiLED.
+  *              Prints this help
+"
+# Deprecated, since only LetsEncrypt HTTPS is possible now anyways:
+# root_cert    Copy the root certificate from ceiled-web's data volume to the current directory. This can then be imported into browsers to allow CeiLED to be hosted over HTTPS without needing a public domain name.
+
+# Currently not in use because it requires the option to install source files
+# build          Build CeiLED's Docker containers from source. Uses the docker-compose.debug.yml file when using --debug
+}
+
+function fail() {
+  echo "Error: $1"
+  exit 1
+}
+
+function is_debug() {
+  [[ $DEBUG == "true" ]]
+}
+
+# TODO: add command: update
+
+while true; do
+  case "$1" in
+    --debug)
+      export DEBUG="true"
+      shift
+      ;;
+    # build)
+    #   source "$CEILED_CLI_DIR/commands/build.sh"
+    #   build
+    #   exit
+    #   ;;
+    env)
+      source "$CEILED_CLI_DIR/commands/env.sh"
+      env
+      exit
+      ;;
+    install)
+      source "$CEILED_CLI_DIR/commands/install.sh"
+      install "$2"
+      exit
+      ;;
+    start)
+      source "$CEILED_CLI_DIR/commands/start.sh"
+      start
+      exit
+      ;;
+    stop)
+      source "$CEILED_CLI_DIR/commands/stop.sh"
+      stop
+      exit
+      ;;
+    # root_cert)
+    #   source "$CEILED_CLI_DIR/commands/get_local_root_cert.sh"
+    #   get_local_root_cert
+    #   ;;
+    *)
+      help
+      exit
+      ;;
+  esac
+done
