@@ -12,3 +12,4 @@ coverage
 ceiled-driver/target
 
 old
+/test-install

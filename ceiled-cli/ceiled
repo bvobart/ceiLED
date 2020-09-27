@@ -18,6 +18,7 @@ Commands:
   install DIR    Install CeiLED to directory DIR. Will be created if it doesn't exist.
   start          Starts CeiLED in the background by calling 'docker-compose up -d'. Uses the docker-compose.debug.yml file when using --debug
   stop           Stops CeiLED.
+  update         Updates CeiLED by downloading the latest versions of CeiLED's Docker containers.
   *              Prints this help
 "
 # Deprecated, since only LetsEncrypt HTTPS is possible now anyways:
@@ -36,7 +37,9 @@ function is_debug() {
   [[ $DEBUG == "true" ]]
 }
 
-# TODO: add command: update
+# TODO: add command: ceiled auth add NAME TOKEN
+# TODO: add command: ceiled auth remove [NAME|TOKEN]
+# TODO: add command: ceiled auth list
 
 while true; do
   case "$1" in
@@ -69,13 +72,19 @@ while true; do
       stop
       exit
       ;;
+    update)
+      source "$CEILED_CLI_DIR/commands/update.sh"
+      update
+      exit
+      ;;
     # root_cert)
     #   source "$CEILED_CLI_DIR/commands/get_local_root_cert.sh"
     #   get_local_root_cert
     #   ;;
     *)
+      echo "Error: Unknown command: $1\n"
       help
-      exit
+      exit 1
       ;;
   esac
 done
