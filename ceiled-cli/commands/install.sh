@@ -18,17 +18,22 @@ function install {
 
   echo "--> Adding CeiLED CLI to system-wide PATH (/etc/profile), I will need sudo for this."
   local profile_target='/etc/profile.d/ceiled.sh'
-  echo "export PATH=$target_dir/ceiled-cli:\$PATH" | sudo tee $profile_target > /dev/null 
+  local export_cmd="export PATH=$target_dir/ceiled-cli:\$PATH"
+  echo "$export_cmd" | sudo tee $profile_target > /dev/null 
   sudo chmod +x $profile_target
   export PATH=$target_dir/ceiled-cli:$PATH
 
-  # echo "--> Downloading Docker images..."
-  # TODO: ceiled update
+  echo "--> Downloading Docker images..."
+  ceiled update
   
   echo "--> Done!"
   echo ""
   echo "> CeiLED is now installed at $target_dir"
-  echo "> The 'ceiled' command-line tool has also been installed and added to PATH"
+  echo "> The 'ceiled' command-line tool has also been installed and added to your system-wide PATH"
+  echo ">"
+  echo "> However, your system-wide path is only read at startup, so if you want"
+  echo "> to use 'ceiled' now, run the following command:"
+  echo "--> $export_cmd"
   echo ""
   echo "> Light up your life! Run this command to start CeiLED: "
   echo "--> ceiled start"
