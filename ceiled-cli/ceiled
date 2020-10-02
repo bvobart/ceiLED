@@ -4,14 +4,19 @@ export CEILED_DIR=$(cd $(dirname $0) && cd .. && pwd)
 export CEILED_CLI_DIR=$(cd $(dirname $0) && pwd)
 export DEBUG="false"
 
+function get_version {
+  cat $CEILED_CLI_DIR/version
+}
+
 function help {
   cli_name=${0##*/}
-  echo "CeiLED CLI - version $(cat $CEILED_CLI_DIR/version)
+  echo "CeiLED CLI - version $(get_version)
 
-Usage: $cli_name [--debug] COMMAND
+Usage: $cli_name [--debug] [--dir DIR] COMMAND
 
 Options:
   --debug        Use CeiLED with the debug driver instead of the actual driver.
+  --dir DIR      Apply the commands to the CeiLED installation in DIR. Useful if you have multiple installations of CeiLED.
 
 Commands:
   env            Edit the .env file for docker-compose.
@@ -28,13 +33,38 @@ Commands:
 # build          Build CeiLED's Docker containers from source. Uses the docker-compose.debug.yml file when using --debug
 }
 
-function fail() {
-  echo "Error: $1"
+function print_red {
+  local red='\033[0;31m'
+  local nocolor='\033[0m'
+  echo -e "${red}$1${nocolor}"
+}
+
+function print_yellow {
+  local yellow='\033[0;33m'
+  local nocolor='\033[0m'
+  echo -e "${yellow}$1${nocolor}"
+}
+
+function print_green {
+  local green='\033[0;32m'
+  local nocolor='\033[0m'
+  echo -e "${green}$1${nocolor}"
+}
+
+function fail {
+  print_red "!-> Error: $1"
   exit 1
 }
 
-function is_debug() {
+function is_debug {
   [[ $DEBUG == "true" ]]
+}
+
+function is_ceiled_dir {
+  [[ -f "$1/docker-compose.yml" ]] &&
+  [[ -f "$1/docker-compose.debug.yml" ]] &&
+  [[ -d "$1/ceiled-cli" ]] &&
+  [[ -f "$1/ceiled-cli/ceiled" ]]
 }
 
 # TODO: add command: ceiled auth add NAME TOKEN
@@ -45,6 +75,16 @@ while true; do
   case "$1" in
     --debug)
       export DEBUG="true"
+      shift
+      ;;
+    --dir)
+      [[ -z "$2" ]] && fail "--dir requires an argument."
+      [[ -z "$3" ]] && fail "--dir got argument $2, but no actual command for ceiled to run!"
+      [[ ! -d "$2" ]] && fail "$2 is not a directory"
+      if ! is_ceiled_dir "$2"; then fail "$2 is missing some files that should exist in an installation of CeiLED. If your installation is malformed, you may want to reinstall CeiLED."; fi
+      export CEILED_DIR="$2"
+      print_green "Using $2 as CeiLED directory"
+      shift
       shift
       ;;
     # build)
@@ -82,7 +122,7 @@ while true; do
     #   get_local_root_cert
     #   ;;
     *)
-      echo "Error: Unknown command: $1\n"
+      print_red "Error: Unknown command: $1\n"
       help
       exit 1
       ;;
