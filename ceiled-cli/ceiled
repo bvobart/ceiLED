@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
-export CEILED_DIR=$(cd $(dirname $0) && cd .. && pwd)
-export CEILED_CLI_DIR=$(cd $(dirname $0) && pwd)
+export CEILED_CLI_DIR=$(dirname $0)
+export CEILED_DIR=$(dirname $CEILED_CLI_DIR)
 export DEBUG="false"
 
 function get_version {

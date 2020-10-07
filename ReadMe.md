@@ -47,8 +47,8 @@ Variable Name   | Default value     | Description
 `HTTP_PORT`     | `80`              | Host machine port on which to listen for HTTP requests
 `HTTPS_PORT`    | `443`             | Host machine port on which to listen for HTTPS requests
 `API_PORT`      | `6565`            | Host machine port for when the API is not hosted through the same port as HTTP or HTTPS.
-`SITE_ADDRESS`  | `localhost`       | Hostname on which ceiled-web will be hosted. Append `:80` to explicitly disable HTTPS.
-`API_ADDRESS`   | `api.localhost`   | Hostname on which the ceiled API will be hosted. Append `:80` to explicitly disable HTTPS.
+`SITE_ADDRESS`  | `localhost`       | Hostname on which ceiled-web will be hosted. Append `:80` to explicitly disable HTTPS. You could also use an IP address here, such as `192.168.0.65` or `192.168.0.101:6565`.
+`API_ADDRESS`   | `api.localhost`   | Hostname on which the ceiled API will be hosted. Append `:80` to explicitly disable HTTPS. You could also use an IP address here, such as `192.168.0.65` or `192.168.0.101:6565`.
 `SITE_ACCESS_POLICY` | `lan`        | By default, CeiLED only allows you to connect to the website from devices on your LAN. Set this to `public` to allow public access to CeiLED's website.
 `API_ACCESS_POLICY` | `lan`         | By default, CeiLED only allows you to connect to the API from devices on your LAN. Set this to `public` to allow public access to CeiLED's API.
 
