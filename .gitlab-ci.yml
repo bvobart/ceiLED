@@ -35,6 +35,7 @@ build - ceiled-driver:
     TEST_COMMAND: cargo test --release
   script:
     # Build builder container with inline cache
+    - docker pull $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder || true
     - docker build
       --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --target builder
@@ -66,6 +67,7 @@ build - ceiled-server:
     TEST_COMMAND: yarn test
   script:
     # Build builder container with inline cache
+    - docker pull $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder || true
     - docker build 
       --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
       --target builder
@@ -95,6 +97,7 @@ build - ceiled-web:
     - login_to_gitlab_registry
   script:
     # Build builder container with inline cache
+    - docker pull $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder || true
     - docker build 
       --target builder
       --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
