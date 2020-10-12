@@ -32,7 +32,7 @@ function prepare_target_folder {
 
 # Installs CeiLED in the folder given as $1
 function install {
-  local target_dir=$(readlink -f "$1") # get absolute path
+  local target_dir=$(get_path "$1")
   [[ ! -e "$1" ]] && mkdir -p "$1"
   [[ ! -d "$1" ]] && fail "Target folder is not a directory: $1"
   [[ -d "$1/.git" ]] && fail "There is already a Git repository in $1, please remove it first, or install CeiLED to a different folder"

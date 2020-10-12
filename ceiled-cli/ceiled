@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
-export CEILED_CLI_DIR=$(dirname $0)
+
+# Returns the full path referenced by $1
+function get_path {
+  readlink -f "$1"
+}
+
+export CEILED_CLI_DIR=$(get_path $(dirname $0))
 export CEILED_DIR=$(dirname $CEILED_CLI_DIR)
 export DEBUG="false"
 
@@ -102,9 +108,25 @@ while true; do
       install "$2"
       exit
       ;;
+    logs)
+      source "$CEILED_CLI_DIR/commands/logs.sh"
+      shift
+      logs "$@"
+      exit
+      ;;
+    restart)
+      source "$CEILED_CLI_DIR/commands/restart.sh"
+      restart "$2"
+      exit
+      ;;
     start)
       source "$CEILED_CLI_DIR/commands/start.sh"
       start
+      exit
+      ;;
+    status)
+      source "$CEILED_CLI_DIR/commands/status.sh"
+      status
       exit
       ;;
     stop)
