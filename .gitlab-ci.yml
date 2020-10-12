@@ -18,15 +18,14 @@ stages:
   - publish
   - deploy
 
-image: docker:latest
-services:
-  - docker:dind
-
 #----------------------------------------------------------
 # Build & Test
 #----------------------------------------------------------
 build - ceiled-driver:
   stage: build
+  image: docker:latest
+  services:
+    - docker:dind
   before_script:
     - source $UTILS
     - cd ceiled-driver
@@ -59,6 +58,9 @@ build - ceiled-driver:
 
 build - ceiled-server:
   stage: build
+  image: docker:latest
+  services:
+    - docker:dind
   before_script:
     - source $UTILS
     - cd ceiled-server
@@ -91,6 +93,9 @@ build - ceiled-server:
 
 build - ceiled-web:
   stage: build
+  image: docker:latest
+  services:
+    - docker:dind
   before_script:
     - source $UTILS
     - cd ceiled-server
@@ -124,6 +129,9 @@ build - ceiled-web:
 #----------------------------------------------------------
 .publish:
   stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
   before_script:
     - source $UTILS
     - login_to_gitlab_registry
@@ -165,7 +173,6 @@ publish - ceiled-web:
 .deploy:
   stage: deploy
   image: alpine:latest
-  services: {}
   before_script:
     - apk update && apk add openssh-client
     - eval $(ssh-agent)
