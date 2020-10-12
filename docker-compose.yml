@@ -1,48 +1,73 @@
 version: "3.7"
 
+#####################################################
+# Environment variables
+# --------------------------
+# HTTP_PORT    - Default: 80
+# HTTPS_PORT   - Default: 443
+# API_PORT     - Default: 6565 - If the API_ADDRESS is on the same host as SITE_ADDRESS, but has a different port, 
+#                                specify that port here, so that it will be exposed to the host.
+# SITE_ADDRESS - Default: 'localhost' - Hostname on which ceiled-web will be hosted. Append ':80' to explicitly disable HTTPS.
+# API_ADDRESS  - Default: 'api.localhost' - Hostname on which the ceiled API will be hosted. Append ':80' to explicitly disable HTTPS.
+# 
+# SITE_ACCESS_POLICY - Default: 'lan' - By default, access to the website is limited to clients coming from within your LAN. Set this to 'public' to allow the website to be accessed publically.
+# API_ACCESS_POLICY  - Default: 'lan' - By default, access to the API is limited to clients coming from within your LAN. Set this to 'public' to allow the API to be accessed publically.
+#####################################################
+
 services:
 
   driver:
-    build: ./ceiled-driver
-    image: ceiled-driver:latest
+    image: bvobart/ceiled-driver:${DOCKER_TAG:-master}
     restart: unless-stopped
-    devices:
-      - "/dev/i2c-5:/dev/i2c-5"
-    environment:
-      ARGS: --pca9685 /dev/i2c-5 --socketFile /app/socket/ceiled.sock 
+    stdin_open: true
+    tty: true
     volumes:
       - ceiled-driver:/app/socket
+    environment:
+      ARGS: --pca9685 /dev/i2c-5 --socketFile /app/socket/ceiled.sock
+    
+  mongodb:
+    image: mongo:4.2
+    restart: unless-stopped
+    expose:
+      - 27017
+    volumes:
+      - mongodb:/data/db
 
   server:
-    build: ./ceiled-server
-    image: ceiled-server:latest
+    image: bvobart/ceiled-server:${DOCKER_TAG:-master}
     restart: unless-stopped
     depends_on:
       - driver
-    ports:
-      - ${PORT}:${PORT}
-    environment:
-      PORT: ${PORT}
-      CEILED_SOCKET: ceiled-driver/ceiled.sock
-      INSECURE: ${INSECURE}
-      KEY_FILE: https/localhost.key.pem
-      CERT_FILE: https/localhost.cert.pem
-      DB_HOST: ${DB_HOST}
-      DB_AUTH: ${DB_AUTH}
-      DB_NAME: ${DB_NAME}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      
+      - mongodb
+    expose:
+      - 6565
     volumes:
       - ceiled-driver:/app/ceiled-driver
-      - ./${HTTPS_FILES}:/app/https
+    environment:
+      PORT: 6565
+      CEILED_SOCKET: app/ceiled-driver/ceiled.sock
+      INSECURE: "true"
+      DB_HOST: mongodb
+      
+  web:
+    image: bvobart/ceiled-web:${DOCKER_TAG:-master}
+    restart: unless-stopped
+    ports:
+      - ${HTTP_PORT:-80}:80
+      - ${HTTPS_PORT:-443}:443
+      - ${API_PORT:-6565}:${API_PORT:-6565}
+    volumes:
+      - caddy-data:/data
+    environment:
+      SERVER_ADDRESS: server:6565
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+      API_ADDRESS: ${API_ADDRESS:-api.localhost}
+      SITE_ACCESS_POLICY: ${SITE_ACCESS_POLICY:-lan}
+      API_ACCESS_POLICY: ${API_ACCESS_POLICY:-lan}
+    
 
 volumes:
   ceiled-driver:
-
-networks:
-  default:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.19.0.0/16
+  caddy-data:
+  mongodb:

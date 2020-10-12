@@ -6,9 +6,11 @@ WebSocket server for the `ceiled-web` UI in order to display patterns on LED dev
 
 This software can be run on any computer that supports NodeJS or Docker.
 
-1. NodeJS v8.0 or higher (just get latest LTS)
-2. MongoDB installed and running.
-3. Running instance of `ceiled-driver`
+### From source
+
+1. Have NodeJS, preferably v12
+2. Have a MongoDB instance running.
+3. Have a running instance of `ceiled-driver`
 4. `yarn install`
 5. `yarn start`
 
@@ -16,6 +18,8 @@ This software can be run on any computer that supports NodeJS or Docker.
 
 - `docker build -t ceiled-server .`
 - `docker run ceiled-server`
+
+Be sure to mount a volume with the driver's `ceiled.sock` file in it to `/app/ceiled-driver/`.
 
 ## Environment variables
 
@@ -31,3 +35,22 @@ This software can be run on any computer that supports NodeJS or Docker.
 | `DB_NAME`       | `ceiled`                       | Name of the database to use for data.                                         |
 | `DB_USERNAME`   |                                | Username to authenticate to MongoDB with                                      |
 | `DB_PASSWORD`   |                                | Password to authenticate to MongoDB with                                      |
+
+## Verifying that API is up
+
+Either launch ceiled-web and try to connect, or use the command below. Requires NodeJS and NPM / NPX to be installed.
+
+```
+npx wscat -c ws://hostname:port/socket.io/\?transport=websocket
+```
+
+Output should be something like:
+
+```
+Connected (press CTRL+C to quit)
+< 0{"sid":"uTPa4zYoDJ8LX4R5AAAC","upgrades":[],"pingInterval":25000,"pingTimeout":5000}
+< 40
+>
+```
+
+(Source)[https://stackoverflow.com/questions/60212309/curl-request-for-socket-io-on-node-express]

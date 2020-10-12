@@ -1,16 +1,6 @@
-const devServerAddress = 'http://localhost:6565';
-const stagingServerAddress = 'https://bart.vanoort.is:6666';
-const productionServerAddress = 'https://bart.vanoort.is:6565';
+import env from "@beam-australia/react-env";
 
-const serverAddress = 
-  process.env.REACT_APP_ENV === 'production'
-  ? productionServerAddress
-  : process.env.REACT_APP_ENV === 'staging'
-  ? stagingServerAddress
-  : devServerAddress;
+const serverAddress = env('API_ADDRESS') || 'api.' + window.location.host;
 
-const config = {
-  serverAddress
-};
-
+const config = { serverAddress };
 export default config;

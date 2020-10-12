@@ -5,9 +5,11 @@ coverage
 # SSL Certificate files
 ./https
 *.pem
+*.crt
 .env
 
 .vscode/ipch
 ceiled-driver/target
 
 old
+/test-install

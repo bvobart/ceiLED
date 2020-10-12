@@ -1,0 +1,185 @@
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_BUILDKIT: 1
+
+  UTILS: .gitlab-ci/utils.sh
+
+  DRIVER_CONTAINER_GITLAB: registry.gitlab.com/bvobart/ceiled/ceiled-driver
+  SERVER_CONTAINER_GITLAB: registry.gitlab.com/bvobart/ceiled/ceiled-server
+  WEB_CONTAINER_GITLAB: registry.gitlab.com/bvobart/ceiled/ceiled-web
+  
+  DRIVER_CONTAINER_DOCKER: bvobart/ceiled-driver
+  SERVER_CONTAINER_DOCKER: bvobart/ceiled-server
+  WEB_CONTAINER_DOCKER: bvobart/ceiled-web
+
+
+stages:
+  - build
+  - publish
+  - deploy
+
+image: docker:latest
+services:
+  - docker:dind
+
+#----------------------------------------------------------
+# Build & Test
+#----------------------------------------------------------
+build - ceiled-driver:
+  stage: build
+  before_script:
+    - source $UTILS
+    - cd ceiled-driver
+    - login_to_gitlab_registry
+  variables:
+    TEST_COMMAND: cargo test --release
+  script:
+    # Build builder container with inline cache
+    - docker pull $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder || true
+    - docker build
+      --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+      --target builder
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+      .
+    # Run tests
+    - docker run $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder $TEST_COMMAND
+    # Build production container with inline cache
+    - docker build -t $DRIVER_CONTAINER_GITLAB
+      --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+      --cache-from $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      -t $DRIVER_CONTAINER_GITLAB:latest
+      .
+    # Push container and tags to Gitlab internal registry
+    - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+    - docker push $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker push $DRIVER_CONTAINER_GITLAB:latest
+
+build - ceiled-server:
+  stage: build
+  before_script:
+    - source $UTILS
+    - cd ceiled-server
+    - login_to_gitlab_registry
+  variables:
+    TEST_COMMAND: yarn test
+  script:
+    # Build builder container with inline cache
+    - docker pull $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder || true
+    - docker build 
+      --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+      --target builder
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+      .
+    # Run tests
+    - docker run $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder $TEST_COMMAND
+    # Build production container with inline cache
+    - docker build -t $SERVER_CONTAINER_GITLAB
+      --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+      --cache-from $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      -t $SERVER_CONTAINER_GITLAB:latest
+      .
+    # Push container and tags to Gitlab internal registry
+    - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+    - docker push $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker push $SERVER_CONTAINER_GITLAB:latest
+
+build - ceiled-web:
+  stage: build
+  before_script:
+    - source $UTILS
+    - cd ceiled-server
+    - login_to_gitlab_registry
+  script:
+    # Build builder container with inline cache
+    - docker pull $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder || true
+    - docker build 
+      --target builder
+      --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+      .
+    # Run tests (no tests for ceiled-web, future)
+    # - docker run $WEB_CONTAINER_GITLAB:builder yarn test
+    # Build production container with inline cache
+    - docker build -t $WEB_CONTAINER_GITLAB
+      --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+      --cache-from $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+      -t $WEB_CONTAINER_GITLAB:latest
+      .
+    # Push container and tags to Gitlab internal registry
+    - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG-builder
+    - docker push $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker push $WEB_CONTAINER_GITLAB:latest
+
+#----------------------------------------------------------
+# Publish
+#----------------------------------------------------------
+.publish:
+  stage: publish
+  before_script:
+    - source $UTILS
+    - login_to_gitlab_registry
+    - login_to_docker_registry
+  only:
+    - master
+    - develop
+
+publish - ceiled-driver:
+  extends: .publish
+  needs:
+    - build - ceiled-driver
+  script:
+    - docker pull $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker tag $DRIVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG $DRIVER_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+    - docker push $DRIVER_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+  
+publish - ceiled-server:
+  extends: .publish
+  needs:
+    - build - ceiled-server
+  script:
+    - docker pull $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker tag $SERVER_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG $SERVER_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+    - docker push $SERVER_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+
+publish - ceiled-web:
+  extends: .publish
+  needs:
+    - build - ceiled-web
+  script:
+    - docker pull $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG
+    - docker tag $WEB_CONTAINER_GITLAB:$CI_COMMIT_REF_SLUG $WEB_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+    - docker push $WEB_CONTAINER_DOCKER:$CI_COMMIT_REF_SLUG
+
+#----------------------------------------------------------
+# Deploy
+#----------------------------------------------------------
+.deploy:
+  stage: deploy
+  before_script:
+    - mv $PACBOT_SSH_PRIVKEY ~/id_ed25519
+    - mv $PACBOT_SSH_PUBKEY ~/id_ed25519.pub
+  script:
+    - ssh ceiled@bart.vanoort.is "ceiled --dir $folder update && ceiled --dir $folder restart"
+
+deploy - production:
+  extends: .deploy
+  variables:
+    folder: production
+  only:
+    - master
+
+deploy - staging:
+  extends: .deploy
+  variables:
+    folder: next
+  only:
+    - develop

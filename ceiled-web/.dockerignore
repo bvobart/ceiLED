@@ -1,0 +1,10 @@
+build
+node_modules
+old
+
+.dockerignore
+Dockerfile
+yarn-error.log
+
+# Generated env file.
+/public/env.js
