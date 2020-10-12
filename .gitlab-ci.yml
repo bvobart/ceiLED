@@ -165,8 +165,10 @@ publish - ceiled-web:
 .deploy:
   stage: deploy
   image: alpine:latest
+  services: {}
   before_script:
     - apk update && apk add openssh-client
+    - eval $(ssh-agent)
     - mkdir -p ~/.ssh
     - mv $PACBOT_SSH_PRIVKEY ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
