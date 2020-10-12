@@ -175,7 +175,7 @@ deploy - production:
     - master
 
 deploy - staging:
-  extends: ./deploy
+  extends: .deploy
   variables:
     folder: next
   only:
