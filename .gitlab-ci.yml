@@ -165,8 +165,10 @@ publish - ceiled-web:
 .deploy:
   stage: deploy
   before_script:
-    - mv $PACBOT_SSH_PRIVKEY ~/id_ed25519
-    - mv $PACBOT_SSH_PUBKEY ~/id_ed25519.pub
+    - mkdir -p ~/.ssh
+    - mv $PACBOT_SSH_PRIVKEY ~/.ssh/id_ed25519
+    - mv $PACBOT_SSH_PUBKEY ~/.ssh/id_ed25519.pub
+    - echo "bart.vanoort.is ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEa0JE6cIEmegG3/CJrxi7mmByoCFN4rjgX4t8UfuPlL" >> ~/.ssh/known_hosts
   script:
     - ssh ceiled@bart.vanoort.is "ceiled --dir $folder update && ceiled --dir $folder restart"
 
