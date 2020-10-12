@@ -17,7 +17,7 @@ version: "3.7"
 services:
 
   driver:
-    image: bvobart/ceiled-driver:master
+    image: bvobart/ceiled-driver:${DOCKER_TAG:-master}
     restart: unless-stopped
     stdin_open: true
     tty: true
@@ -35,7 +35,7 @@ services:
       - mongodb:/data/db
 
   server:
-    image: bvobart/ceiled-server:master
+    image: bvobart/ceiled-server:${DOCKER_TAG:-master}
     restart: unless-stopped
     depends_on:
       - driver
@@ -51,7 +51,7 @@ services:
       DB_HOST: mongodb
       
   web:
-    image: bvobart/ceiled-web:master
+    image: bvobart/ceiled-web:${DOCKER_TAG:-master}
     restart: unless-stopped
     ports:
       - ${HTTP_PORT:-80}:80

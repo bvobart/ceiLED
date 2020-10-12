@@ -27,7 +27,10 @@ Options:
 Commands:
   env            Edit the .env file for docker-compose.
   install DIR    Install CeiLED to directory DIR. Will be created if it doesn't exist. Requires sudo.
+  logs ARGS?     Shows the latest of CeiLED's logs. Any arguments passed to this command will be passed to the underlying 'docker-compose logs'.
+  restart        Restarts CeiLED or starts CeiLED if it is not yet running. Uses a rolling update mechanism for the driver, server and MongoDB, so those will have no downtime.
   start          Starts CeiLED in the background by calling 'docker-compose up -d'. Uses the docker-compose.debug.yml file when using --debug
+  status         Prints the status of all running CeiLED Docker containers.
   stop           Stops CeiLED.
   update         Updates CeiLED by downloading the latest versions of CeiLED's Docker containers.
   *              Prints this help

@@ -52,6 +52,8 @@ Variable Name   | Default value     | Description
 `SITE_ACCESS_POLICY` | `lan`        | By default, CeiLED only allows you to connect to the website from devices on your LAN. Set this to `public` to allow public access to CeiLED's website.
 `API_ACCESS_POLICY` | `lan`         | By default, CeiLED only allows you to connect to the API from devices on your LAN. Set this to `public` to allow public access to CeiLED's API.
 
+In case you're feeling adventurous and want to run CeiLED with Docker containers from a different branch on this repository, add the `DOCKER_TAG` variable to your `.env` file to specify the branch's name, e.g. `develop`.
+
 
 ## Quick start for building from source
 
