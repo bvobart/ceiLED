@@ -1,2 +1,5 @@
 /old
 root.cert
+
+/commands/build.sh
+/commands/get_local_root_cert.sh
