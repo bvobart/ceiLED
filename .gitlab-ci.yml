@@ -98,7 +98,7 @@ build - ceiled-web:
     - docker:dind
   before_script:
     - source $UTILS
-    - cd ceiled-server
+    - cd ceiled-web
     - login_to_gitlab_registry
   script:
     # Build builder container with inline cache

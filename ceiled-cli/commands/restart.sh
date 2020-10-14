@@ -23,7 +23,6 @@ function restart_service {
 
 # Restarts ceiled-web without a rolling update, as it binds to ports on the host.
 function restart_web {
-  local container_id=$(docker-compose ps -q web)
   docker-compose $compose_args up -d --no-deps web
 }
 
@@ -50,6 +49,7 @@ function restart_all {
   [[ -n "$driver_id" ]] && scale_service driver 1
   [[ -n "$mongodb_id" ]] && scale_service mongodb 1
   [[ -n "$server_id" ]] && scale_service server 1
+  true
 }
 
 # Restarts CeiLED if it is running, or starts it if it doesn't. 
