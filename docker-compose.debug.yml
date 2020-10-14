@@ -3,5 +3,6 @@ version: "3.7"
 services:
 
   driver:
+    devices: []
     environment:
       ARGS: --debug --socketFile /app/socket/ceiled.sock

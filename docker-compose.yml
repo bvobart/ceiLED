@@ -2,7 +2,8 @@ version: "3.7"
 
 #####################################################
 # Environment variables
-# --------------------------
+# ---------------------------------------------------
+# DEV_PCA9685  - Default: /dev/i2c-5 - i2c device file on the host of a PCA9685 controller that ceiled-driver will connect to. Not used if using debug driver.
 # HTTP_PORT    - Default: 80
 # HTTPS_PORT   - Default: 443
 # API_PORT     - Default: 6565 - If the API_ADDRESS is on the same host as SITE_ADDRESS, but has a different port, 
@@ -23,6 +24,8 @@ services:
     tty: true
     volumes:
       - ceiled-driver:/app/socket
+    devices:
+      - ${DEV_PCA9685:-/dev/i2c-5}:/dev/i2c-5
     environment:
       ARGS: --pca9685 /dev/i2c-5 --socketFile /app/socket/ceiled.sock
     

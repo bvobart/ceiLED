@@ -43,7 +43,7 @@ These are the environment variables that can be configured
 
 Variable Name   | Default value     | Description
 ----------------|-------------------|----------------
-`DEV_PCA9685`   | `/dev/i2c-5`      | i2c device file of a PCA9685 controller. Not supported if using debug driver
+`DEV_PCA9685`   | `/dev/i2c-5`      | i2c device file on the host of a PCA9685 controller that ceiled-driver will connect to. Not used if using debug driver.
 `HTTP_PORT`     | `80`              | Host machine port on which to listen for HTTP requests
 `HTTPS_PORT`    | `443`             | Host machine port on which to listen for HTTPS requests
 `API_PORT`      | `6565`            | Host machine port for when the API is not hosted through the same port as HTTP or HTTPS.
