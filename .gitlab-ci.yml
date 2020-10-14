@@ -182,7 +182,7 @@ publish - ceiled-web:
     - ssh-add ~/.ssh/id_ed25519
     - echo "bart.vanoort.is ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEa0JE6cIEmegG3/CJrxi7mmByoCFN4rjgX4t8UfuPlL" >> ~/.ssh/known_hosts
   script:
-    - cmd="source .bashrc && ceiled --dir $folder update && ceiled --dir $folder restart"
+    - cmd="bash --login -c \"ceiled --dir $folder update && ceiled --dir $folder restart\""
     - ssh ceiled@bart.vanoort.is "$cmd"
 
 deploy - production:
