@@ -13,9 +13,9 @@ function restart_service {
 
   if [[ -n "$driver_id" ]]; then
     print_yellow "--> Removing old instance of ceiled-$1..."
-    docker kill -s SIGTERM $container_id
+    docker kill -s SIGTERM $container_id &> /dev/null || true
     sleep 1
-    docker rm -f $container_id
+    docker rm -f $container_id &> /dev/null || true
   fi
 
   [[ -n "$driver_id" ]] && scale_service $1 1
@@ -41,9 +41,9 @@ function restart_all {
 
   if [[ -n "$driver_id" ]] || [[ -n "$mongodb_id" ]] || [[ -n "$server_id" ]]; then
     print_yellow "--> Removing old services..."
-    docker kill -s SIGTERM $driver_id $mongodb_id $server_id > /dev/null
+    docker kill -s SIGTERM $driver_id $mongodb_id $server_id &> /dev/null || true
     sleep 1
-    docker rm -f $driver_id $mongodb_id $server_id > /dev/null
+    docker rm -f $driver_id $mongodb_id $server_id &> /dev/null || true
   fi
   
   [[ -n "$driver_id" ]] && scale_service driver 1
