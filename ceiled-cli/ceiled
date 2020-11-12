@@ -21,19 +21,26 @@ function help {
 Usage: $cli_name [--debug] [--dir DIR] COMMAND
 
 Options:
-  --debug        Use CeiLED with the debug driver instead of the actual driver.
-  --dir DIR      Apply the commands to the CeiLED installation in DIR. Useful if you have multiple installations of CeiLED.
+  --debug               Use CeiLED with the debug driver instead of the actual driver.
+  --dir DIR             Apply the commands to the CeiLED installation in DIR.
+                        Useful if you have multiple installations of CeiLED.
 
 Commands:
-  env            Edit the .env file for docker-compose.
-  install DIR    Install CeiLED to directory DIR. Will be created if it doesn't exist. Requires sudo.
-  logs ARGS?     Shows the latest of CeiLED's logs. Any arguments passed to this command will be passed to the underlying 'docker-compose logs'.
-  restart        Restarts CeiLED or starts CeiLED if it is not yet running. Uses a rolling update mechanism for the driver, server and MongoDB, so those will have no downtime.
-  start          Starts CeiLED in the background by calling 'docker-compose up -d'. Uses the docker-compose.debug.yml file when using --debug
-  status         Prints the status of all running CeiLED Docker containers.
-  stop           Stops CeiLED.
-  update         Updates CeiLED by downloading the latest versions of CeiLED's Docker containers.
-  *              Prints this help
+  auth add|remove|list  Manage authorisation tokens. See '$cli_name auth help'
+  env                   Edit the .env file for docker-compose.
+  install DIR           Install CeiLED to directory DIR. Will be created if it doesn't exist.
+                        Requires sudo.
+  logs ARGS?            Shows the latest of CeiLED's logs. Any arguments passed to this command 
+                        will be passed to the underlying 'docker-compose logs'.
+  restart all|driver|   Restarts CeiLED or starts CeiLED if it is not yet running. 
+          web|server|   Uses a rolling update mechanism for the driver, server and MongoDB,
+          mongodb       so those will have no downtime.
+  start                 Starts CeiLED in the background by calling 'docker-compose up -d'.
+                        Uses the docker-compose.debug.yml file when using --debug
+  status                Prints the status of all running CeiLED Docker containers.
+  stop                  Stops CeiLED.
+  update                Updates CeiLED by downloading the latest versions of CeiLED's Docker containers.
+  *                     Prints this help
 "
 # Deprecated, since only LetsEncrypt HTTPS is possible now anyways:
 # root_cert    Copy the root certificate from ceiled-web's data volume to the current directory. This can then be imported into browsers to allow CeiLED to be hosted over HTTPS without needing a public domain name.
@@ -76,6 +83,12 @@ function is_ceiled_dir {
   [[ -f "$1/ceiled-cli/ceiled" ]]
 }
 
+function is_help {
+  [[ "$1" == "help" ]] ||
+  [[ "$1" == "--help" ]] || 
+  [[ "$1" == "-h" ]]
+}
+
 # TODO: add command: ceiled auth add NAME TOKEN
 # TODO: add command: ceiled auth remove [NAME|TOKEN]
 # TODO: add command: ceiled auth list
@@ -101,6 +114,12 @@ while true; do
     #   build
     #   exit
     #   ;;
+    auth)
+      source "$CEILED_CLI_DIR/commands/auth.sh"
+      shift
+      auth "$@"
+      exit
+      ;;
     env)
       source "$CEILED_CLI_DIR/commands/env.sh"
       env
@@ -147,7 +166,7 @@ while true; do
     #   get_local_root_cert
     #   ;;
     *)
-      print_red "Error: Unknown command: $1\n"
+      is_help "$1" || print_red "Error: Unknown command: $1\n"
       help
       exit 1
       ;;
