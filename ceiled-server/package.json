@@ -3,6 +3,7 @@
   "version": "3.0.0-beta",
   "description": "TypeScript NodeJS WebSocket server for displaying patterns on LED devices connected through ceiled-driver.",
   "main": "src/server.ts",
+  "engines" : { "node" : "~12" },
   "typings": "src/typings.d.ts",
   "author": "Bart van Oort",
   "license": "ISC",
@@ -24,26 +25,30 @@
   "dependencies": {
     "bluebird": "3.7.2",
     "duration": "0.2.2",
-    "mongodb": "3.5.6",
+    "mongodb": "3.6.3",
     "socket.io": "2.3.0",
-    "typescript": "3.8.3"
+    "typescript": "4.0.5"
   },
   "devDependencies": {
-    "@types/bluebird": "3.5.30",
+    "@types/bluebird": "3.5.33",
     "@types/bluebird-global": "3.5.12",
-    "@types/jest": "25.2.1",
-    "@types/mongodb": "3.5.14",
+    "@types/jest": "26.0.15",
+    "@types/mongodb": "3.5.33",
     "@types/node": "12.12.5",
-    "@types/socket.io": "2.1.4",
-    "husky": "2.3.0",
-    "jest": "25.4.0",
+    "@types/socket.io": "2.1.11",
+    "@typescript-eslint/eslint-plugin": "4.7.0",
+    "@typescript-eslint/parser": "4.7.0",
+    "eslint": "7.13.0",
+    "eslint-config-prettier": "6.15.0",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-prettier": "3.1.4",
+    "husky": "4.3.0",
+    "jest": "26.6.3",
     "lint-staged": "8.1.7",
     "nodemon": "1.19.3",
-    "prettier": "1.19.1",
-    "ts-jest": "25.4.0",
-    "ts-node": "8.9.1",
-    "tslint": "5.20.0",
-    "tslint-config-prettier": "1.18.0"
+    "prettier": "2.1.2",
+    "ts-jest": "26.4.4",
+    "ts-node": "9.0.0"
   },
   "jest": {
     "globals": {
@@ -71,9 +76,8 @@
     }
   },
   "lint-staged": {
-    "*.{js,json,ts,md}": [
-      "prettier --write",
-      "git add"
+    "*.{js,ts,tsx}": [
+      "eslint --fix"
     ]
   }
 }
