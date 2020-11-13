@@ -34,19 +34,26 @@ const add = async (name: string, token: string): Promise<void> => {
   console.log('- Name:', name);
   console.log('- Token:', token);
 
+  const existing = await authRepo.findByToken(token);
+  if (existing && name === existing.name) {
+    console.log('!-> Nothing to do: that token is already in the DB under the same name');
+    process.exit(0);
+  }
+  if (existing) {
+    fail(`that token is already in the DB under name '${existing.name}'`);
+  }
+
   const res = await prompts({
     type: 'confirm',
     name: 'confirmed',
     message: 'Are you sure you want to add this name and authorisation token to the database?',
   });
 
-  if (res.confirmed) {
-    await authRepo.create(token, name);
-    console.log('--> Successfully added to authorisation database!');
-    process.exit(0);
-  } else {
-    process.exit(1);
-  }
+  if (!res.confirmed) process.exit(1);
+
+  await authRepo.create(token, name);
+  console.log('--> Successfully added to authorisation database!');
+  process.exit(0);
 };
 
 // if launched directly through node, then launch.
