@@ -22,6 +22,7 @@ module.exports = {
   ],
   rules: {
     'no-console': 'off',
+    'no-process-exit': 'off',
     'object-literal-sort-keys': 'off',
     'max-classes-per-file': 'off',
     'no-explicit-any': 'off',
@@ -30,6 +31,12 @@ module.exports = {
     quotes: ['error', 'single', 'avoid-escape'],
     'no-trailing-spaces': 'error',
     '@typescript-eslint/no-floating-promises': ['error'],
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      {
+        "checksVoidReturn": false
+      }
+    ],
     '@typescript-eslint/naming-convention': [
       'error',
       {

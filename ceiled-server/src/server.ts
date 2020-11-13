@@ -38,7 +38,7 @@ const launch = async (): Promise<void> => {
   const onExit = (code: any) => {
     driver.close();
     void server.close();
-    throw code;
+    process.exit(code);
   };
 
   // register exit handler.
@@ -62,6 +62,6 @@ if (require.main === module) {
     console.error('| ', reason);
     console.error('!---------------------------!\n');
     console.error('--> Exiting...');
-    throw reason;
+    process.exit(1);
   });
 }

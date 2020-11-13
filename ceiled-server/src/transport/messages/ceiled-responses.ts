@@ -1,7 +1,5 @@
 import { IPattern } from '../../patterns/Pattern';
 
-/* tslint:disable:max-classes-per-file */
-
 export interface PatternResponse {
   channel: number;
   pattern: IPattern | undefined;
