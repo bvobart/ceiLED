@@ -10,9 +10,9 @@ export CEILED_CLI_DIR=$(get_path $(dirname $0))
 export CEILED_DIR=$(dirname $CEILED_CLI_DIR)
 export DEBUG="false"
 
-function get_version {
-  cat $CEILED_CLI_DIR/version
-}
+source $CEILED_CLI_DIR/utils.sh
+export COMPOSE_FILES="$(get_compose_files)"
+alias docker-compose="docker-compose $COMPOSE_FILES"
 
 function help {
   cli_name=${0##*/}
@@ -49,54 +49,11 @@ Commands:
 # build          Build CeiLED's Docker containers from source. Uses the docker-compose.debug.yml file when using --debug
 }
 
-function print_red {
-  local red='\033[0;31m'
-  local nocolor='\033[0m'
-  echo -e "${red}$1${nocolor}"
-}
-
-function print_yellow {
-  local yellow='\033[0;33m'
-  local nocolor='\033[0m'
-  echo -e "${yellow}$1${nocolor}"
-}
-
-function print_green {
-  local green='\033[0;32m'
-  local nocolor='\033[0m'
-  echo -e "${green}$1${nocolor}"
-}
-
-function fail {
-  print_red "!-> Error: $1"
-  exit 1
-}
-
-function is_debug {
-  [[ $DEBUG == "true" ]]
-}
-
-function is_ceiled_dir {
-  [[ -f "$1/docker-compose.yml" ]] &&
-  [[ -f "$1/docker-compose.debug.yml" ]] &&
-  [[ -d "$1/ceiled-cli" ]] &&
-  [[ -f "$1/ceiled-cli/ceiled" ]]
-}
-
-function is_help {
-  [[ "$1" == "help" ]] ||
-  [[ "$1" == "--help" ]] || 
-  [[ "$1" == "-h" ]]
-}
-
-# TODO: add command: ceiled auth add NAME TOKEN
-# TODO: add command: ceiled auth remove [NAME|TOKEN]
-# TODO: add command: ceiled auth list
-
 while true; do
   case "$1" in
     --debug)
       export DEBUG="true"
+      export COMPOSE_FILES="$(get_compose_files)"
       shift
       ;;
     --dir)

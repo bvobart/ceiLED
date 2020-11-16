@@ -1,22 +1,3 @@
-# Copies CeiLED's files to the target directory $1
-function copy_ceiled_files {
-  cp -r $CEILED_DIR/ceiled-cli "$1/ceiled-cli/"
-  cp $CEILED_DIR/.env.sample "$1"
-  cp $CEILED_DIR/docker-compose.yml "$1"
-  cp $CEILED_DIR/docker-compose.debug.yml "$1"
-  cp $CEILED_DIR/ReadMe.md "$1"
-}
-
-# Prints the relative paths of the installed files and directories relative to $CEILED_DIR
-# preceded by a / because it's meant to be thrown into .git/info/sparse_checkout
-function echo_ceiled_files {
-  echo "/ceiled-cli"
-  echo "/.env.sample"
-  echo "/docker-compose.yml"
-  echo "/docker-compose.debug.yml"
-  echo "/ReadMe.md"
-}
-
 # Prepares the targeted installation folder by initialising a sparse Git repo in it
 # such that updates can be downloaded using `git fetch`
 function prepare_target_folder {
@@ -47,6 +28,7 @@ function install {
   print_yellow "--> Copying CeiLED files..."
   copy_ceiled_files $target_dir
 
+  # TODO: do not automatically add to /etc/profile, but rather ask first whether the user wants this
   print_yellow "--> Adding CeiLED CLI to system-wide PATH (/etc/profile), I will need sudo for this."
   echo "$export_cmd" | sudo tee $profile_target > /dev/null 
   sudo chmod +x $profile_target
