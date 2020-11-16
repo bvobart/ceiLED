@@ -4,9 +4,9 @@ Repository for the software written in order to control the LED strips on my roo
 
 - `ceiled-web`: a ReactJS website that serves as a remote control for displaying cool RGB colour patterns on the LED strips. Recently rewritten using the amazing React hooks, TypeScript and MaterialUI v4.
 - `ceiled-server`: a TypeScript NodeJS web server that hosts a recently rewritten socket.io WebSocket API and connects to a MongoDB database for authorisation. It is what `ceiled-web` talks to in order to show its cool colours, and it is what carefully exposes `ceiled-driver` to the internet.
-- `ceiled-driver`: a low-level hardware driver written in Rust. This is what actually controls the LED strips. It accepts a simple yet powerful API through a UNIX socket. In the future, I want to set it up as a native module NPM package, so that `ceiled-server` can use its API directly instead of as a separate process through a Unix socket.
+- `ceiled-driver`: a low-level hardware driver written in Rust. This is what actually controls the LED strips. It accepts a simple yet powerful API through a UNIX socket. In the future, I want to set it up as a WASM NPM package, so that `ceiled-server` can use its API directly instead of as a separate process through a Unix socket.
 
-Finally, to bring it all together, to help with installing and managing your installation, there's `ceiled-cli`, a small but very useful command-line utility written in Bash. 
+Finally, to bring it all together, to help with installing and managing your installation, there's `ceiled-cli`, a small but very useful command-line utility written completely in Bash. 
 
 Branch  | Build status
 --------|--------
@@ -28,12 +28,12 @@ git clone --depth 1 https://github.com/bvobart/ceiLED.git
 ./ceiled-cli/ceiled install DIRECTORY
 ```
 
-The installation script will guide you through the rest.
+The installation script will guide you through the rest :)
 
-Per default, CeiLED binds to ports `80`, `443` and `6565`, though this can be changed using environment variables. 
-CeiLED will also try to acquire SSL certificates using LetsEncrypt for the configured `SITE_ADDRESS` and `API_ADDRESS`,
-as long as they are not `localhost` or addresses on LAN, including `.local` addresses.
-
+### Friendly reminders
+- Per default, CeiLED binds to ports `80`, `443` and `6565`, though this can be changed using environment variables. 
+- CeiLED will also try to acquire SSL certificates using LetsEncrypt for the configured `SITE_ADDRESS` and `API_ADDRESS`, as long as they are not `localhost` or addresses on LAN, including `.local` addresses.
+- Per default, CeiLED is set up to only use the debug driver. To actually use the PCA9685 controller, specify the `DEV_PCA9685` environment variable in the `.env` file.
 
 ## Environment variables
 
@@ -43,7 +43,6 @@ These are the environment variables that can be configured
 
 Variable Name   | Default value     | Description
 ----------------|-------------------|----------------
-`DEV_PCA9685`   | `/dev/i2c-5`      | i2c device file on the host of a PCA9685 controller that ceiled-driver will connect to. Not used if using debug driver.
 `HTTP_PORT`     | `80`              | Host machine port on which to listen for HTTP requests
 `HTTPS_PORT`    | `443`             | Host machine port on which to listen for HTTPS requests
 `API_PORT`      | `6565`            | Host machine port for when the API is not hosted through the same port as HTTP or HTTPS.
@@ -51,6 +50,8 @@ Variable Name   | Default value     | Description
 `API_ADDRESS`   | `api.localhost`   | Hostname on which the ceiled API will be hosted. Append `:80` to explicitly disable HTTPS. You could also use an IP address here, such as `192.168.0.65` or `192.168.0.101:6565`.
 `SITE_ACCESS_POLICY` | `lan`        | By default, CeiLED only allows you to connect to the website from devices on your LAN. Set this to `public` to allow public access to CeiLED's website.
 `API_ACCESS_POLICY` | `lan`         | By default, CeiLED only allows you to connect to the API from devices on your LAN. Set this to `public` to allow public access to CeiLED's API.
+**Output Devices** | | _Per default, CeiLED only uses the debug driver. Specify these environment variables to use an actual output device_
+`DEV_PCA9685`   | `/dev/i2c-5`      | i2c device file on the host of a PCA9685 controller that ceiled-driver will connect to. Not used if using debug driver.
 
 In case you're feeling adventurous and want to run CeiLED with Docker containers from a different branch on this repository, add the `DOCKER_TAG` variable to your `.env` file to specify the branch's name, e.g. `develop`.
 
@@ -62,8 +63,8 @@ To get CeiLED running in a production environment, but built from source, use th
 # If you want to build CeiLED from source
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 
-# If you want to build CeiLED from source AND want to use the debug driver:
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.debug.yml up
+# If you want to build CeiLED from source AND want to use the PCA9685 driver:
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.pca9685.yml up
 ```
 
 You can still use `./ceiled-cli/ceiled env` to edit your environment variables file. 
