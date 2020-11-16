@@ -21,18 +21,37 @@ Commands:
 }
 
 function auth_add {
-  # TODO: implement adding user to auth DB
-  echo "not implemented"
+  local name="$1"
+  local token="$2"
+  
+  local server_container=$(docker-compose ps -q server)
+  local mongo_container=$(docker-compose ps -q mongodb)
+
+  [[ -z "$server_container" ]] && fail "ceiled-server must be running to add users to the authorisation database"
+  [[ -z "$mongo_container" ]] && fail "CeiLED's MongoDB container must be running to add users to the authorisation database"
+
+  docker-compose exec server node scripts/auth/add.js "$name" "$token"
 }
 
 function auth_list {
-  # TODO: implement listing all known auth entries
-  echo "not implemented"
+  local server_container=$(docker-compose ps -q server)
+  local mongo_container=$(docker-compose ps -q mongodb)
+
+  [[ -z "$server_container" ]] && fail "ceiled-server must be running to list the contents of the authorisation database"
+  [[ -z "$mongo_container" ]] && fail "CeiLED's MongoDB container must be running to list the contents of the authorisation database"
+
+  docker-compose exec server node scripts/auth/list.js
 }
 
 function auth_remove {
-  # TODO: implement removing an auth token
-  echo "not implemented"
+  local args="$@"
+  local server_container=$(docker-compose ps -q server)
+  local mongo_container=$(docker-compose ps -q mongodb)
+
+  [[ -z "$server_container" ]] && fail "ceiled-server must be running to remove a user from the authorisation database"
+  [[ -z "$mongo_container" ]] && fail "CeiLED's MongoDB container must be running to remove a user from the authorisation database"
+
+  docker-compose exec server node scripts/auth/remove.js "$args"
 }
 
 function auth {

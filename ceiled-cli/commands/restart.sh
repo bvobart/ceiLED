@@ -8,17 +8,17 @@ function scale_service {
 function restart_service {
   local container_id=$(docker-compose ps -q $1)
   print_yellow "--> Starting new instance of ceiled-$1..."
-  [[ -n "$driver_id" ]] && scale_service $1 2 || scale_service $1 1
+  [[ -n "$container_id" ]] && scale_service $1 2 || scale_service $1 1
   sleep 1
 
-  if [[ -n "$driver_id" ]]; then
+  if [[ -n "$container_id" ]]; then
     print_yellow "--> Removing old instance of ceiled-$1..."
     docker kill -s SIGTERM $container_id &> /dev/null || true
     sleep 1
     docker rm -f $container_id &> /dev/null || true
   fi
 
-  [[ -n "$driver_id" ]] && scale_service $1 1
+  [[ -n "$container_id" ]] && scale_service $1 1
 }
 
 # Restarts ceiled-web without a rolling update, as it binds to ports on the host.
