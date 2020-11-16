@@ -9,6 +9,7 @@ function get_path {
 export CEILED_CLI_DIR=$(get_path $(dirname $0))
 export CEILED_DIR=$(dirname $CEILED_CLI_DIR)
 export DEBUG="false"
+export DEV="false"
 
 source $CEILED_CLI_DIR/utils.sh
 export COMPOSE_FILES="$(get_compose_files)"
@@ -56,6 +57,12 @@ while true; do
       export COMPOSE_FILES="$(get_compose_files)"
       shift
       ;;
+    --dev)
+      [[ -f "$CEILED_DIR/docker-compose.dev.yml" ]] || fail "--dev requires that docker-compose.dev.yml is present, which is not included in the default installation of CeiLED."
+      export DEV="true"
+      export COMPOSE_FILES="$(get_compose_files)"
+      shift
+      ;;
     --dir)
       [[ -z "$2" ]] && fail "--dir requires an argument."
       [[ -z "$3" ]] && fail "--dir got argument $2, but no actual command for ceiled to run!"
@@ -75,6 +82,12 @@ while true; do
       source "$CEILED_CLI_DIR/commands/auth.sh"
       shift
       auth "$@"
+      exit
+      ;;
+    build)
+      source "$CEILED_CLI_DIR/commands/build.sh"
+      shift
+      build "$@"
       exit
       ;;
     env)

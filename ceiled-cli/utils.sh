@@ -44,6 +44,10 @@ function is_debug {
   [[ $DEBUG == "true" ]]
 }
 
+function is_dev {
+  [[ $DEV == "true" ]]
+}
+
 # Checks if $1 is a help command / param
 function is_help {
   [[ "$1" == "help" ]] ||
@@ -100,6 +104,10 @@ function get_compose_files {
     files="$files"
   elif is_in_envfile "DEV_PCA9685"; then
     files="$files -f docker-compose.pca9685.yml"
+  fi
+
+  if is_dev; then
+    files="$files -f docker-compose.dev.yml"
   fi
 
   echo "$files"
