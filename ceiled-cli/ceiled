@@ -68,21 +68,20 @@ while true; do
       [[ -z "$2" ]] && fail "--dir requires an argument."
       [[ -z "$3" ]] && fail "--dir got argument $2, but no actual command for ceiled to run!"
       [[ ! -d "$2" ]] && fail "$2 is not a directory"
-      if ! is_ceiled_dir "$2" && [[ "$3" != "update" ]]; then 
-        fail "$2 is missing some files that should exist in an installation of CeiLED. If your installation is malformed, you may want to reinstall CeiLED."
-      fi
       export CEILED_DIR="$2"
       print_green "Using $2 as CeiLED directory"
       shift
       shift
       ;;
     auth)
+      assert_ceiled_dir $CEILED_DIR
       source "$CEILED_CLI_DIR/commands/auth.sh"
       shift
       auth "$@"
       exit
       ;;
     build)
+      assert_ceiled_dir $CEILED_DIR
       source "$CEILED_CLI_DIR/commands/build.sh"
       shift
       build "$@"
@@ -100,27 +99,32 @@ while true; do
       exit
       ;;
     logs)
+      assert_ceiled_dir $CEILED_DIR
       source "$CEILED_CLI_DIR/commands/logs.sh"
       shift
       logs "$@"
       exit
       ;;
     restart)
+      assert_ceiled_dir $CEILED_DIR
       source "$CEILED_CLI_DIR/commands/restart.sh"
       restart "$2"
       exit
       ;;
     start)
+      assert_ceiled_dir $CEILED_DIR
       source "$CEILED_CLI_DIR/commands/start.sh"
       start
       exit
       ;;
     status)
+      assert_ceiled_dir $CEILED_DIR
       source "$CEILED_CLI_DIR/commands/status.sh"
       status
       exit
       ;;
     stop)
+      assert_ceiled_dir $CEILED_DIR
       source "$CEILED_CLI_DIR/commands/stop.sh"
       stop
       exit

@@ -86,6 +86,13 @@ function is_ceiled_dir {
   [[ -f "$1/ceiled-cli/ceiled" ]]
 }
 
+# Asserts that $1 is a directory where CeiLED is installed.
+function assert_ceiled_dir {
+  if ! is_ceiled_dir "$1"; then
+    fail "$1 is missing some files that should exist in an installation of CeiLED. If your installation is malformed, you may want to reinstall CeiLED."
+  fi
+}
+
 # Checks if the environment variable $1 is defined in CeiLED's .env file
 function is_in_envfile {
   grep -e "^\s*DEV_PCA9685=..*" $CEILED_DIR/.env &> /dev/null
