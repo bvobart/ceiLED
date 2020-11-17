@@ -29,8 +29,9 @@ Options:
 Commands:
   auth add|remove|list  Manage authorisation tokens. See '$cli_name auth help'
   env                   Edit the .env file for docker-compose.
-  install DIR           Install CeiLED to directory DIR. Will be created if it doesn't exist.
-                        Requires sudo.
+  install DIR REF?      Install CeiLED to directory DIR. Will be created if it doesn't exist.
+                        Define REF as a Git reference (e.g. the branch 'develop') to install
+                        a different version of CeiLED. 
   logs ARGS?            Shows the latest of CeiLED's logs. Any arguments passed to this command 
                         will be passed to the underlying 'docker-compose logs'.
   restart all|driver|   Restarts CeiLED or starts CeiLED if it is not yet running. 
@@ -67,17 +68,14 @@ while true; do
       [[ -z "$2" ]] && fail "--dir requires an argument."
       [[ -z "$3" ]] && fail "--dir got argument $2, but no actual command for ceiled to run!"
       [[ ! -d "$2" ]] && fail "$2 is not a directory"
-      if ! is_ceiled_dir "$2"; then fail "$2 is missing some files that should exist in an installation of CeiLED. If your installation is malformed, you may want to reinstall CeiLED."; fi
+      if ! is_ceiled_dir "$2" && [[ "$3" != "update" ]]; then 
+        fail "$2 is missing some files that should exist in an installation of CeiLED. If your installation is malformed, you may want to reinstall CeiLED."
+      fi
       export CEILED_DIR="$2"
       print_green "Using $2 as CeiLED directory"
       shift
       shift
       ;;
-    # build)
-    #   source "$CEILED_CLI_DIR/commands/build.sh"
-    #   build
-    #   exit
-    #   ;;
     auth)
       source "$CEILED_CLI_DIR/commands/auth.sh"
       shift
@@ -97,7 +95,8 @@ while true; do
       ;;
     install)
       source "$CEILED_CLI_DIR/commands/install.sh"
-      install "$2"
+      shift
+      install "$@"
       exit
       ;;
     logs)

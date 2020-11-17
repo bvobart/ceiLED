@@ -73,7 +73,7 @@ function echo_ceiled_files {
 function copy_ceiled_files {
   cp $CEILED_DIR/docker-compose.yml "$1"
   cp $CEILED_DIR/docker-compose.pca9685.yml "$1"
-  cp -r $CEILED_DIR/ceiled-cli "$1/ceiled-cli/"
+  cp -r $CEILED_DIR/ceiled-cli "$1"
   cp $CEILED_DIR/.env.sample "$1"
   cp $CEILED_DIR/ReadMe.md "$1"
 }
