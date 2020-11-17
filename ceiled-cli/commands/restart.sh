@@ -1,6 +1,6 @@
 # Scales a service $1 to have $2 replicas.
 function scale_service {
-  docker-compose $compose_args up -d --no-deps --scale $1=$2 $1
+  docker-compose up -d --no-deps --scale $1=$2 $1
 }
 
 # Restarts a single CeiLED service with name $1 by doing a rolling update.
@@ -8,22 +8,22 @@ function scale_service {
 function restart_service {
   local container_id=$(docker-compose ps -q $1)
   print_yellow "--> Starting new instance of ceiled-$1..."
-  [[ -n "$driver_id" ]] && scale_service $1 2 || scale_service $1 1
+  [[ -n "$container_id" ]] && scale_service $1 2 || scale_service $1 1
   sleep 1
 
-  if [[ -n "$driver_id" ]]; then
+  if [[ -n "$container_id" ]]; then
     print_yellow "--> Removing old instance of ceiled-$1..."
     docker kill -s SIGTERM $container_id &> /dev/null || true
     sleep 1
     docker rm -f $container_id &> /dev/null || true
   fi
 
-  [[ -n "$driver_id" ]] && scale_service $1 1
+  [[ -n "$container_id" ]] && scale_service $1 1
 }
 
 # Restarts ceiled-web without a rolling update, as it binds to ports on the host.
 function restart_web {
-  docker-compose $compose_args up -d --no-deps web
+  docker-compose up -d --no-deps web
 }
 
 # Restarts all CeiLED service by doing a rolling update, except for ceiled-web.
@@ -52,13 +52,9 @@ function restart_all {
   true
 }
 
-# Restarts CeiLED if it is running, or starts it if it doesn't. 
-# Additionally uses docker-compose.debug.yml if in debug mode
+# Restarts CeiLED if it is running, or starts it if it doesn't.
 function restart {
   cd $CEILED_DIR
-
-  local compose_args=""
-  if is_debug; then local compose_args="-f docker-compose.yml -f docker-compose.debug.yml"; fi
 
   if [[ "$1" == "server" || "$1" == "driver" || "$1" == "mongodb" ]]; then
     print_yellow "--> Restarting ceiled-$1..."

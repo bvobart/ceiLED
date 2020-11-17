@@ -11,14 +11,14 @@ export class BufferDriver implements Driver {
   // the buffers. These will hold all setColors and setFades commands before being flushed
   private colorBuffer: Map<number, Color>;
   private fadeBuffer: Map<number, Color>;
-  private lastMillis: number;
-  private lastInterp: InterpolationType;
+  private lastMillis = 0;
+  private lastInterp = InterpolationType.LINEAR;
 
   constructor(driver: Driver) {
     this.driver = driver;
     this.channels = driver.channels;
-    this.colorBuffer = new Map();
-    this.fadeBuffer = new Map();
+    this.colorBuffer = new Map<number, Color>();
+    this.fadeBuffer = new Map<number, Color>();
   }
 
   public setColors(colors: Map<number, Color>): Promise<void> {

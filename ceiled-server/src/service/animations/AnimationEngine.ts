@@ -4,15 +4,17 @@ import { Pattern } from '../../patterns/Pattern';
 import { BufferDriver } from './BufferDriver';
 
 export class AnimationEngine {
-  public speed: number = 30; // bpm
-  public onError: (error: Error) => void;
+  public speed = 30; // bpm
+  public onError = (error: Error): void => {
+    console.error('!-> Error: AnimationEngine:', error);
+  };
 
   private driver: BufferDriver;
 
-  private animations: Map<number, Animation> = new Map();
-  private activePatterns: Map<number, Pattern> = new Map();
-  private running: boolean = false;
-  private timeout: NodeJS.Timeout;
+  private animations = new Map<number, Animation>();
+  private activePatterns = new Map<number, Pattern>();
+  private running = false;
+  private timeout?: NodeJS.Timeout;
 
   constructor(driver: Driver) {
     this.driver = new BufferDriver(driver);
@@ -38,13 +40,13 @@ export class AnimationEngine {
   public play(animations: Map<number, Animation>): void {
     this.pause();
     this.animations = animations;
-    this.activePatterns = new Map(); // TODO: activePatterns is not being used.
+    this.activePatterns = new Map<number, Pattern>(); // TODO: activePatterns is not being used.
     this.continue();
   }
 
   public pause(): void {
     this.running = false;
-    clearTimeout(this.timeout);
+    this.timeout && clearTimeout(this.timeout);
   }
 
   public continue(): void {
@@ -75,6 +77,6 @@ export class AnimationEngine {
     }
 
     await Promise.all(promises);
-    this.driver.flush();
+    void this.driver.flush();
   }
 }

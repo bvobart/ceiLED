@@ -8,25 +8,25 @@ export interface ErrorMessage {
 export class InvalidRequestMessage implements ErrorMessage {
   public message = 'Invalid request';
   public event: Events;
-  public request: any;
+  public request: unknown;
 
-  constructor(event: Events, request: any) {
+  constructor(event: Events, request: unknown) {
     this.event = event;
     this.request = request;
   }
 }
 
 export class UnauthorisedMessage implements ErrorMessage {
-  public message = 'You are not authorised to do that';
+  public message = 'Error: Unauthorised! Please add your authorisation token to the auth database';
 }
 
 export class InternalErrorMessage implements ErrorMessage {
   public message: string;
   public event: Events;
-  public request: any;
+  public request: unknown;
   public stackTrace: string;
 
-  constructor(event: Events, request: any, error: Error) {
+  constructor(event: Events, request: unknown, error: Error) {
     this.message = error.message;
     this.stackTrace = error.stack || 'Stacktrace unknown';
     this.event = event;

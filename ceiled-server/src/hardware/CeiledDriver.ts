@@ -7,18 +7,19 @@ const CMD_OFF = 'set roomlight 0\nset all solid 0 0 0';
 
 export class CeiledDriver implements Driver {
   public channels: number;
-  public isConnected: boolean = false;
+  public isConnected = false;
 
   private socketFileName: string;
   private socket: Socket | null;
-  private shouldReconnect: boolean = true;
+  private shouldReconnect = true;
 
-  private nextRequestId: number = 0;
-  private waitingForResponse: Map<number, (result?: any) => void> = new Map();
+  private nextRequestId = 0;
+  private waitingForResponse = new Map<number, (result?: any) => void>();
 
   constructor(file: string, channels: number) {
     this.channels = channels;
     this.socketFileName = file;
+    this.socket = null;
   }
 
   public connect(): Promise<void> {
@@ -28,26 +29,12 @@ export class CeiledDriver implements Driver {
         this.isConnected = true;
         this.shouldReconnect = true;
 
-        this.socket?.on('data', this.onResponse.bind(this));
-        this.socket?.on('close', async hadErr => {
-          this.isConnected = false;
-          console.error('--> ceiled-driver disconnected', hadErr ? 'with error' : '');
-          console.log('--> trying to reconnect to ceiled-driver...');
-
-          while (!this.isConnected && this.shouldReconnect) {
-            try {
-              await this.connect();
-            } catch (err) {
-              console.error(err);
-              console.log('--> trying to reconnect to ceiled-driver after 1 second...');
-              await sleep(1000);
-            }
-          }
-        });
+        this.socket && this.socket.on('data', this.onResponse.bind(this));
+        this.socket && this.socket.on('close', this.onClose.bind(this));
 
         resolve();
       }).on('error', (err: Error) => {
-        reject('--> failed to connect to ceiled-driver: ' + err.message + '\n' + err.stack);
+        reject(`--> failed to connect to ceiled-driver:\n${err.stack || ''}`);
       });
     });
   }
@@ -154,33 +141,43 @@ export class CeiledDriver implements Driver {
     return this.getNumber('flux');
   }
 
-  private getNumber(name: string): Promise<number> {
-    return new Promise(async (resolve, reject) => {
-      if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
-      const id = this.nextRequestId++;
-      const cmd = `id ${id} get ${name}\n`;
-      const promise = this.expectReply(id);
-      this.socket.write(cmd);
-      const reply = await promise;
+  private async getNumber(name: string): Promise<number> {
+    if (!this.socket || !this.isConnected) throw new Error('ceiled-driver not connected');
 
-      try {
-        const res = parseInt(reply, 10);
-        resolve(res);
-      } catch (error) {
-        reject(error);
-      }
-    });
+    const id = this.nextRequestId++;
+    const cmd = `id ${id} get ${name}\n`;
+    const promise = this.expectReply(id);
+    this.socket.write(cmd);
+
+    const reply = await promise;
+    return parseInt(reply, 10);
   }
 
   private expectReply(id: number): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.waitingForResponse.set(id, resolve);
     });
   }
 
+  private async onClose(hadErr: boolean) {
+    this.isConnected = false;
+    console.error('--> ceiled-driver disconnected', hadErr ? 'with error' : '');
+    console.log('--> trying to reconnect to ceiled-driver...');
+
+    while (!this.isConnected && this.shouldReconnect) {
+      try {
+        await this.connect();
+      } catch (err) {
+        console.error(err);
+        console.log('--> trying to reconnect to ceiled-driver after 1 second...');
+        await sleep(1000);
+      }
+    }
+  }
+
   private onResponse(buf: Buffer) {
     const data = buf.toString().trim();
-    const ids = data.match(/^id \d*/);
+    const ids = /^id \d*/.exec(data);
 
     if (ids && ids.length > 0) {
       const id = parseInt(ids[0].substring(2), 10);
@@ -199,4 +196,4 @@ export class CeiledDriver implements Driver {
   }
 }
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

@@ -3,9 +3,11 @@
     "target": "es2019",
     "module": "commonjs",
     "outDir": "./build",
+    "strict": true,
     "sourceMap": true,
     "noImplicitAny": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["./src/**/*"],
   "exclude": ["./src/old/**/*"]
