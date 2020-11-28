@@ -40,10 +40,6 @@ function print_green {
 # Args
 #-----------------
 
-function is_debug {
-  [[ $DEBUG == "true" ]]
-}
-
 function is_dev {
   [[ $DEV == "true" ]]
 }
@@ -95,7 +91,17 @@ function assert_ceiled_dir {
 
 # Checks if the environment variable $1 is defined in CeiLED's .env file
 function is_in_envfile {
-  grep -e "^\s*DEV_PCA9685=..*" $CEILED_DIR/.env &> /dev/null
+  grep -e "^\s*$1=.*" $CEILED_DIR/.env &> /dev/null
+}
+
+# Checks if the device $1 should be used.
+function use_device {
+  is_in_envfile $1
+}
+
+# Prints every supported device.
+function list_devices {
+  echo "DEV_PCA9685"
 }
 
 #-----------------
@@ -107,9 +113,7 @@ function is_in_envfile {
 function get_compose_files {
   local files="-f docker-compose.yml"
 
-  if is_debug; then
-    files="$files"
-  elif is_in_envfile "DEV_PCA9685"; then
+  if is_in_envfile "DEV_PCA9685"; then
     files="$files -f docker-compose.pca9685.yml"
   fi
 

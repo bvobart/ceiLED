@@ -4,12 +4,12 @@ function auth_help {
   cli_name=${0##*/}
   echo "CeiLED CLI - version $(get_version) - Command: auth
 
-Usage: $cli_name [--debug] [--dir DIR] auth COMMAND
+Usage: $cli_name [--dir DIR] [--dev] auth COMMAND
 
 Options:
-  --debug               Use CeiLED with the debug driver instead of the actual driver.
   --dir DIR             Apply the commands to the CeiLED installation in DIR. 
                         Useful if you have multiple installations of CeiLED.
+  --dev                 Build CeiLED from source. Must be used from within the original Git repository.
 
 Commands:
   add NAME TOKEN        Add an authorisation token to the authorisation database. 
@@ -55,6 +55,7 @@ function auth_remove {
 }
 
 function auth {
+  cd $CEILED_DIR
   while true; do
     case "$1" in
       add)

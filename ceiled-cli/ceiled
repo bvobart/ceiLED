@@ -8,7 +8,7 @@ function get_path {
 
 export CEILED_CLI_DIR=$(get_path $(dirname $0))
 export CEILED_DIR=$(dirname $CEILED_CLI_DIR)
-export DEBUG="false"
+
 export DEV="false"
 
 source $CEILED_CLI_DIR/utils.sh
@@ -19,16 +19,18 @@ function help {
   cli_name=${0##*/}
   echo "CeiLED CLI - version $(get_version)
 
-Usage: $cli_name [--debug] [--dir DIR] COMMAND
+Usage: $cli_name [--dir DIR] [--dev] COMMAND
 
 Options:
-  --debug               Use CeiLED with the debug driver instead of the actual driver.
   --dir DIR             Apply the commands to the CeiLED installation in DIR.
                         Useful if you have multiple installations of CeiLED.
+  --dev                 Build CeiLED from source. Must be used from within the original Git repository.
 
 Commands:
   auth add|remove|list  Manage authorisation tokens. See '$cli_name auth help'
   env                   Edit the .env file for docker-compose.
+  build                 Build CeiLED's Docker containers from source. 
+                        Must be used from within the original Git repository and implies --dev
   install DIR REF?      Install CeiLED to directory DIR. Will be created if it doesn't exist.
                         Define REF as a Git reference (e.g. the branch 'develop') to install
                         a different version of CeiLED. 
@@ -38,26 +40,17 @@ Commands:
           web|server|   Uses a rolling update mechanism for the driver, server and MongoDB,
           mongodb       so those will have no downtime.
   start                 Starts CeiLED in the background by calling 'docker-compose up -d'.
-                        Uses the docker-compose.debug.yml file when using --debug
   status                Prints the status of all running CeiLED Docker containers.
-  stop                  Stops CeiLED.
+  stop                  Stops CeiLED by calling 'docker-compose down'.
   update                Updates CeiLED by downloading the latest versions of CeiLED's Docker containers.
   *                     Prints this help
 "
 # Deprecated, since only LetsEncrypt HTTPS is possible now anyways:
 # root_cert    Copy the root certificate from ceiled-web's data volume to the current directory. This can then be imported into browsers to allow CeiLED to be hosted over HTTPS without needing a public domain name.
-
-# Currently not in use because it requires the option to install source files
-# build          Build CeiLED's Docker containers from source. Uses the docker-compose.debug.yml file when using --debug
 }
 
 while true; do
   case "$1" in
-    --debug)
-      export DEBUG="true"
-      export COMPOSE_FILES="$(get_compose_files)"
-      shift
-      ;;
     --dev)
       [[ -f "$CEILED_DIR/docker-compose.dev.yml" ]] || fail "--dev requires that docker-compose.dev.yml is present, which is not included in the default installation of CeiLED."
       export DEV="true"
