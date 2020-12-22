@@ -7,121 +7,163 @@ import { Pattern } from '../patterns/Pattern';
 import { SolidPattern } from '../patterns/SolidPattern';
 import { inRange, range } from '../patterns/utils';
 import { AnimationEngine } from './animations/AnimationEngine';
+import { CeiledState, DisplayMode } from './CeiledState';
 import { Service } from './Service';
 
 /**
  * Defines and implements all functionalities that can be called on ceiled-server thrugh the API.
- * TODO: reapply any active solid patterns upon changing brightness, roomlight or flux. Not necessary for fades.
  */
 export class CeiledService implements Service {
-  private driver: Driver;
-  private brightness = 100;
-  private roomlight = 0;
-  private flux = -1;
-
   private autoFluxTimeout: NodeJS.Timeout | undefined;
-  private currentPatterns: Map<number, Pattern>;
   private animationEngine: AnimationEngine;
+  private driver: Driver;
+
+  private state = new CeiledState();
 
   constructor(driver: Driver) {
     this.driver = driver;
     this.animationEngine = new AnimationEngine(driver);
     void this.initSettings();
 
-    this.currentPatterns = new Map<number, Pattern>();
     for (const c of range(driver.channels)) {
-      this.currentPatterns.set(c, new SolidPattern(1, Color.random()));
+      this.state.current.patterns.set(c, new SolidPattern(1, Color.random()));
     }
   }
+
+  // --            --
+  // ----  Flux  ----
+  // --            --
 
   public async getBrightness(): Promise<number> {
     const brightness = Math.round((await this.driver.getBrightness()) / 2.55);
-    this.brightness = brightness;
+    this.state.brightness = brightness;
     return brightness;
   }
 
-  public setBrightness(brightness: number): Promise<void> {
+  public async setBrightness(brightness: number): Promise<void> {
     const newBrightness = inRange(brightness, 0, 100);
-    if (this.brightness === newBrightness) return Promise.resolve();
+    if (this.state.brightness === newBrightness) return Promise.resolve();
 
-    this.brightness = newBrightness;
-    return this.driver.setBrightness(newBrightness * 2.55);
-  }
+    this.state.brightness = newBrightness;
+    await this.driver.setBrightness(newBrightness * 2.55);
 
-  public async getRoomlight(): Promise<number> {
-    const roomlight = Math.round((await this.driver.getRoomlight()) / 2.55);
-    this.roomlight = roomlight;
-    return roomlight;
-  }
-
-  public setRoomlight(roomlight: number): Promise<void> {
-    const newRoomlight = inRange(roomlight, 0, 100);
-    if (this.roomlight === newRoomlight) return Promise.resolve();
-
-    this.roomlight = newRoomlight;
-    return this.driver.setRoomlight(newRoomlight * 2.55);
-  }
-
-  public async getFlux(): Promise<number> {
-    if (this.flux === -1) return -1;
-
-    const flux = await this.driver.getFlux();
-    this.flux = flux;
-    return flux;
-  }
-
-  public setFlux(flux: number): Promise<void> {
-    const newFlux = inRange(flux, -1, 5);
-    if (this.flux === newFlux) return Promise.resolve();
-
-    this.flux = newFlux;
-    if (newFlux === -1) {
-      return this.autoUpdateFlux();
-    } else {
-      this.clearAutoFluxTimer();
-      return this.driver.setFlux(newFlux);
+    // re-apply solid colours, otherwise setting brightness has no effect.
+    if (this.state.mode == DisplayMode.Solids) {
+      await this.setPatterns(this.state.current.patterns);
     }
   }
 
+  // --            --
+  // ----  Flux  ----
+  // --            --
+
+  public async getRoomlight(): Promise<number> {
+    const roomlight = Math.round((await this.driver.getRoomlight()) / 2.55);
+    this.state.roomlight = roomlight;
+    return roomlight;
+  }
+
+  public async setRoomlight(roomlight: number): Promise<void> {
+    const newRoomlight = inRange(roomlight, 0, 100);
+    if (this.state.roomlight === newRoomlight) return Promise.resolve();
+
+    this.state.roomlight = newRoomlight;
+    await this.driver.setRoomlight(newRoomlight * 2.55);
+
+    // re-apply solid colours, otherwise setting roomlight has no effect.
+    if (this.state.mode == DisplayMode.Solids) {
+      await this.setPatterns(this.state.current.patterns);
+    }
+  }
+
+  // --            --
+  // ----  Flux  ----
+  // --            --
+
+  public async getFlux(): Promise<number> {
+    if (this.state.flux === -1) return -1;
+
+    const flux = await this.driver.getFlux();
+    this.state.flux = flux;
+    return flux;
+  }
+
+  public async setFlux(flux: number): Promise<void> {
+    const newFlux = inRange(flux, -1, 5);
+    if (this.state.flux === newFlux) return Promise.resolve();
+
+    this.state.flux = newFlux;
+    if (newFlux === -1) {
+      await this.autoUpdateFlux();
+    } else {
+      this.clearAutoFluxTimer();
+      await this.driver.setFlux(newFlux);
+    }
+
+    // re-apply solid colours, otherwise setting flux has no effect.
+    if (this.state.mode == DisplayMode.Solids) {
+      await this.setPatterns(this.state.current.patterns);
+    }
+  }
+
+  // --           --
+  // ----  Off  ----
+  // --           --
+
   public off(): Promise<void> {
+    this.state.mode = DisplayMode.Off;
     return this.driver.off();
   }
+
+  // --                --
+  // ----  Patterns  ----
+  // --                --
 
   public getPattern(channel: number): Promise<Pattern | undefined> {
     if (this.animationEngine.isRunning()) {
       return Promise.resolve(this.animationEngine.getCurrentPattern(channel));
     }
-    return Promise.resolve(this.currentPatterns.get(channel));
+    return Promise.resolve(this.state.current.patterns.get(channel));
   }
 
   public getPatterns(): Promise<Map<number, Pattern>> {
     if (this.animationEngine.isRunning()) {
       return Promise.resolve(this.animationEngine.getCurrentPatterns());
     }
-    return Promise.resolve(this.currentPatterns);
+    return Promise.resolve(this.state.current.patterns);
   }
 
-  public async setPattern(channel: number | 'all', pattern: Pattern): Promise<void> {
-    this.animationEngine.pause();
-    await pattern.show(channel, this.driver, this.animationEngine.speed);
+  // --              --
+  // ----  Solids  ----
+  // --              --
 
+  public setPattern(channel: number | 'all', pattern: Pattern): Promise<void> {
     if (channel === 'all') {
-      for (const c of range(this.driver.channels)) this.currentPatterns.set(c, pattern);
+      for (const c of range(this.driver.channels)) this.state.current.patterns.set(c, pattern);
     } else {
-      this.currentPatterns.set(channel, pattern);
+      this.state.current.patterns.set(channel, pattern);
     }
+
+    this.state.mode = DisplayMode.Solids;
+    this.animationEngine.pause();
+    return pattern.show(channel, this.driver, this.animationEngine.speed);
   }
 
   public async setPatterns(patterns: Map<number, Pattern>): Promise<void> {
     const applying = new Array<Promise<void>>();
     for (const [channel, pattern] of patterns) {
       applying.push(pattern.show(channel, this.driver, this.animationEngine.speed));
-      this.currentPatterns.set(channel, pattern);
+      this.state.current.patterns.set(channel, pattern);
     }
 
+    this.state.mode = DisplayMode.Solids;
     this.animationEngine.pause();
     await Promise.all(applying);
   }
+
+  // --                  --
+  // ----  Animations  ----
+  // --                  --
 
   public setAnimations(animations: Map<number, Animation>): Promise<void> {
     for (const [channel, animation] of animations) {
@@ -130,9 +172,14 @@ export class CeiledService implements Service {
         throw new Error(`animation for channel ${channel} contains no patterns`);
     }
 
+    this.state.mode = DisplayMode.Animations;
     this.animationEngine.play(animations);
     return Promise.resolve();
   }
+
+  // --             --
+  // ----  Moods  ----
+  // --             --
 
   /**
    * Sets a mood, see the `ceiled-server/moods` folder for the configured moods.
@@ -140,9 +187,15 @@ export class CeiledService implements Service {
    */
   public setMood(mood: Moods): Promise<void> {
     const animations = moods.builder(mood).channels(this.driver.channels).generate();
+    this.state.mode = DisplayMode.Mood;
+    this.state.current.mood = mood;
     this.animationEngine.play(animations);
     return Promise.resolve();
   }
+
+  // --                       --
+  // ----  Animation speed  ----
+  // --                       --
 
   public getSpeed(): Promise<number> {
     return Promise.resolve(this.animationEngine.speed);
@@ -160,6 +213,10 @@ export class CeiledService implements Service {
     await this.driver.getRoomlight();
     await this.driver.getFlux();
   }
+
+  // --                 --
+  // ----  Auto-flux  ----
+  // --                 --
 
   /**
    * Enables automatic flux setting. Will keep calling itself until `clearAutoFluxTimer` is called.
