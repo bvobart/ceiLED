@@ -11,6 +11,7 @@ export CEILED_DIR=$(dirname $CEILED_CLI_DIR)
 
 export DEV="false"
 
+# Make an alias for docker-compose so it includes the right .yml config files
 source $CEILED_CLI_DIR/utils.sh
 export COMPOSE_FILES="$(get_compose_files)"
 alias docker-compose="docker-compose $COMPOSE_FILES"
