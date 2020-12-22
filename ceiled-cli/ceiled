@@ -37,9 +37,10 @@ Commands:
                         a different version of CeiLED. 
   logs ARGS?            Shows the latest of CeiLED's logs. Any arguments passed to this command 
                         will be passed to the underlying 'docker-compose logs'.
-  restart all|driver|   Restarts CeiLED or starts CeiLED if it is not yet running. 
-          web|server|   Uses a rolling update mechanism for the driver, server and MongoDB,
-          mongodb       so those will have no downtime.
+  restart all?          Restarts CeiLED or starts CeiLED if it is not yet running. 
+          [driver|web   Restarts one or more of CeiLED's services.
+           web|server
+           mongodb]?
   start                 Starts CeiLED in the background by calling 'docker-compose up -d'.
   status                Prints the status of all running CeiLED Docker containers.
   stop                  Stops CeiLED by calling 'docker-compose down'.
