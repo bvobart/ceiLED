@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  ExpansionPanel,
-  ExpansionPanelSummary,
+  Accordion,
+  AccordionSummary,
   Grid,
   Typography,
   makeStyles,
@@ -76,8 +76,8 @@ const SolidControls = (props: ControlsProps): JSX.Element => {
   );
 
   return (
-    <ExpansionPanel className={classes.panel} expanded={expanded}>
-      <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
+    <Accordion className={classes.panel} expanded={expanded}>
+      <AccordionSummary onClick={() => setExpanded(!expanded)}>
         <Grid container justify='space-between'>
           <Grid item>
             <Typography variant='h6'>Solids</Typography>
@@ -88,7 +88,7 @@ const SolidControls = (props: ControlsProps): JSX.Element => {
             </Button>
           </Grid>
         </Grid>
-      </ExpansionPanelSummary>
+      </AccordionSummary>
       <div className={classes.content}>
         <GridList className={classes.gridList} spacing={8} cellHeight='auto' cols={isNotMobile ? 3 : 1.5}>
           {range(3).map(channel => {
@@ -104,7 +104,7 @@ const SolidControls = (props: ControlsProps): JSX.Element => {
           })}
         </GridList>
       </div>
-    </ExpansionPanel>
+    </Accordion>
   );
 };
 

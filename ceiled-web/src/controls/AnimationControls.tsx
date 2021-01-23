@@ -1,13 +1,5 @@
 import React, { useState, Dispatch, SetStateAction, useEffect } from 'react';
-import {
-  makeStyles,
-  ExpansionPanel,
-  ExpansionPanelSummary,
-  Typography,
-  Grid,
-  Button,
-  Collapse,
-} from '@material-ui/core';
+import { makeStyles, Accordion, AccordionSummary, Typography, Grid, Button, Collapse } from '@material-ui/core';
 import { ControlsProps } from '.';
 import { CeiledState } from '../api';
 import { Animation } from '../api/patterns';
@@ -33,9 +25,9 @@ const AnimationControls = (props: ControlsProps): JSX.Element => {
   useEffect(() => setExpanded(props.expanded), [props.expanded]);
 
   return (
-    <ExpansionPanel expanded={expanded} className={classes.panel}>
+    <Accordion expanded={expanded} className={classes.panel}>
       <AnimationsProvider>
-        <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
+        <AccordionSummary onClick={() => setExpanded(!expanded)}>
           <Grid container justify='space-between'>
             <Typography variant='h6'>Animations</Typography>
             <Grid item container xs={4} justify='space-between'>
@@ -43,13 +35,13 @@ const AnimationControls = (props: ControlsProps): JSX.Element => {
               <SyncButton disabled={!expanded} />
             </Grid>
           </Grid>
-        </ExpansionPanelSummary>
+        </AccordionSummary>
         <SpeedSlider className={classes.speed} />
         <Collapse in={expanded}>
           <AnimationComposer key={`animation-composer-${syncCount}`} />
         </Collapse>
       </AnimationsProvider>
-    </ExpansionPanel>
+    </Accordion>
   );
 };
 

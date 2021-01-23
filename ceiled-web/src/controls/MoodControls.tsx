@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, ExpansionPanel, ExpansionPanelSummary, makeStyles, Grid, Button } from '@material-ui/core';
+import { Typography, Accordion, AccordionSummary, makeStyles, Grid, Button } from '@material-ui/core';
 import { ControlsProps } from '.';
 import { Moods } from '../api/moods';
 import SpeedSlider from '../components/animations/SpeedSlider';
@@ -53,8 +53,8 @@ const MoodControls = (props: ControlsProps): JSX.Element => {
   };
 
   return (
-    <ExpansionPanel className={classes.panel} expanded={expanded}>
-      <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
+    <Accordion className={classes.panel} expanded={expanded}>
+      <AccordionSummary onClick={() => setExpanded(!expanded)}>
         <Grid container justify='space-between'>
           <Typography variant='h6'>Moods</Typography>
           <SlidingPowerButton
@@ -65,7 +65,7 @@ const MoodControls = (props: ControlsProps): JSX.Element => {
           />
           <SyncButton disabled={!expanded || status !== CeiledStatus.CONNECTED} />
         </Grid>
-      </ExpansionPanelSummary>
+      </AccordionSummary>
       <SpeedSlider className={classes.speed} />
       <Grid className={classes.tiles} container spacing={1}>
         {Object.values(Moods).map(mood => (
@@ -83,7 +83,7 @@ const MoodControls = (props: ControlsProps): JSX.Element => {
           </Grid>
         ))}
       </Grid>
-    </ExpansionPanel>
+    </Accordion>
   );
 };
 
