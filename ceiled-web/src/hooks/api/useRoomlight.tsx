@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from "react";
-import { Events } from "../../api";
+import { useState, useCallback, useEffect } from 'react';
+import { Events } from '../../api';
 import { SetSettingRequest, GetSettingRequest } from '../../api/requests';
-import useAuthToken from "./useAuthToken";
+import useAuthToken from './useAuthToken';
 import useCeiledSocket from './useCeiledSocket';
 
 const useRoomlight = (): [number, (newRoomlight: number) => void] => {
@@ -19,15 +19,18 @@ const useRoomlight = (): [number, (newRoomlight: number) => void] => {
     }
   }, [socket, authToken]);
 
-  const updateRoomlight = useCallback((newRoomlight: number) => {
-    if (socket) {
-      const request: SetSettingRequest<number> = { authToken, action: 'set', value: newRoomlight };
-      socket.emit(Events.ROOMLIGHT, request);
-    }
-    setRoomlight(newRoomlight);
-  }, [socket, setRoomlight, authToken]);
+  const updateRoomlight = useCallback(
+    (newRoomlight: number) => {
+      if (socket) {
+        const request: SetSettingRequest<number> = { authToken, action: 'set', value: newRoomlight };
+        socket.emit(Events.ROOMLIGHT, request);
+      }
+      setRoomlight(newRoomlight);
+    },
+    [socket, setRoomlight, authToken],
+  );
 
   return [roomlight, updateRoomlight];
-}
+};
 
 export default useRoomlight;

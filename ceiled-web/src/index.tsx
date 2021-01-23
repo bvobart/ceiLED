@@ -12,7 +12,12 @@ const theme = createMuiTheme({
   },
 });
 
-ReactDOM.render(<ThemeProvider theme={theme}><App /></ThemeProvider>, document.getElementById('root'));
+ReactDOM.render(
+  <ThemeProvider theme={theme}>
+    <App />
+  </ThemeProvider>,
+  document.getElementById('root'),
+);
 
 // TODO: change this to register() when better developed;
 serviceWorker.unregister();

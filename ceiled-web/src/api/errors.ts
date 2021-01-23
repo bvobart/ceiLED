@@ -1,4 +1,4 @@
-import { Events } from ".";
+import { Events } from '.';
 
 export interface ErrorMessage {
   message: string;
@@ -6,9 +6,7 @@ export interface ErrorMessage {
 
 export class InvalidRequestMessage implements ErrorMessage {
   static is(x: any): x is InvalidRequestMessage {
-    return x && typeof x.message === 'string'
-      && Object.values(Events).includes(x.event)
-      && x.request;
+    return x && typeof x.message === 'string' && Object.values(Events).includes(x.event) && x.request;
   }
 
   public message = 'Invalid request';
@@ -27,9 +25,9 @@ export class UnauthorisedMessage implements ErrorMessage {
 
 export class InternalErrorMessage implements ErrorMessage {
   static is(x: any): x is InternalErrorMessage {
-    return x && typeof x.message === 'string' 
-      && Object.values(Events).includes(x.event)
-      && typeof x.stackTrace === 'string';
+    return (
+      x && typeof x.message === 'string' && Object.values(Events).includes(x.event) && typeof x.stackTrace === 'string'
+    );
   }
 
   public message: string;

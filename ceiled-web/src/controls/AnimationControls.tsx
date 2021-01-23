@@ -1,5 +1,13 @@
 import React, { useState, Dispatch, SetStateAction, useEffect } from 'react';
-import { makeStyles, ExpansionPanel, ExpansionPanelSummary, Typography, Grid, Button, Collapse } from '@material-ui/core';
+import {
+  makeStyles,
+  ExpansionPanel,
+  ExpansionPanelSummary,
+  Typography,
+  Grid,
+  Button,
+  Collapse,
+} from '@material-ui/core';
 import { ControlsProps } from '.';
 import { CeiledState } from '../api';
 import { Animation } from '../api/patterns';
@@ -14,11 +22,11 @@ const useStyles = makeStyles({
     minWidth: '400px',
   },
   speed: {
-    padding: "0px 24px 8px 24px",
+    padding: '0px 24px 8px 24px',
   },
 });
 
-const AnimationControls = (props: ControlsProps) => {
+const AnimationControls = (props: ControlsProps): JSX.Element => {
   const classes = useStyles();
   const [syncCount] = useSyncCount();
   const [expanded, setExpanded] = useState(props.expanded);
@@ -42,8 +50,8 @@ const AnimationControls = (props: ControlsProps) => {
         </Collapse>
       </AnimationsProvider>
     </ExpansionPanel>
-  )
-}
+  );
+};
 
 export default AnimationControls;
 
@@ -55,9 +63,13 @@ const SendButton = (props: { disabled?: boolean }) => {
     event.stopPropagation();
     api.setAnimations(encodeAnimations(animations));
   };
-  
-  return <Button variant='outlined' onClick={onSend} disabled={props.disabled}>Send</Button>
-}
+
+  return (
+    <Button variant='outlined' onClick={onSend} disabled={props.disabled}>
+      Send
+    </Button>
+  );
+};
 
 const SyncButton = (props: { disabled?: boolean }) => {
   const [ceiledState, api] = useCeiledAPI();
@@ -69,10 +81,14 @@ const SyncButton = (props: { disabled?: boolean }) => {
     api.getPattern('all');
     setAnimations(decodeCeiledState(ceiledState));
     setSyncCount(syncCount + 1);
-  }
-  
-  return <Button variant='outlined' onClick={onSync} disabled={props.disabled}>Sync</Button>
-}
+  };
+
+  return (
+    <Button variant='outlined' onClick={onSync} disabled={props.disabled}>
+      Sync
+    </Button>
+  );
+};
 
 const useSyncCount = (): [number, Dispatch<SetStateAction<number>>] => useState(0);
 
@@ -83,8 +99,8 @@ const decodeCeiledState = (state: CeiledState): Animation[] => {
     }
     return [patteranim];
   });
-}
+};
 
 const encodeAnimations = (animations: Animation[]): Map<number, Animation> => {
   return animations.reduce((map, anim, channel) => map.set(channel, anim), new Map<number, Animation>());
-}
+};

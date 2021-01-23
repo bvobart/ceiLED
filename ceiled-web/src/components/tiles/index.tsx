@@ -19,10 +19,8 @@ const useStyles = makeStyles({
     // TODO: set the colour of the icon based on the pattern's colour so that the icons are always visible
     color: 'rgba(255, 255, 255, 0.7)',
   },
-  picker: {
-
-  }
-})
+  picker: {},
+});
 
 export interface EditableTileProps {
   className?: string;
@@ -32,7 +30,7 @@ export interface EditableTileProps {
   onDelete: () => void;
 }
 
-export const EditableTile: FunctionComponent<EditableTileProps> = (props) => {
+export const EditableTile: FunctionComponent<EditableTileProps> = props => {
   const { className, hsv: initialHSV, onEditConfirm, onEditStart, onDelete } = props;
   const [editing, setEditing] = useState(false);
   const classes = useStyles();
@@ -41,16 +39,16 @@ export const EditableTile: FunctionComponent<EditableTileProps> = (props) => {
   const onEdit = () => {
     setEditing(true);
     onEditStart && onEditStart();
-  }
+  };
 
   const onConfirm = (color: HSVColor) => {
     setEditing(false);
     onEditConfirm(color);
-  }
+  };
 
   return editing ? (
-    <div 
-      className={className} 
+    <div
+      className={className}
       style={{
         width: 'calc(100% - 10px)',
         borderRadius: '4px',
@@ -59,11 +57,11 @@ export const EditableTile: FunctionComponent<EditableTileProps> = (props) => {
       }}
     >
       <ColorPicker className={classes.picker} hsv={hsv} onChange={setHSV} />
-      <Button 
-        className={classes.button} 
+      <Button
+        className={classes.button}
         variant='outlined'
-        onClick={() => onConfirm(hsv)} 
-        style={{ background: hsv.toCSS()}}
+        onClick={() => onConfirm(hsv)}
+        style={{ background: hsv.toCSS() }}
       >
         Confirm
       </Button>
@@ -71,23 +69,31 @@ export const EditableTile: FunctionComponent<EditableTileProps> = (props) => {
   ) : (
     <Tile className={className} hsv={hsv}>
       <Grid className={classes.editTile} container justify='flex-end' alignItems='center'>
-        <IconButton size='small' onClick={onEdit}><EditIcon className={classes.icon} /></IconButton>
-        <IconButton size='small' onClick={onDelete}><DeleteIcon className={classes.icon} /></IconButton>
+        <IconButton size='small' onClick={onEdit}>
+          <EditIcon className={classes.icon} />
+        </IconButton>
+        <IconButton size='small' onClick={onDelete}>
+          <DeleteIcon className={classes.icon} />
+        </IconButton>
       </Grid>
     </Tile>
-  )
-}
+  );
+};
 
 //----------------------------------------------------------------------------------------
 
 export interface TileProps {
-  className?: string
-  hsv: HSVColor
-  style?: CSSProperties
+  className?: string;
+  hsv: HSVColor;
+  style?: CSSProperties;
 }
 
-export const Tile: FunctionComponent<TileProps> = (props) => {
+export const Tile: FunctionComponent<TileProps> = props => {
   const { className, children, hsv, style } = props;
   const background = hsv ? hsv.toCSS() : 'rgba(0, 0, 0, 0)';
-  return <div className={className} style={{ ...style, background }}>{children}</div>
-}
+  return (
+    <div className={className} style={{ ...style, background }}>
+      {children}
+    </div>
+  );
+};

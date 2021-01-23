@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from "react";
-import { Events } from "../../api";
+import { useState, useCallback, useEffect } from 'react';
+import { Events } from '../../api';
 import { SetSettingRequest, GetSettingRequest } from '../../api/requests';
-import useAuthToken from "./useAuthToken";
+import useAuthToken from './useAuthToken';
 import useCeiledSocket from './useCeiledSocket';
 
 const useBrightness = (): [number, (newBrightness: number) => void] => {
@@ -19,15 +19,18 @@ const useBrightness = (): [number, (newBrightness: number) => void] => {
     }
   }, [socket, authToken]);
 
-  const updateBrightness = useCallback((newBrightness: number) => {
-    if (socket) {
-      const request: SetSettingRequest<number> = { authToken, action: 'set', value: newBrightness };
-      socket.emit(Events.BRIGHTNESS, request);
-    }
-    setBrightness(newBrightness);
-  }, [socket, setBrightness, authToken]);
+  const updateBrightness = useCallback(
+    (newBrightness: number) => {
+      if (socket) {
+        const request: SetSettingRequest<number> = { authToken, action: 'set', value: newBrightness };
+        socket.emit(Events.BRIGHTNESS, request);
+      }
+      setBrightness(newBrightness);
+    },
+    [socket, setBrightness, authToken],
+  );
 
   return [brightness, updateBrightness];
-}
+};
 
 export default useBrightness;

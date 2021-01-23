@@ -1,4 +1,4 @@
-import { IPattern, isPattern, isPatternArray } from "./patterns";
+import { IPattern, isPattern, isPatternArray } from './patterns';
 
 export class PatternResponse {
   channel: number;
@@ -22,9 +22,12 @@ export class PatternsResponse {
   }
 
   static is(res: any): res is PatternsResponse {
-    return Array.isArray(res.patterns) && !res.patterns.some(([channel, pattern]: [any, any]) => {
-      return typeof channel !== 'number' || !isPattern(pattern);
-    });
+    return (
+      Array.isArray(res.patterns) &&
+      !res.patterns.some(([channel, pattern]: [any, any]) => {
+        return typeof channel !== 'number' || !isPattern(pattern);
+      })
+    );
   }
 }
 
@@ -36,8 +39,11 @@ export class AnimationsResponse {
   }
 
   static is(res: any): res is AnimationsResponse {
-    return Array.isArray(res.animations) && !res.animations.some(([channel, anim]: [any, any]) => {
-      return typeof channel !== 'number' || !isPatternArray(anim);
-    });
+    return (
+      Array.isArray(res.animations) &&
+      !res.animations.some(([channel, anim]: [any, any]) => {
+        return typeof channel !== 'number' || !isPatternArray(anim);
+      })
+    );
   }
 }

@@ -14,7 +14,7 @@ const useStyles = makeStyles({
     minWidth: '400px',
   },
   speed: {
-    padding: "0px 24px 8px 24px",
+    padding: '0px 24px 8px 24px',
   },
   tiles: {
     padding: '8px',
@@ -29,15 +29,15 @@ const useStyles = makeStyles({
   },
   power: {
     maxWidth: '48px',
-  }
+  },
 });
 
-const MoodControls = (props: ControlsProps) => {
+const MoodControls = (props: ControlsProps): JSX.Element => {
   const classes = useStyles();
   const [expanded, setExpanded] = useState(props.expanded);
   useEffect(() => setExpanded(props.expanded), [props.expanded]);
-  const [showPowerButton, setShowPowerButton ] = useState(false);
-  
+  const [showPowerButton, setShowPowerButton] = useState(false);
+
   const [status] = useCeiled();
   const [, api] = useCeiledAPI();
   const [currentMood, setCurrentMood] = useState<Moods | null>(null);
@@ -50,39 +50,42 @@ const MoodControls = (props: ControlsProps) => {
       setShowPowerButton(true);
       setTimeout(() => setShowPowerButton(false), 3000);
     }
-  }
+  };
 
   return (
     <ExpansionPanel className={classes.panel} expanded={expanded}>
       <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
         <Grid container justify='space-between'>
           <Typography variant='h6'>Moods</Typography>
-          <SlidingPowerButton 
-            className={classes.power} 
+          <SlidingPowerButton
+            className={classes.power}
             in={showPowerButton}
             size='small'
-            onClick={event => event.stopPropagation()} 
+            onClick={event => event.stopPropagation()}
           />
           <SyncButton disabled={!expanded || status !== CeiledStatus.CONNECTED} />
         </Grid>
       </ExpansionPanelSummary>
       <SpeedSlider className={classes.speed} />
       <Grid className={classes.tiles} container spacing={1}>
-        { Object.values(Moods).map(mood => 
+        {Object.values(Moods).map(mood => (
           <Grid key={'moodtile-' + mood} item xs={12} sm={6} md={4}>
             <MoodTile mood={mood}>
-              <Button 
-                fullWidth variant='text' 
-                className={mood === currentMood ? classes.current : classes.button} 
+              <Button
+                fullWidth
+                variant='text'
+                className={mood === currentMood ? classes.current : classes.button}
                 onClick={() => onClickMood(mood)}
-              >{mood}</Button>
+              >
+                {mood}
+              </Button>
             </MoodTile>
           </Grid>
-        ) }
+        ))}
       </Grid>
     </ExpansionPanel>
-  )
-}
+  );
+};
 
 const SyncButton = (props: { disabled?: boolean }) => {
   const [syncCount, setSyncCount] = useState(0);
@@ -90,11 +93,15 @@ const SyncButton = (props: { disabled?: boolean }) => {
   const onSync = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.stopPropagation();
     setSyncCount(syncCount + 1);
-  }
+  };
 
   // TODO: actually sync something here
-  
-  return <Button variant='outlined' onClick={onSync} disabled={props.disabled}>Sync</Button>
-}
+
+  return (
+    <Button variant='outlined' onClick={onSync} disabled={props.disabled}>
+      Sync
+    </Button>
+  );
+};
 
 export default MoodControls;

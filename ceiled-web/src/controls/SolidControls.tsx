@@ -1,5 +1,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { ExpansionPanel, ExpansionPanelSummary, Grid, Typography, makeStyles, Button, GridList, GridListTile, useMediaQuery, Theme } from '@material-ui/core';
+import {
+  ExpansionPanel,
+  ExpansionPanelSummary,
+  Grid,
+  Typography,
+  makeStyles,
+  Button,
+  GridList,
+  GridListTile,
+  useMediaQuery,
+  Theme,
+} from '@material-ui/core';
 import { ControlsProps } from '.';
 import { CeiledState } from '../api';
 import { SolidPattern } from '../api/patterns';
@@ -20,12 +31,12 @@ const useStyles = makeStyles({
     minHeight: '276px',
   },
   channelLabel: {
-    width: '100%'
+    width: '100%',
   },
   gridList: {
     flexWrap: 'nowrap',
     transform: 'translateZ(0)',
-  }
+  },
 });
 
 const key = 'solids-state';
@@ -36,7 +47,7 @@ const key = 'solids-state';
  * random colours are chosen. The 'Sync' button synchronises the displayed colours with those that are
  * currently actually being displayed on the server.
  */
-const SolidControls = (props: ControlsProps) => {
+const SolidControls = (props: ControlsProps): JSX.Element => {
   const classes = useStyles();
   const [ceiledState, api] = useCeiledAPI();
   const [solidsState, setSolidsState] = useSolidsState();
@@ -46,24 +57,36 @@ const SolidControls = (props: ControlsProps) => {
 
   const isNotMobile = useMediaQuery<Theme>(theme => theme.breakpoints.up('sm'));
 
-  const onChangeColor = useCallback((channel: number, newColor: HSVColor) => {
-    setSolidsState(new Map(solidsState.set(channel, newColor)));
-    api.setPattern(channel, new SolidPattern(1, newColor.toRGB()));
-  }, [solidsState, api, setSolidsState]);
+  const onChangeColor = useCallback(
+    (channel: number, newColor: HSVColor) => {
+      setSolidsState(new Map(solidsState.set(channel, newColor)));
+      api.setPattern(channel, new SolidPattern(1, newColor.toRGB()));
+    },
+    [solidsState, api, setSolidsState],
+  );
 
-  const onSync = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.stopPropagation();
-    api.getPattern('all');
-    setSolidsState(decodeCeiledState(ceiledState));
-    setSyncCount(syncCount + 1);
-  }, [ceiledState, api, syncCount, setSolidsState, setSyncCount]);
+  const onSync = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      event.stopPropagation();
+      api.getPattern('all');
+      setSolidsState(decodeCeiledState(ceiledState));
+      setSyncCount(syncCount + 1);
+    },
+    [ceiledState, api, syncCount, setSolidsState, setSyncCount],
+  );
 
   return (
     <ExpansionPanel className={classes.panel} expanded={expanded}>
       <ExpansionPanelSummary onClick={() => setExpanded(!expanded)}>
         <Grid container justify='space-between'>
-          <Grid item><Typography variant='h6'>Solids</Typography></Grid>
-          <Grid item><Button variant='outlined' onClick={onSync} disabled={!expanded}>Sync</Button></Grid>
+          <Grid item>
+            <Typography variant='h6'>Solids</Typography>
+          </Grid>
+          <Grid item>
+            <Button variant='outlined' onClick={onSync} disabled={!expanded}>
+              Sync
+            </Button>
+          </Grid>
         </Grid>
       </ExpansionPanelSummary>
       <div className={classes.content}>
@@ -72,16 +95,18 @@ const SolidControls = (props: ControlsProps) => {
             const color = solidsState.get(channel) || HSVColor.random();
             return (
               <GridListTile key={`solid-picker-${channel}-${syncCount}`}>
-                <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>Channel {channel + 1}</Typography>
-                <ColorPicker preview className={classes.picker} hsv={color} onChange={(c) => onChangeColor(channel, c)} />
+                <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>
+                  Channel {channel + 1}
+                </Typography>
+                <ColorPicker preview className={classes.picker} hsv={color} onChange={c => onChangeColor(channel, c)} />
               </GridListTile>
             );
           })}
         </GridList>
       </div>
     </ExpansionPanel>
-  )
-}
+  );
+};
 
 export default SolidControls;
 
@@ -89,17 +114,20 @@ const useSolidsState = (): [Map<number, HSVColor>, (state: Map<number, HSVColor>
   const savedState = decodeSavedState(localStorage.getItem(key) || '[]');
   const [state, setState] = useState(savedState);
 
-  const updateState = useCallback((state: Map<number, HSVColor>): void => {
-    localStorage.setItem(key, encodeSavedState(state));
-    setState(state);
-  }, [setState]);
+  const updateState = useCallback(
+    (state: Map<number, HSVColor>): void => {
+      localStorage.setItem(key, encodeSavedState(state));
+      setState(state);
+    },
+    [setState],
+  );
 
   return [state, updateState];
-}
+};
 
 const encodeSavedState = (state: Map<number, HSVColor>): string => {
   return JSON.stringify(Array.from(state.entries()));
-}
+};
 
 const decodeSavedState = (state: string): Map<number, HSVColor> => {
   const saved = new Map<number, any>(JSON.parse(state));
@@ -110,7 +138,7 @@ const decodeSavedState = (state: string): Map<number, HSVColor> => {
     }
   }
   return res;
-}
+};
 
 const decodeCeiledState = (state: CeiledState): Map<number, HSVColor> => {
   const res = new Map<number, HSVColor>();
@@ -120,4 +148,4 @@ const decodeCeiledState = (state: CeiledState): Map<number, HSVColor> => {
     }
   }
   return res;
-}
+};

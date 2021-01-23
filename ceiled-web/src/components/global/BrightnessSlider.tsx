@@ -3,10 +3,10 @@ import { Grid, Typography, Slider } from '@material-ui/core';
 import useBrightness from '../../hooks/api/useBrightness';
 
 interface BrightnessSliderProps {
-  className?: string
+  className?: string;
 }
 
-const BrightnessSlider = (props: BrightnessSliderProps) => {
+const BrightnessSlider = (props: BrightnessSliderProps): JSX.Element => {
   const [brightness, setBrightness] = useBrightness();
 
   return (
@@ -29,7 +29,7 @@ const BrightnessSlider = (props: BrightnessSliderProps) => {
         />
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
 export default BrightnessSlider;

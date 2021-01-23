@@ -3,10 +3,10 @@ import { Grid, Typography, Slider } from '@material-ui/core';
 import useFlux from '../../hooks/api/useFlux';
 
 interface FluxSliderProps {
-  className?: string
+  className?: string;
 }
 
-const FluxSlider = (props: FluxSliderProps) => {
+const FluxSlider = (props: FluxSliderProps): JSX.Element => {
   const [flux, setFlux] = useFlux();
 
   return (
@@ -29,7 +29,7 @@ const FluxSlider = (props: FluxSliderProps) => {
         />
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
 export default FluxSlider;

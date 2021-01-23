@@ -29,7 +29,7 @@ export interface EditSolidPatternProps {
 
 const key = 'animations-pick-solid';
 
-const EditSolidPattern = (props: EditSolidPatternProps) => {
+const EditSolidPattern = (props: EditSolidPatternProps): JSX.Element => {
   const { pattern: initialPattern, onConfirm } = props;
   const classes = useStyles();
   const previousColor = getSavedColor();
@@ -40,37 +40,41 @@ const EditSolidPattern = (props: EditSolidPatternProps) => {
     if (!initialPattern) setSavedColor(color);
     const length = initialPattern ? initialPattern.length : 1;
     onConfirm(new SolidPattern(length, color.toRGB()));
-  }
+  };
 
   const onClickCancel = () => onConfirm(initialPattern);
 
-  return (<>
-    <ColorPicker className={classes.picker} hsv={color} onChange={setColor} />
-    <Grid container justify='space-between'>
-      <Grid item xs={8}>
-        <Button 
-          className={classes.buttonConfirm} 
-          variant='outlined' 
-          onClick={onClickConfirm}
-          style={{ background: color.toCSS() }}>Confirm</Button>
+  return (
+    <>
+      <ColorPicker className={classes.picker} hsv={color} onChange={setColor} />
+      <Grid container justify='space-between'>
+        <Grid item xs={8}>
+          <Button
+            className={classes.buttonConfirm}
+            variant='outlined'
+            onClick={onClickConfirm}
+            style={{ background: color.toCSS() }}
+          >
+            Confirm
+          </Button>
+        </Grid>
+        <Grid item xs={4}>
+          <Button className={classes.buttonCancel} variant='outlined' onClick={onClickCancel}>
+            Cancel
+          </Button>
+        </Grid>
       </Grid>
-      <Grid item xs={4}>
-        <Button 
-          className={classes.buttonCancel} 
-          variant='outlined' 
-          onClick={onClickCancel}>Cancel</Button>
-      </Grid>
-    </Grid>
-  </>)
-}
+    </>
+  );
+};
 
 const getSavedColor = (): HSVColor => {
   const saved = localStorage.getItem(key);
   return saved ? new HSVColor(JSON.parse(saved)) : HSVColor.random();
-}
+};
 
 const setSavedColor = (color: HSVColor): void => {
   localStorage.setItem(key, JSON.stringify(color));
-}
+};
 
 export default EditSolidPattern;

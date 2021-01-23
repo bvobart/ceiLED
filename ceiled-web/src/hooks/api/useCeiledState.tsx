@@ -1,6 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Events, CeiledState } from '../../api';
-import { Pattern, Animation, decodePatternOrAnimation, IPattern, decodePattern, decodeAnimation } from '../../api/patterns';
+import {
+  Pattern,
+  Animation,
+  decodePatternOrAnimation,
+  IPattern,
+  decodePattern,
+  decodeAnimation,
+} from '../../api/patterns';
 import { GetPatternRequest } from '../../api/requests';
 import { PatternResponse, PatternsResponse, AnimationsResponse } from '../../api/responses';
 import useAuthToken from './useAuthToken';
@@ -40,19 +47,22 @@ const useCeiledState = (): [CeiledState, (state: CeiledState) => void] => {
     }
   }, [socket, authToken]);
 
-  const updateState = useCallback((state: CeiledState): void => {
-    localStorage.setItem(key, encodeSavedState(state));
-    setState(state);
-  }, [setState]);
+  const updateState = useCallback(
+    (state: CeiledState): void => {
+      localStorage.setItem(key, encodeSavedState(state));
+      setState(state);
+    },
+    [setState],
+  );
 
   return [state, updateState];
-}
+};
 
 export default useCeiledState;
 
 const encodeSavedState = (state: CeiledState): string => {
   return JSON.stringify(Array.from(state.entries()));
-}
+};
 
 const decodeSavedState = (state: string): CeiledState => {
   const saved = new Map<number, IPattern | IPattern[]>(JSON.parse(state));
@@ -66,7 +76,7 @@ const decodeSavedState = (state: string): CeiledState => {
   }
 
   return res;
-}
+};
 
 const decodeCeiledMessage = (message: PatternsResponse | AnimationsResponse): CeiledState => {
   const res = new Map<number, Pattern | Animation>();
@@ -82,4 +92,4 @@ const decodeCeiledMessage = (message: PatternsResponse | AnimationsResponse): Ce
   }
 
   return res;
-}
+};

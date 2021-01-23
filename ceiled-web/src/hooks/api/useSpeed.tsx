@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
-import { Events } from "../../api";
+import { useState, useCallback, useEffect } from 'react';
+import { Events } from '../../api';
 import { SetSettingRequest, GetSettingRequest } from '../../api/requests';
-import useAuthToken from "./useAuthToken";
+import useAuthToken from './useAuthToken';
 import useCeiledSocket from './useCeiledSocket';
 
-const useSpeed = (): [number, (newSpeed: number) => void] => { // hehe, use speed :P
+const useSpeed = (): [number, (newSpeed: number) => void] => {
+  // hehe, use speed :P
   const [speed, setSpeed] = useState(30); // BPM
   const [socket] = useCeiledSocket();
   const authToken = useAuthToken();
@@ -19,15 +20,18 @@ const useSpeed = (): [number, (newSpeed: number) => void] => { // hehe, use spee
     }
   }, [socket, authToken]);
 
-  const updateSpeed = useCallback((newSpeed: number) => {
-    if (socket) {
-      const request: SetSettingRequest<number> = { authToken, action: 'set', value: newSpeed };
-      socket.emit(Events.SPEED, request);
-    }
-    setSpeed(newSpeed);
-  }, [socket, setSpeed, authToken]);
+  const updateSpeed = useCallback(
+    (newSpeed: number) => {
+      if (socket) {
+        const request: SetSettingRequest<number> = { authToken, action: 'set', value: newSpeed };
+        socket.emit(Events.SPEED, request);
+      }
+      setSpeed(newSpeed);
+    },
+    [socket, setSpeed, authToken],
+  );
 
   return [speed, updateSpeed];
-}
+};
 
 export default useSpeed;

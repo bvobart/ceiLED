@@ -1,4 +1,4 @@
-import { RGBColor, isRGBList, IRGBColor } from "../components/color-picking/colors";
+import { RGBColor, isRGBList, IRGBColor } from '../components/color-picking/colors';
 
 export enum PatternType {
   SOLID = 'solid',
@@ -15,7 +15,7 @@ export interface Pattern extends IPattern {
   toCSS(): string;
 }
 
-export type Animation = Pattern[]
+export type Animation = Pattern[];
 
 export const isPattern = (x: any): x is IPattern => {
   return Object.values(PatternType).includes(x.type) && typeof x.length === 'number';
@@ -34,7 +34,7 @@ export const decodePattern = (p: any): Pattern => {
   }
 
   if (typeof p.length !== 'number') {
-    throw new Error(`Invalid pattern length: not a number: ${p.length}`)
+    throw new Error(`Invalid pattern length: not a number: ${p.length}`);
   }
 
   if (p.type === PatternType.SOLID) {
@@ -43,11 +43,15 @@ export const decodePattern = (p: any): Pattern => {
     } else {
       throw new Error(`Invalid solid pattern: Invalid color: ${JSON.stringify(p.color)}`);
     }
-  } 
+  }
 
   if (p.type === PatternType.FADE_LINEAR || p.type === PatternType.FADE_SIGMOID) {
     if (isRGBList(p.colors)) {
-      return new FadePattern(p.type, p.length, p.colors.map((c: IRGBColor) => new RGBColor(c)));
+      return new FadePattern(
+        p.type,
+        p.length,
+        p.colors.map((c: IRGBColor) => new RGBColor(c)),
+      );
     } else {
       throw new Error(`Invalid fade pattern: invalid colors: ${JSON.stringify(p.colors)}`);
     }
@@ -56,16 +60,16 @@ export const decodePattern = (p: any): Pattern => {
   // TODO: MoodPattern
 
   throw new Error('invalid pattern: ' + JSON.stringify(p));
-}
+};
 
 export const decodeAnimation = (ps: IPattern[]): Animation => {
   return ps.map(decodePattern);
-}
+};
 
 export const decodePatternOrAnimation = (value: any): Pattern | Animation => {
   if (isPatternArray(value)) return decodeAnimation(value);
   else return decodePattern(value);
-}
+};
 
 export class SolidPattern implements Pattern {
   type: PatternType.SOLID = PatternType.SOLID;
@@ -108,15 +112,17 @@ export class FadePattern implements Pattern {
     }, '');
 
     if (direction) {
-      return `linear-gradient(${direction}, ${colorsCSS})`
+      return `linear-gradient(${direction}, ${colorsCSS})`;
     }
-    return `linear-gradient(${colorsCSS})`
+    return `linear-gradient(${colorsCSS})`;
   }
 
   static is(p: any): p is FadePattern {
-    return (p.type === PatternType.FADE_LINEAR || p.type === PatternType.FADE_SIGMOID)
-      && typeof p.length === 'number'
-      && isRGBList(p.colors);
+    return (
+      (p.type === PatternType.FADE_LINEAR || p.type === PatternType.FADE_SIGMOID) &&
+      typeof p.length === 'number' &&
+      isRGBList(p.colors)
+    );
   }
 }
 

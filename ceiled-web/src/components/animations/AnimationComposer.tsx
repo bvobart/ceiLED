@@ -25,7 +25,7 @@ const useStyles = makeStyles({
   },
 });
 
-const AnimationComposer = () => {
+const AnimationComposer = (): JSX.Element => {
   const classes = useStyles();
   const theme = useTheme();
   const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
@@ -36,7 +36,7 @@ const AnimationComposer = () => {
     if (!result.destination) return;
     // element was dragged, but dropped in its original spot
     if (result.destination.index === result.source.index) return;
-    
+
     // element was dragged and dropped into the same column
     if (result.source.droppableId === result.destination.droppableId) {
       const channel = parseInt(result.source.droppableId.charAt(8));
@@ -57,27 +57,29 @@ const AnimationComposer = () => {
       const newAnimations = replace(replace(animations, fromChannel, fromAnimation), toChannel, toAnimation);
       setAnimations(newAnimations);
     }
-  }
+  };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <GridList className={classes.root} spacing={8} cellHeight='auto' cols={isNotMobile ? 3 : 1.5}>
-        {range(numChannels).map((channel) => (
+        {range(numChannels).map(channel => (
           <GridListTile key={channel}>
-            <Typography gutterBottom className={classes.label} align='center' variant='subtitle1'>Channel {channel + 1}</Typography>
+            <Typography gutterBottom className={classes.label} align='center' variant='subtitle1'>
+              Channel {channel + 1}
+            </Typography>
             <Divider />
             <DroppableAnimationList
               animation={animations[channel]}
               channel={channel}
               className={classes.animator}
-              droppableId={`channel-${channel}`} 
+              droppableId={`channel-${channel}`}
               onChange={anim => setAnimations(replace(animations, channel, anim))}
             />
           </GridListTile>
         ))}
       </GridList>
     </DragDropContext>
-  )
-}
+  );
+};
 
 export default AnimationComposer;

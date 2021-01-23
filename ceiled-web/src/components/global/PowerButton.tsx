@@ -16,14 +16,13 @@ const useStyles = makeStyles({
   },
   on: {
     color: green.A400,
-  }
+  },
 });
-
 
 /**
  * The power button at the top right of the header.
  * When clicked, connects to the server at address `config.serverAddress`
- * 
+ *
  * TODO: implement showing 'connecting' as orange or so
  */
 const PowerButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
@@ -32,8 +31,8 @@ const PowerButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) 
 
   const onClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (props.onClick) props.onClick(event);
-    connect(config.serverAddress)
-  }
+    connect(config.serverAddress);
+  };
 
   return (
     <IconButton
@@ -50,7 +49,8 @@ const PowerButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) 
       <PowerSettingsNewIcon className={classes.icon} />
       {props.children}
     </IconButton>
-  )
+  );
 });
 
+PowerButton.displayName = 'PowerButton';
 export default PowerButton;

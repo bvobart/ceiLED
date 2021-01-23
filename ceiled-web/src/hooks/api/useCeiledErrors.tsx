@@ -15,6 +15,6 @@ const useCeiledErrors = (): [ErrorMessage | null, () => void] => {
 
   const dismiss = useCallback(() => setError(null), []);
   return [error, dismiss];
-}
+};
 
 export default useCeiledErrors;

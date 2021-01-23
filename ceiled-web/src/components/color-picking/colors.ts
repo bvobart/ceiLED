@@ -7,7 +7,7 @@ export interface IHSVColor {
 export interface IRGBColor {
   red: number;
   green: number;
-  blue: number;  
+  blue: number;
 }
 
 /**
@@ -44,17 +44,17 @@ export class HSVColor implements IHSVColor {
     const p = this.v * (1 - this.s);
     const q = this.v * (1 - f * this.s);
     const t = this.v * (1 - (1 - f) * this.s);
-    
+
     let r = 0;
     let g = 0;
     let b = 0;
     switch (i % 6) {
-      case 0: r = this.v; g = t; b = p; break;
-      case 1: r = q; g = this.v; b = p; break;
-      case 2: r = p; g = this.v; b = t; break;
-      case 3: r = p; g = q; b = this.v; break;
-      case 4: r = t; g = p; b = this.v; break;
-      case 5: r = this.v; g = p; b = q; break;
+      case 0: r = this.v; g = t; b = p; break; // eslint-disable-line prettier/prettier
+      case 1: r = q; g = this.v; b = p; break; // eslint-disable-line prettier/prettier
+      case 2: r = p; g = this.v; b = t; break; // eslint-disable-line prettier/prettier
+      case 3: r = p; g = q; b = this.v; break; // eslint-disable-line prettier/prettier
+      case 4: r = t; g = p; b = this.v; break; // eslint-disable-line prettier/prettier
+      case 5: r = this.v; g = p; b = q; break; // eslint-disable-line prettier/prettier
     }
 
     return new RGBColor({
@@ -69,10 +69,10 @@ export class HSVColor implements IHSVColor {
   }
 
   static is(c: any): c is IHSVColor {
-    return c && typeof c.h === 'number' && typeof c.s === 'number' && typeof c.v === 'number'
-             && c.h >= 0 && c.h <= 1 
-             && c.s >= 0 && c.s <= 1 
-             && c.v >= 0 && c.v <= 1;
+    return c && typeof c.h === 'number' && typeof c.s === 'number' && typeof c.v === 'number' // eslint-disable-line prettier/prettier
+             && c.h >= 0 && c.h <= 1  // eslint-disable-line prettier/prettier
+             && c.s >= 0 && c.s <= 1  // eslint-disable-line prettier/prettier
+             && c.v >= 0 && c.v <= 1; // eslint-disable-line prettier/prettier
   }
 }
 
@@ -122,7 +122,7 @@ export class RGBColor implements IRGBColor {
   }
 
   toCSS(): string {
-    return `rgb(${this.red}, ${this.green}, ${this.blue})`
+    return `rgb(${this.red}, ${this.green}, ${this.blue})`;
   }
 
   /**
@@ -135,31 +135,50 @@ export class RGBColor implements IRGBColor {
     const d = max - min;
 
     let h = 0;
-    const s = (max === 0 ? 0 : d / max);
+    const s = max === 0 ? 0 : d / max;
     const v = max / 255;
 
     switch (max) {
-        case min: h = 0; break;
-        case this.red: h = (this.green - this.blue) + d * (this.green < this.blue ? 6 : 0); h /= 6 * d; break;
-        case this.green: h = (this.blue - this.red) + d * 2; h /= 6 * d; break;
-        case this.blue: h = (this.red - this.green) + d * 4; h /= 6 * d; break;
+      case min:
+        h = 0;
+        break;
+      case this.red:
+        h = this.green - this.blue + d * (this.green < this.blue ? 6 : 0);
+        h /= 6 * d;
+        break;
+      case this.green:
+        h = this.blue - this.red + d * 2;
+        h /= 6 * d;
+        break;
+      case this.blue:
+        h = this.red - this.green + d * 4;
+        h /= 6 * d;
+        break;
     }
 
     return new HSVColor({ h: h, s: s, v: v });
   }
 
   static is(c: any): c is IRGBColor {
-    return c && typeof c.red === 'number' && typeof c.green === 'number' && typeof c.blue === 'number'
-             && c.red >= 0 && c.red <= 255 
-             && c.green >= 0 && c.green <= 255 
-             && c.blue >= 0 && c.blue <= 255;
+    return (
+      c &&
+      typeof c.red === 'number' &&
+      typeof c.green === 'number' &&
+      typeof c.blue === 'number' &&
+      c.red >= 0 &&
+      c.red <= 255 &&
+      c.green >= 0 &&
+      c.green <= 255 &&
+      c.blue >= 0 &&
+      c.blue <= 255
+    );
   }
 }
 
 export const isHSVList = (x: any): x is IHSVColor[] => {
   return Array.isArray(x) && !x.find(c => !HSVColor.is(c));
-}
+};
 
 export const isRGBList = (x: any): x is IRGBColor[] => {
   return Array.isArray(x) && !x.find(c => !RGBColor.is(c));
-}
+};

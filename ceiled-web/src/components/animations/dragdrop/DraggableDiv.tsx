@@ -6,7 +6,7 @@ export interface DraggableDivProps {
   disabled?: boolean;
 }
 
-const DraggableDiv: FunctionComponent<DraggableDivProps> = (props) => {
+const DraggableDiv: FunctionComponent<DraggableDivProps> = props => {
   const id = `draggable-div-${props.index}`;
   return (
     <Draggable draggableId={id} index={props.index} isDragDisabled={props.disabled}>
@@ -16,7 +16,7 @@ const DraggableDiv: FunctionComponent<DraggableDivProps> = (props) => {
         </div>
       )}
     </Draggable>
-  )
-}
+  );
+};
 
 export default DraggableDiv;

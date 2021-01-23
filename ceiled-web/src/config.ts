@@ -1,4 +1,4 @@
-import env from "@beam-australia/react-env";
+import env from '@beam-australia/react-env';
 
 const serverAddress = env('API_ADDRESS') || 'api.' + window.location.host;
 

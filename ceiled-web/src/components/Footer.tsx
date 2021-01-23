@@ -14,7 +14,7 @@ export interface FooterProps {
   className?: string;
 }
 
-const Footer = (props: FooterProps) => {
+const Footer = (props: FooterProps): JSX.Element => {
   const classes = useStyles();
   const ref = useRef<HTMLDivElement>(null);
   const [showAbout, setShowAbout] = useState(false);
@@ -24,7 +24,9 @@ const Footer = (props: FooterProps) => {
     <Card ref={ref} className={props.className}>
       <CardContent>
         <Grid container justify='space-between' alignItems='center'>
-          <Button variant='text' onClick={() => setShowAbout(!showAbout)}>About</Button>
+          <Button variant='text' onClick={() => setShowAbout(!showAbout)}>
+            About
+          </Button>
           <Typography variant='subtitle2'>Status - {status}</Typography>
         </Grid>
         <Collapse in={showAbout} onEntered={() => ref.current && ref.current.scrollIntoView({ behavior: 'smooth' })}>
@@ -32,7 +34,7 @@ const Footer = (props: FooterProps) => {
         </Collapse>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 export default Footer;

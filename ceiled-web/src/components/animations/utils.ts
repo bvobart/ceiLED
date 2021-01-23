@@ -16,7 +16,7 @@ export const reorder = <T>(list: Array<T>, source: number, destination: number):
   const [removed] = result.splice(source, 1);
   result.splice(destination, 0, removed);
   return result;
-}
+};
 
 /**
  * Replaces the item at position `index` in the given list with `newValue`. Returns a new list.
@@ -28,7 +28,7 @@ export const replace = <T>(list: Array<T>, index: number, newValue: T): Array<T>
   const result = [...list];
   result[index] = newValue;
   return result;
-}
+};
 
 /**
  * Removes an item from an array, returning an array with as first element a new array containing
@@ -40,7 +40,7 @@ export const remove = <T>(list: Array<T>, index: number): [Array<T>, T] => {
   const result = [...list];
   const [removed] = result.splice(index, 1);
   return [result, removed];
-}
+};
 
 /**
  * Inserts an item in a list at the specified index. Returns a new array.
@@ -52,4 +52,4 @@ export const insert = <T>(list: Array<T>, index: number, value: T): Array<T> => 
   const result = [...list];
   result.splice(index, 0, value);
   return result;
-}
+};

@@ -29,7 +29,7 @@ const useStyles = makeStyles({
   },
 });
 
-const AnimationList: FunctionComponent<AnimationListProps> = (props) => {
+const AnimationList: FunctionComponent<AnimationListProps> = props => {
   const { animation, onChange } = props;
   const classes = useStyles();
   const [adding, setAdding] = useState<boolean>(false);
@@ -41,42 +41,42 @@ const AnimationList: FunctionComponent<AnimationListProps> = (props) => {
 
   const onEditPattern = (index: number, pattern: Pattern) => {
     onChange(replace(animation, index, pattern));
-  }
+  };
 
   const onDeletePattern = (index: number) => {
     // TODO: transition out the deleted pattern?
     const [newAnim] = remove(animation, index);
     onChange(newAnim);
-  }
+  };
 
   return (
     <div className={props.className} key={`animation-list-${props.channel}`}>
       <List disablePadding>
-        {
-          animation.map((pattern: Pattern, index: number) => {
-            const key = `li-${props.channel}-${index}`;
-            const draggableIndex = ((props.channel || 0) + 1) * 1000 + index;
-            return (
-              <AnimationItem
-                key={key}
-                draggableIndex={draggableIndex}
-                pattern={pattern} 
-                onEditConfirm={newPattern => onEditPattern(index, newPattern)}
-                onDelete={() => onDeletePattern(index)}
-              />
-            );
-          })
-        }
+        {animation.map((pattern: Pattern, index: number) => {
+          const key = `li-${props.channel}-${index}`;
+          const draggableIndex = ((props.channel || 0) + 1) * 1000 + index;
+          return (
+            <AnimationItem
+              key={key}
+              draggableIndex={draggableIndex}
+              pattern={pattern}
+              onEditConfirm={newPattern => onEditPattern(index, newPattern)}
+              onDelete={() => onDeletePattern(index)}
+            />
+          );
+        })}
         {props.children}
       </List>
-      { 
-        adding 
-        ? <EditPattern onConfirm={onAddPattern} />
-        : <Button className={classes.button} variant='outlined' onClick={() => setAdding(true)}>Add</Button>
-      }
+      {adding ? (
+        <EditPattern onConfirm={onAddPattern} />
+      ) : (
+        <Button className={classes.button} variant='outlined' onClick={() => setAdding(true)}>
+          Add
+        </Button>
+      )}
     </div>
-  )
-}
+  );
+};
 
 export default AnimationList;
 
@@ -87,7 +87,7 @@ interface AnimationItemProps {
   onDelete: () => void;
 }
 
-const AnimationItem: FunctionComponent<AnimationItemProps> = (props) => {
+const AnimationItem: FunctionComponent<AnimationItemProps> = props => {
   const { pattern, draggableIndex, onEditConfirm, onDelete } = props;
   const [dragDisabled, setDragDisabled] = useState(false);
 
@@ -95,16 +95,16 @@ const AnimationItem: FunctionComponent<AnimationItemProps> = (props) => {
   const onEditFinish = (pattern: Pattern) => {
     setDragDisabled(false);
     onEditConfirm(pattern);
-  }
+  };
 
   return (
     <DraggableItem index={draggableIndex} disabled={dragDisabled}>
-      <EditablePatternTile 
+      <EditablePatternTile
         pattern={pattern}
         onEditStart={onEditStart}
         onEditConfirm={onEditFinish}
         onDelete={onDelete}
       />
     </DraggableItem>
-  )
-}
+  );
+};

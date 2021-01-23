@@ -12,7 +12,7 @@ import PowerButton from './PowerButton';
 export const SlidingPowerButton = forwardRef<HTMLButtonElement, IconButtonProps & { in: boolean }>((props, ref) => {
   const [show, setShow] = useState(props.in);
   useEffect(() => setShow(props.in), [props.in]);
-  
+
   const [status] = useCeiled();
   useEffect(() => {
     if (status === CeiledStatus.CONNECTED) {
@@ -21,15 +21,15 @@ export const SlidingPowerButton = forwardRef<HTMLButtonElement, IconButtonProps 
       setTimeout(() => setShow(false), 2000);
     }
   }, [status]);
-  
+
   const [hideTimout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
-  
+
   const onClickPower = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.stopPropagation();
     hideTimout && clearTimeout(hideTimout);
     setHideTimeout(null);
     props.onClick && props.onClick(event);
-  }
+  };
 
   const { in: _, ...buttonProps } = props;
   return (
@@ -37,4 +37,6 @@ export const SlidingPowerButton = forwardRef<HTMLButtonElement, IconButtonProps 
       <PowerButton {...buttonProps} onClick={onClickPower} />
     </Slide>
   );
-}); 
+});
+
+SlidingPowerButton.displayName = 'SlidingPowerButton';

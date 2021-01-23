@@ -30,7 +30,7 @@ const useStyles = makeStyles({
     borderRadius: '4px',
     border: '1px solid rgba(255, 255, 255, 0.23)',
     padding: '4px 4px 8px 4px',
-  }
+  },
 });
 
 //----------------------------------------------------------------------------------------
@@ -42,20 +42,20 @@ export interface EditablePatternTileProps {
   onDelete: () => void;
 }
 
-export const EditablePatternTile: FunctionComponent<EditablePatternTileProps> = (props) => {
+export const EditablePatternTile: FunctionComponent<EditablePatternTileProps> = props => {
   const { pattern, onEditStart, onEditConfirm, onDelete } = props;
   const classes = useStyles();
   const [editing, setEditing] = useState(false);
- 
+
   const onEdit = () => {
     setEditing(true);
     onEditStart && onEditStart();
-  }
+  };
 
   const onConfirm = (newPattern: Pattern | undefined) => {
     setEditing(false);
     if (newPattern) onEditConfirm(newPattern);
-  }
+  };
 
   return editing ? (
     <OutlinedBox label='Edit pattern'>
@@ -64,46 +64,54 @@ export const EditablePatternTile: FunctionComponent<EditablePatternTileProps> = 
   ) : (
     <PatternTile pattern={pattern}>
       <Grid className={classes.editTile} container justify='flex-end' alignItems='center'>
-        <IconButton size='small' onClick={onEdit}><EditIcon className={classes.icon} /></IconButton>
-        <IconButton size='small' onClick={onDelete}><DeleteIcon className={classes.icon} /></IconButton>
+        <IconButton size='small' onClick={onEdit}>
+          <EditIcon className={classes.icon} />
+        </IconButton>
+        <IconButton size='small' onClick={onDelete}>
+          <DeleteIcon className={classes.icon} />
+        </IconButton>
       </Grid>
     </PatternTile>
   );
-}
+};
 
 //----------------------------------------------------------------------------------------
 
 export interface PatternTileProps {
   pattern: Pattern;
-} 
+}
 
-export const PatternTile: FunctionComponent<PatternTileProps> = (props) => {
+export const PatternTile: FunctionComponent<PatternTileProps> = props => {
   const { pattern } = props;
   const classes = useStyles();
 
   if (pattern instanceof SolidPattern) {
-    return <SolidTile pattern={pattern}>{props.children}</SolidTile>
+    return <SolidTile pattern={pattern}>{props.children}</SolidTile>;
   }
   if (pattern instanceof FadePattern) {
-    return <FadeTile pattern={pattern}>{props.children}</FadeTile>
+    return <FadeTile pattern={pattern}>{props.children}</FadeTile>;
   }
 
-  return <div className={classes.solidTile}>NONE</div>
-}
+  return <div className={classes.solidTile}>NONE</div>;
+};
 
 //----------------------------------------------------------------------------------------
 
 export interface SolidTileProps extends PatternTileProps {
   pattern: SolidPattern;
-} 
+}
 
-export const SolidTile: FunctionComponent<SolidTileProps> = (props) => {
+export const SolidTile: FunctionComponent<SolidTileProps> = props => {
   const { pattern } = props;
   const classes = useStyles();
   // minimum height is the pattern's length times the height of one block, plus the padding normally found in between the blocks.
   const minHeight = 48 * pattern.length + 8 * (pattern.length - 1);
-  return <Tile className={classes.solidTile} hsv={pattern.color.toHSV()} style={{ minHeight: `${minHeight}px` }}>{props.children}</Tile>
-}
+  return (
+    <Tile className={classes.solidTile} hsv={pattern.color.toHSV()} style={{ minHeight: `${minHeight}px` }}>
+      {props.children}
+    </Tile>
+  );
+};
 
 //----------------------------------------------------------------------------------------
 
@@ -113,14 +121,18 @@ export interface FadeTileProps extends PatternTileProps {
   direction?: string;
 }
 
-export const FadeTile: FunctionComponent<FadeTileProps> = (props) => {
+export const FadeTile: FunctionComponent<FadeTileProps> = props => {
   const { pattern, direction } = props;
   const classes = useStyles();
   const background = pattern.toCSS(direction);
   // minimum height is the pattern's length times the height of one block, plus the padding normally found in between the blocks.
   const minHeight = 48 * pattern.length + 8 * (pattern.length - 1);
   // TODO: show some distinction between linear and sigmoid, possibly also a switch to swap between the two
-  return <div className={classes.fadeTile} style={{ background, minHeight: `${minHeight}px` }}>{props.children}</div>
-}
+  return (
+    <div className={classes.fadeTile} style={{ background, minHeight: `${minHeight}px` }}>
+      {props.children}
+    </div>
+  );
+};
 
 //----------------------------------------------------------------------------------------

@@ -7,21 +7,23 @@ export interface DraggableItemProps {
   disabled?: boolean;
 }
 
-const DraggableItem: FunctionComponent<DraggableItemProps> = (props) => {
+const DraggableItem: FunctionComponent<DraggableItemProps> = props => {
   const id = `draggable-item-${props.index}`;
   return (
     <Draggable draggableId={id} index={props.index} isDragDisabled={props.disabled}>
       {provided => (
-        <ListItem dense disableGutters
-          ref={provided.innerRef} 
-          {...provided.draggableProps} 
+        <ListItem
+          dense
+          disableGutters
+          ref={provided.innerRef}
+          {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
           {props.children}
         </ListItem>
       )}
     </Draggable>
-  )
-}
+  );
+};
 
 export default DraggableItem;

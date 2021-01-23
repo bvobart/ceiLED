@@ -6,10 +6,10 @@ import Hue from './HueSlider';
 import Saturation from './Saturation';
 
 interface ColorPickerProps {
-  className: string
-  hsv: HSVColor
-  onChange: (color: HSVColor) => void
-  preview?: boolean
+  className: string;
+  hsv: HSVColor;
+  onChange: (color: HSVColor) => void;
+  preview?: boolean;
 }
 
 const useStyles = makeStyles({
@@ -25,12 +25,12 @@ const useStyles = makeStyles({
   },
 });
 
-const ColorPicker = (props: ColorPickerProps) => {
+const ColorPicker = (props: ColorPickerProps): JSX.Element => {
   const classes = useStyles();
   const [hsv, setHSV] = useState<HSVColor>(props.hsv);
   const { hsv: hsvProp, onChange } = props;
   useEffect(() => {
-    if (!hsv.equals(hsvProp)) onChange(hsv)
+    if (!hsv.equals(hsvProp)) onChange(hsv);
   }, [hsv, onChange, hsvProp]);
 
   return (
@@ -39,7 +39,7 @@ const ColorPicker = (props: ColorPickerProps) => {
       {props.preview && <Tile className={classes.preview} hsv={hsv} />}
       <Saturation className={classes.saturation} hsv={hsv} onChange={setHSV} />
     </div>
-  )
-}
+  );
+};
 
 export default ColorPicker;

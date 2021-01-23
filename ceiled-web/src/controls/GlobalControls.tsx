@@ -12,7 +12,7 @@ const useStyles = makeStyles({
   },
 });
 
-const GlobalControls = () => {
+const GlobalControls = (): JSX.Element => {
   const classes = useStyles();
   return (
     <Card className={classes.card}>
@@ -22,7 +22,7 @@ const GlobalControls = () => {
         <FluxSlider />
       </Grid>
     </Card>
-  )
-}
+  );
+};
 
 export default GlobalControls;

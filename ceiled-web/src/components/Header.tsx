@@ -16,10 +16,10 @@ const useStyles = makeStyles<Theme>(theme => ({
   },
   power: {
     maxWidth: '96px',
-  }
+  },
 }));
 
-const Header = () => {
+const Header = (): JSX.Element => {
   const classes = useStyles();
 
   return (
@@ -32,7 +32,7 @@ const Header = () => {
         <PowerButton className={classes.power} />
       </Grid>
     </Card>
-  )
-}
+  );
+};
 
 export default Header;

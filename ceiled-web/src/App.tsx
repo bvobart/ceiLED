@@ -24,26 +24,26 @@ const useStyles = makeStyles<Theme>(theme => ({
       marginTop: '8px',
       marginLeft: '8px',
       marginRight: '8px',
-    }
+    },
   },
   solids: {
     marginTop: '8px',
     [theme.breakpoints.up('lg')]: {
       marginLeft: '8px',
       marginRight: '8px',
-    }
+    },
   },
   moods: {
     marginTop: '8px',
     [theme.breakpoints.up('lg')]: {
       marginRight: '8px',
-    }
+    },
   },
   animations: {
     marginTop: '8px',
     [theme.breakpoints.up('lg')]: {
       marginRight: '8px',
-    }
+    },
   },
   footer: {
     minWidth: '400px',
@@ -51,11 +51,11 @@ const useStyles = makeStyles<Theme>(theme => ({
     [theme.breakpoints.up('lg')]: {
       marginLeft: '8px',
       marginRight: '8px',
-    }
-  }
+    },
+  },
 }));
 
-const App = () => {
+const App = (): JSX.Element => {
   const classes = useStyles();
   const isMedium = useMediaQuery<Theme>(theme => theme.breakpoints.up('md'));
   const isLarge = useMediaQuery<Theme>(theme => theme.breakpoints.up('lg'));
@@ -72,22 +72,35 @@ const App = () => {
                 <Header />
                 <GlobalControls />
               </Grid>
-              <Grid className={classes.solids} item xs={12}><SolidControls expanded={isLarge} /></Grid>
-              {isLarge && <Grid item xs={12}><Footer className={classes.footer}/></Grid>}
+              <Grid className={classes.solids} item xs={12}>
+                <SolidControls expanded={isLarge} />
+              </Grid>
+              {isLarge && (
+                <Grid item xs={12}>
+                  <Footer className={classes.footer} />
+                </Grid>
+              )}
             </Grid>
 
             <Grid container item xs={12} lg={6} alignContent='flex-start'>
-              <Grid className={classes.moods} item xs={12}><MoodControls expanded={isLarge} /></Grid>
-              <Grid className={classes.animations} item xs={12}><AnimationControls expanded={isLarge} /></Grid>
+              <Grid className={classes.moods} item xs={12}>
+                <MoodControls expanded={isLarge} />
+              </Grid>
+              <Grid className={classes.animations} item xs={12}>
+                <AnimationControls expanded={isLarge} />
+              </Grid>
             </Grid>
 
-            {!isLarge && <Grid item xs={12}><Footer className={classes.footer}/></Grid>}
+            {!isLarge && (
+              <Grid item xs={12}>
+                <Footer className={classes.footer} />
+              </Grid>
+            )}
           </Grid>
-          
         </Container>
       </StatusProvider>
     </SocketProvider>
   );
-}
+};
 
 export default App;

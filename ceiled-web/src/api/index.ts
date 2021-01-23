@@ -1,4 +1,4 @@
-import { Animation, Pattern } from "./patterns";
+import { Animation, Pattern } from './patterns';
 import { Moods } from './moods';
 
 export enum CeiledStatus {

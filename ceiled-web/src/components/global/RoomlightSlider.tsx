@@ -3,10 +3,10 @@ import { Grid, Typography, Slider } from '@material-ui/core';
 import useRoomlight from '../../hooks/api/useRoomlight';
 
 interface RoomlightSliderProps {
-  className?: string
+  className?: string;
 }
 
-const RoomlightSlider = (props: RoomlightSliderProps) => {
+const RoomlightSlider = (props: RoomlightSliderProps): JSX.Element => {
   const [roomlight, setRoomlight] = useRoomlight();
 
   return (
@@ -29,7 +29,7 @@ const RoomlightSlider = (props: RoomlightSliderProps) => {
         />
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
 export default RoomlightSlider;

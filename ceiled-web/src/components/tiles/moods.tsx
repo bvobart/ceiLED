@@ -8,12 +8,16 @@ export interface MoodTileProps {
   mood: Moods;
 }
 
-export const MoodTile: FunctionComponent<MoodTileProps> = (props) => {
+export const MoodTile: FunctionComponent<MoodTileProps> = props => {
   const { children, mood } = props;
   const colors = getColors(mood);
   const pattern = new FadePattern(PatternType.FADE_LINEAR, 2, colors);
-  return <FadeTile pattern={pattern} direction='to right'>{children}</FadeTile>
-}
+  return (
+    <FadeTile pattern={pattern} direction='to right'>
+      {children}
+    </FadeTile>
+  );
+};
 
 const getColors = (mood: Moods): RGBColor[] => {
   switch (mood) {
@@ -33,8 +37,9 @@ const getColors = (mood: Moods): RGBColor[] => {
     default:
       return unreachable(mood);
   }
-}
+};
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const unreachable = (x: never): never => {
   throw new Error('this is unreachable');
 };

@@ -1,5 +1,5 @@
 import { Moods } from './moods';
-import { IPattern } from "./patterns";
+import { IPattern } from './patterns';
 
 export interface AuthorisedRequest {
   authToken: string;
