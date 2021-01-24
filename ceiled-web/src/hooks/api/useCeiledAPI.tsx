@@ -20,20 +20,20 @@ const useCeiledAPI = (): [Map<number, Pattern | Animation>, CeiledAPI] => {
 
   // GET pattern
   const getPattern = useCallback(
-    (channel: number | 'all'): Promise<void> => {
+    (channel: number | 'all'): CeiledStatus => {
       if (isConnected(socket)) {
         const request: GetPatternRequest = { authToken, action: 'get', channel };
         socket.emit(Events.CEILED, request);
-        return Promise.resolve();
+        return CeiledStatus.CONNECTED;
       }
-      return Promise.reject(CeiledStatus.DISCONNECTED);
+      return CeiledStatus.DISCONNECTED;
     },
     [socket, authToken],
   );
 
   // SET pattern
   const updatePattern = useCallback(
-    (channel: number | 'all', pattern: Pattern): Promise<void> => {
+    (channel: number | 'all', pattern: Pattern): CeiledStatus => {
       if (isConnected(socket)) {
         if (channel === 'all') {
           const newState = new Map();
@@ -46,30 +46,30 @@ const useCeiledAPI = (): [Map<number, Pattern | Animation>, CeiledAPI] => {
 
         const request: SetPatternRequest = { authToken, action: 'set', channel, pattern };
         socket.emit(Events.CEILED, request);
-        return Promise.resolve();
+        return CeiledStatus.CONNECTED;
       }
-      return Promise.reject(CeiledStatus.DISCONNECTED);
+      return CeiledStatus.DISCONNECTED;
     },
     [socket, authToken, state, setState],
   );
 
   // SET patterns
   const setPatterns = useCallback(
-    (patterns: Map<number, Pattern>): Promise<void> => {
+    (patterns: Map<number, Pattern>): CeiledStatus => {
       if (isConnected(socket)) {
         setState(patterns);
         const request: SetPatternsRequest = { authToken, action: 'set', patterns: Array.from(patterns.entries()) };
         socket.emit(Events.CEILED, request);
-        return Promise.resolve();
+        return CeiledStatus.CONNECTED;
       }
-      return Promise.reject(CeiledStatus.DISCONNECTED);
+      return CeiledStatus.DISCONNECTED;
     },
     [socket, authToken, setState],
   );
 
   // SET animations
   const setAnimations = useCallback(
-    (animations: Map<number, Animation>): Promise<void> => {
+    (animations: Map<number, Animation>): CeiledStatus => {
       if (isConnected(socket)) {
         setState(animations);
         const request: SetAnimationsRequest = {
@@ -78,22 +78,22 @@ const useCeiledAPI = (): [Map<number, Pattern | Animation>, CeiledAPI] => {
           animations: Array.from(animations.entries()),
         };
         socket.emit(Events.CEILED, request);
-        return Promise.resolve();
+        return CeiledStatus.CONNECTED;
       }
-      return Promise.reject(CeiledStatus.DISCONNECTED);
+      return CeiledStatus.DISCONNECTED;
     },
     [socket, authToken, setState],
   );
 
   // SET mood
   const setMood = useCallback(
-    (mood: Moods): Promise<void> => {
+    (mood: Moods): CeiledStatus => {
       if (isConnected(socket)) {
         const request: SetMoodRequest = { authToken, action: 'set', mood };
         socket.emit(Events.CEILED, request);
-        return Promise.resolve();
+        return CeiledStatus.CONNECTED;
       }
-      return Promise.reject(CeiledStatus.DISCONNECTED);
+      return CeiledStatus.DISCONNECTED;
     },
     [socket, authToken],
   );

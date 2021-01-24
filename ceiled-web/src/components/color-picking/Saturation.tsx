@@ -1,39 +1,34 @@
-import React, { useRef } from 'react';
+import React, { useContext, useRef } from 'react';
 import throttle from 'lodash.throttle';
 import { grey } from '@material-ui/core/colors';
 import { HSVColor } from './colors';
+import { ColorContext } from '../../hooks/context/ColorContext';
 
 export interface SaturationProps {
   className?: string;
-  hsv: HSVColor;
-  onChange: (hsv: HSVColor) => void;
 }
 
 const Saturation = (props: SaturationProps) => {
-  const cssColor = `hsl(${props.hsv.h * 360}, 100%, 50%)`;
+  const [hsv, setHSV] = useContext(ColorContext);
+  const cssColor = `hsl(${hsv.h * 360}, 100%, 50%)`;
   const backgroundRef = useRef<HTMLDivElement>(null);
 
-  const onPointerMove = throttle(
-    (pageX: number, pageY: number) => {
-      if (backgroundRef.current) {
-        const { width, height, left, top } = backgroundRef.current.getBoundingClientRect();
-        const mouseX = pageX - left - window.pageXOffset;
-        const mouseY = pageY - top - window.pageYOffset;
-        const x = mouseX < 0 ? 0 : mouseX > width ? width : mouseX;
-        const y = mouseY < 0 ? 0 : mouseY > height ? height : mouseY;
+  const onPointerMove = throttle((pageX: number, pageY: number) => {
+    if (backgroundRef.current) {
+      const { width, height, left, top } = backgroundRef.current.getBoundingClientRect();
+      const mouseX = pageX - left - window.pageXOffset;
+      const mouseY = pageY - top - window.pageYOffset;
+      const x = mouseX < 0 ? 0 : mouseX > width ? width : mouseX;
+      const y = mouseY < 0 ? 0 : mouseY > height ? height : mouseY;
 
-        props.onChange(
-          new HSVColor({
-            h: props.hsv.h,
-            s: x / width,
-            v: -y / height + 1,
-          }),
-        );
-      }
-    },
-    20,
-    { leading: true, trailing: true },
-  );
+      const newColor = new HSVColor({
+        h: hsv.h,
+        s: x / width,
+        v: -y / height + 1,
+      });
+      setHSV(newColor);
+    }
+  }, 16);
 
   const onClick = (event: React.MouseEvent) => onPointerMove(event.pageX, event.pageY);
   const onMouseMove = (event: MouseEvent) => onPointerMove(event.pageX, event.pageY);
@@ -56,8 +51,6 @@ const Saturation = (props: SaturationProps) => {
     document.ontouchmove = null;
     document.ontouchend = null;
   };
-
-  const { hsv } = props;
 
   return (
     <div className={props.className} style={{ background: cssColor }}>

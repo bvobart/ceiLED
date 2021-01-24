@@ -19,10 +19,10 @@ export class HSVColor implements IHSVColor {
   s: number;
   v: number;
 
-  constructor({ h, s, v }: IHSVColor) {
-    this.h = h;
-    this.s = s;
-    this.v = v;
+  constructor(color?: IHSVColor) {
+    this.h = color?.h || 0;
+    this.s = color?.s || 0;
+    this.v = color?.v || 0;
   }
 
   equals(other: HSVColor): boolean {

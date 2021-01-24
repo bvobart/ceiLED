@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { HSVColor } from './colors';
 import { Tile } from '../tiles';
 import Hue from './HueSlider';
 import Saturation from './Saturation';
+import { ColorContext, ColorProvider } from '../../hooks/context/ColorContext';
 
 interface ColorPickerProps {
   className: string;
@@ -25,21 +26,26 @@ const useStyles = makeStyles({
   },
 });
 
+/**
+ * Color picker used all throughout CeiLED.
+ */
 const ColorPicker = (props: ColorPickerProps): JSX.Element => {
   const classes = useStyles();
-  const [hsv, setHSV] = useState<HSVColor>(props.hsv);
-  const { hsv: hsvProp, onChange } = props;
-  useEffect(() => {
-    if (!hsv.equals(hsvProp)) onChange(hsv);
-  }, [hsv, onChange, hsvProp]);
 
   return (
-    <div className={props.className}>
-      <Hue className={classes.hue} hsv={hsv} onChange={setHSV} />
-      {props.preview && <Tile className={classes.preview} hsv={hsv} />}
-      <Saturation className={classes.saturation} hsv={hsv} onChange={setHSV} />
-    </div>
+    <ColorProvider color={props.hsv}>
+      <div className={props.className}>
+        <Hue className={classes.hue} />
+        {props.preview && <PreviewTile className={classes.preview} />}
+        <Saturation className={classes.saturation} />
+      </div>
+    </ColorProvider>
   );
+};
+
+const PreviewTile = (props: { className?: string }) => {
+  const [hsv] = useContext(ColorContext);
+  return <Tile className={props.className} hsv={hsv}></Tile>;
 };
 
 export default ColorPicker;

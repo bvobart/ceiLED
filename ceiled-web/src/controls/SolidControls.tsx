@@ -6,18 +6,16 @@ import {
   Typography,
   makeStyles,
   Button,
-  GridList,
-  GridListTile,
   useMediaQuery,
   Theme,
 } from '@material-ui/core';
 import { ControlsProps } from '.';
 import { CeiledState } from '../api';
-import { SolidPattern } from '../api/patterns';
-import ColorPicker from '../components/color-picking/ColorPicker';
+import { Pattern, SolidPattern } from '../api/patterns';
 import { HSVColor } from '../components/color-picking/colors';
-import { range } from '../components/animations/utils';
 import useCeiledAPI from '../hooks/api/useCeiledAPI';
+import { AllChannelPicker } from '../components/solids/AllChannelPicker';
+import { PerChannelPicker } from '../components/solids/PerChannelPicker';
 
 const useStyles = makeStyles({
   panel: {
@@ -41,6 +39,8 @@ const useStyles = makeStyles({
 
 const key = 'solids-state';
 
+export type SolidsState = Map<number, HSVColor>;
+
 /**
  * Controls for solid colours. The chosen colours are saved in localStorage so that they persist on reload.
  * When the component renders, it first checks whether there are any colours in localStorage. If not, then
@@ -51,18 +51,17 @@ const SolidControls = (props: ControlsProps): JSX.Element => {
   const classes = useStyles();
   const [ceiledState, api] = useCeiledAPI();
   const [solidsState, setSolidsState] = useSolidsState();
-  const [syncCount, setSyncCount] = useState(0);
   const [expanded, setExpanded] = useState(props.expanded);
   useEffect(() => setExpanded(props.expanded), [props.expanded]);
 
-  const isNotMobile = useMediaQuery<Theme>(theme => theme.breakpoints.up('sm'));
+  const showAllChannels = useMediaQuery<Theme>(theme => theme.breakpoints.up('md'));
 
-  const onChangeColor = useCallback(
-    (channel: number, newColor: HSVColor) => {
-      setSolidsState(new Map(solidsState.set(channel, newColor)));
-      api.setPattern(channel, new SolidPattern(1, newColor.toRGB()));
+  const onChangeSolidsState = useCallback(
+    (newState: SolidsState) => {
+      setSolidsState(newState);
+      api.setPatterns(encodeAsPatterns(newState));
     },
-    [solidsState, api, setSolidsState],
+    [api, setSolidsState],
   );
 
   const onSync = useCallback(
@@ -70,9 +69,8 @@ const SolidControls = (props: ControlsProps): JSX.Element => {
       event.stopPropagation();
       api.getPattern('all');
       setSolidsState(decodeCeiledState(ceiledState));
-      setSyncCount(syncCount + 1);
     },
-    [ceiledState, api, syncCount, setSolidsState, setSyncCount],
+    [ceiledState, api, setSolidsState],
   );
 
   return (
@@ -90,19 +88,11 @@ const SolidControls = (props: ControlsProps): JSX.Element => {
         </Grid>
       </AccordionSummary>
       <div className={classes.content}>
-        <GridList className={classes.gridList} spacing={8} cellHeight='auto' cols={isNotMobile ? 3 : 1.5}>
-          {range(3).map(channel => {
-            const color = solidsState.get(channel) || HSVColor.random();
-            return (
-              <GridListTile key={`solid-picker-${channel}-${syncCount}`}>
-                <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>
-                  Channel {channel + 1}
-                </Typography>
-                <ColorPicker preview className={classes.picker} hsv={color} onChange={c => onChangeColor(channel, c)} />
-              </GridListTile>
-            );
-          })}
-        </GridList>
+        {showAllChannels ? (
+          <AllChannelPicker state={solidsState} onChange={onChangeSolidsState} />
+        ) : (
+          <PerChannelPicker state={solidsState} onChange={onChangeSolidsState} />
+        )}
       </div>
     </Accordion>
   );
@@ -110,12 +100,12 @@ const SolidControls = (props: ControlsProps): JSX.Element => {
 
 export default SolidControls;
 
-const useSolidsState = (): [Map<number, HSVColor>, (state: Map<number, HSVColor>) => void] => {
+const useSolidsState = (): [SolidsState, (state: SolidsState) => void] => {
   const savedState = decodeSavedState(localStorage.getItem(key) || '[]');
   const [state, setState] = useState(savedState);
 
   const updateState = useCallback(
-    (state: Map<number, HSVColor>): void => {
+    (state: SolidsState): void => {
       localStorage.setItem(key, encodeSavedState(state));
       setState(state);
     },
@@ -125,11 +115,11 @@ const useSolidsState = (): [Map<number, HSVColor>, (state: Map<number, HSVColor>
   return [state, updateState];
 };
 
-const encodeSavedState = (state: Map<number, HSVColor>): string => {
+const encodeSavedState = (state: SolidsState): string => {
   return JSON.stringify(Array.from(state.entries()));
 };
 
-const decodeSavedState = (state: string): Map<number, HSVColor> => {
+const decodeSavedState = (state: string): SolidsState => {
   const saved = new Map<number, any>(JSON.parse(state));
   const res = new Map<number, HSVColor>();
   for (const [key, value] of saved.entries()) {
@@ -140,12 +130,20 @@ const decodeSavedState = (state: string): Map<number, HSVColor> => {
   return res;
 };
 
-const decodeCeiledState = (state: CeiledState): Map<number, HSVColor> => {
+const decodeCeiledState = (state: CeiledState): SolidsState => {
   const res = new Map<number, HSVColor>();
   for (const [channel, pattern] of state.entries()) {
     if (SolidPattern.is(pattern)) {
       res.set(channel, pattern.color.toHSV());
     }
+  }
+  return res;
+};
+
+const encodeAsPatterns = (state: SolidsState): Map<number, Pattern> => {
+  const res = new Map<number, Pattern>();
+  for (const [channel, color] of state.entries()) {
+    res.set(channel, new SolidPattern(1, color.toRGB()));
   }
   return res;
 };

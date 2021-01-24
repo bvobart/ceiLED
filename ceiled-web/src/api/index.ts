@@ -21,13 +21,12 @@ export enum Events {
   SPEED = 'speed',
 }
 
-// TODO: possibly make all CeiledAPI method return some form of error object if there is a client-side error in sending the request (e.g. not connected)
 export interface CeiledAPI {
-  getPattern(channel: number | 'all'): Promise<void>;
-  setPattern(channel: number | 'all', pattern: Pattern): Promise<void>;
-  setPatterns(patterns: Map<number, Pattern>): Promise<void>;
-  setAnimations(animations: Map<number, Animation>): Promise<void>;
-  setMood(mood: Moods): Promise<void>;
+  getPattern(channel: number | 'all'): CeiledStatus;
+  setPattern(channel: number | 'all', pattern: Pattern): CeiledStatus;
+  setPatterns(patterns: Map<number, Pattern>): CeiledStatus;
+  setAnimations(animations: Map<number, Animation>): CeiledStatus;
+  setMood(mood: Moods): CeiledStatus;
 }
 
 export type CeiledState = Map<number, Pattern | Animation>;
