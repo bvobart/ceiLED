@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState, CSSProperties } from 'react';
+import React, { FunctionComponent, useState, CSSProperties, forwardRef, PropsWithChildren } from 'react';
 import { makeStyles, Grid, IconButton, Button } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteOutlined';
 import EditIcon from '@material-ui/icons/EditOutlined';
@@ -88,12 +88,13 @@ export interface TileProps {
   style?: CSSProperties;
 }
 
-export const Tile: FunctionComponent<TileProps> = props => {
+export const Tile = forwardRef<HTMLDivElement, PropsWithChildren<TileProps>>((props, ref) => {
   const { className, children, hsv, style } = props;
   const background = hsv ? hsv.toCSS() : 'rgba(0, 0, 0, 0)';
   return (
-    <div className={className} style={{ ...style, background }}>
+    <div ref={ref} className={className} style={{ ...style, background }}>
       {children}
     </div>
   );
-};
+});
+Tile.displayName = 'Tile';

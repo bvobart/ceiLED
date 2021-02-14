@@ -31,3 +31,5 @@ yarn-error.log*
 
 # old ceiled-web files
 old
+# experimental snippets of code.
+src/.experiments

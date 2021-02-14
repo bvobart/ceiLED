@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { forwardRef, useContext } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { HSVColor } from './colors';
 import { Tile } from '../tiles';
@@ -43,9 +43,10 @@ const ColorPicker = (props: ColorPickerProps): JSX.Element => {
   );
 };
 
-const PreviewTile = (props: { className?: string }) => {
+const PreviewTile = forwardRef<HTMLDivElement, { className?: string }>((props, ref) => {
   const [hsv] = useContext(ColorContext);
-  return <Tile className={props.className} hsv={hsv}></Tile>;
-};
+  return <Tile ref={ref} className={props.className} hsv={hsv}></Tile>;
+});
+PreviewTile.displayName = 'PreviewTile';
 
 export default ColorPicker;

@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from 'react';
+import React, { useCallback, useContext, useRef } from 'react';
 import throttle from 'lodash.throttle';
 import { grey } from '@material-ui/core/colors';
 import { HSVColor } from './colors';
@@ -8,24 +8,46 @@ export interface SaturationProps {
   className?: string;
 }
 
+/**
+ * This Saturation box's background is the hue of the current color in ColorContext,
+ * and has two gradients on top to simulate saturation and value.
+ * The pointer also moves.
+ * Sadly though, on Chrome / Chromium on Linux (at least on mine, Nvidia GPU), the onPointerMove gets throttled,
+ * which causes the pointer and previews to lag quite a lot. This problem doesn't happen on Android,
+ * Chrome on Windows, or Firefox on Linux.
+ * Maybe only solvable with canvas, idk.
+ * @param props props
+ */
 const Saturation = (props: SaturationProps) => {
   const [hsv, setHSV] = useContext(ColorContext);
   const cssColor = `hsl(${hsv.h * 360}, 100%, 50%)`;
   const backgroundRef = useRef<HTMLDivElement>(null);
 
-  const onPointerMove = throttle((pageX: number, pageY: number) => {
-    if (backgroundRef.current) {
-      const { width, height, left, top } = backgroundRef.current.getBoundingClientRect();
-      const mouseX = pageX - left - window.pageXOffset;
-      const mouseY = pageY - top - window.pageYOffset;
+  /**
+   * Calculates the resulting HSVColor based on the pointer position on the saturation canvas.
+   * @param mousePageX mouse position X coordinate
+   * @param mousePageY mouse position Y coordinate
+   */
+  const getHSVfromPointerPosition = useCallback(
+    (mousePageX: number, mousePageY: number, bg: HTMLDivElement): HSVColor => {
+      const { width, height, left, top } = bg.getBoundingClientRect();
+      const mouseX = mousePageX - left - window.pageXOffset;
+      const mouseY = mousePageY - top - window.pageYOffset;
       const x = mouseX < 0 ? 0 : mouseX > width ? width : mouseX;
       const y = mouseY < 0 ? 0 : mouseY > height ? height : mouseY;
 
-      const newColor = new HSVColor({
-        h: hsv.h,
-        s: x / width,
-        v: -y / height + 1,
+      return new HSVColor({
+        h: hsv.h, // hue remains the same
+        s: x / width, // saturation is based on horizontal position
+        v: -y / height + 1, // value is based on vertical position
       });
+    },
+    [hsv.h],
+  );
+
+  const onPointerMove = throttle((pageX: number, pageY: number) => {
+    if (backgroundRef.current) {
+      const newColor = getHSVfromPointerPosition(pageX, pageY, backgroundRef.current);
       setHSV(newColor);
     }
   }, 16);
