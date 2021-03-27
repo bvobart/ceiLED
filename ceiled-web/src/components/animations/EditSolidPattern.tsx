@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Button, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { SolidPattern } from '../../api/patterns';
-import ColorPicker from '../color-picking/ColorPicker';
-import { HSVColor } from '../color-picking/colors';
+import ColorPicker from '../colorpicking/ColorPicker';
+import { HSVColor } from '../colorpicking/colors';
 
 const useStyles = makeStyles({
   buttonCancel: {

@@ -12,7 +12,7 @@ import {
 import { ControlsProps } from '.';
 import { CeiledState } from '../api';
 import { Pattern, SolidPattern } from '../api/patterns';
-import { HSVColor } from '../components/color-picking/colors';
+import { HSVColor } from '../components/colorpicking/colors';
 import useCeiledAPI from '../hooks/api/useCeiledAPI';
 import { AllChannelPicker } from '../components/solids/AllChannelPicker';
 import { PerChannelPicker } from '../components/solids/PerChannelPicker';

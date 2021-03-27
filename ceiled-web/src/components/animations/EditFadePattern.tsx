@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Button, makeStyles, Grid } from '@material-ui/core';
 import { FadePattern, PatternType } from '../../api/patterns';
-import { HSVColor } from '../color-picking/colors';
+import { HSVColor } from '../colorpicking/colors';
 import OutlinedBox from '../global/OutlinedBox';
 import { EditableTile } from '../tiles';
 import { replace, remove, reorder } from './utils';

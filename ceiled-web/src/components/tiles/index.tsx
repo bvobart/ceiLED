@@ -2,8 +2,8 @@ import React, { FunctionComponent, useState, CSSProperties, forwardRef, PropsWit
 import { makeStyles, Grid, IconButton, Button } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteOutlined';
 import EditIcon from '@material-ui/icons/EditOutlined';
-import { HSVColor } from '../color-picking/colors';
-import ColorPicker from '../color-picking/ColorPicker';
+import { HSVColor } from '../colorpicking/colors';
+import ColorPicker from '../colorpicking/ColorPicker';
 
 const useStyles = makeStyles({
   button: {
@@ -88,13 +88,15 @@ export interface TileProps {
   style?: CSSProperties;
 }
 
-export const Tile = forwardRef<HTMLDivElement, PropsWithChildren<TileProps>>((props, ref) => {
-  const { className, children, hsv, style } = props;
-  const background = hsv ? hsv.toCSS() : 'rgba(0, 0, 0, 0)';
-  return (
-    <div ref={ref} className={className} style={{ ...style, background }}>
-      {children}
-    </div>
-  );
-});
+export const Tile = React.memo(
+  forwardRef<HTMLDivElement, PropsWithChildren<TileProps>>((props, ref) => {
+    const { className, children, hsv, style } = props;
+    const background = hsv ? hsv.toCSS() : 'rgba(0, 0, 0, 0)';
+    return (
+      <div ref={ref} className={className} style={{ ...style, background }}>
+        {children}
+      </div>
+    );
+  }),
+);
 Tile.displayName = 'Tile';

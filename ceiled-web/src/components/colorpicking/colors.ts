@@ -10,11 +10,37 @@ export interface IRGBColor {
   blue: number;
 }
 
+export interface IHSLColor {
+  h: number;
+  s: number;
+  l: number;
+}
+
 /**
  * HSVColor defines a colour by its Hue, Saturation and Value properties, go look that up on Wikipedia if you're unfamiliar.
  * The `h`, `s` and `v` values are assumed to be between 0 and 1.
  */
 export class HSVColor implements IHSVColor {
+  public static BLACK = new HSVColor({ h: 0, s: 0, v: 0 });
+  public static WHITE = new HSVColor({ h: 0, s: 0, v: 1 });
+
+  static grey(value: number): HSVColor {
+    return new HSVColor({ h: 0, s: 0, v: value });
+  }
+
+  static random(): HSVColor {
+    return new HSVColor({ h: Math.random(), s: Math.random(), v: Math.random() });
+  }
+
+  static is(c: any): c is IHSVColor {
+    return c && typeof c.h === 'number' && typeof c.s === 'number' && typeof c.v === 'number' // eslint-disable-line prettier/prettier
+             && c.h >= 0 && c.h <= 1  // eslint-disable-line prettier/prettier
+             && c.s >= 0 && c.s <= 1  // eslint-disable-line prettier/prettier
+             && c.v >= 0 && c.v <= 1; // eslint-disable-line prettier/prettier
+  }
+
+  // --------------------------------------------------
+
   h: number;
   s: number;
   v: number;
@@ -29,8 +55,21 @@ export class HSVColor implements IHSVColor {
     return this.toRGB().equals(other.toRGB());
   }
 
-  toCSS(): string {
-    return this.toRGB().toCSS();
+  toCSS(alpha?: number): string {
+    return this.toHSL().toCSS(alpha);
+  }
+
+  toHSL(): HSLColor {
+    const lum = ((2 - this.s) * this.v) / 2;
+
+    const sat = ((lum: number): number => {
+      if (lum == 0) return this.s;
+      if (lum == 1) return 0;
+      if (lum < 0.5) return (this.s * this.v) / (lum * 2);
+      return (this.s * this.v) / (2 - lum * 2);
+    })(lum);
+
+    return new HSLColor({ h: this.h, s: sat, l: lum });
   }
 
   /**
@@ -64,15 +103,31 @@ export class HSVColor implements IHSVColor {
     });
   }
 
-  static random(): HSVColor {
-    return new HSVColor({ h: Math.random(), s: Math.random(), v: Math.random() });
+  /**
+   * Applies a brightness adjustment to this colour.
+   * @param brightness brightness as percentage between 0 and 100.
+   */
+  withBrightness(brightness: number): HSVColor {
+    return new HSVColor({ h: this.h, s: this.s, v: (this.v * brightness) / 100 });
+  }
+}
+
+export class HSLColor implements IHSLColor {
+  // hue, float: [0..1]
+  h: number;
+  // saturation, float: [0..1]
+  s: number;
+  // luminosity, float: [0..1]
+  l: number;
+
+  constructor(color?: IHSLColor) {
+    this.h = color?.h || 0;
+    this.s = color?.s || 0;
+    this.l = color?.l || 0;
   }
 
-  static is(c: any): c is IHSVColor {
-    return c && typeof c.h === 'number' && typeof c.s === 'number' && typeof c.v === 'number' // eslint-disable-line prettier/prettier
-             && c.h >= 0 && c.h <= 1  // eslint-disable-line prettier/prettier
-             && c.s >= 0 && c.s <= 1  // eslint-disable-line prettier/prettier
-             && c.v >= 0 && c.v <= 1; // eslint-disable-line prettier/prettier
+  toCSS(alpha?: number): string {
+    return `hsla(${this.h * 360}, ${this.s * 100}%, ${this.l * 100}%, ${alpha ?? 1})`;
   }
 }
 

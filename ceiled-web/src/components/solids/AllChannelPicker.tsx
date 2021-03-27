@@ -1,8 +1,8 @@
 import React from 'react';
 import { GridList, GridListTile, makeStyles, Typography } from '@material-ui/core';
-import ColorPicker from '../color-picking/ColorPicker';
+import ColorPicker from '../colorpicking/ColorPicker';
 import { range } from '../animations/utils';
-import { HSVColor } from '../color-picking/colors';
+import { HSVColor } from '../colorpicking/colors';
 
 const useStyles = makeStyles({
   picker: {

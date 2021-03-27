@@ -2,7 +2,7 @@ import React, { FunctionComponent } from 'react';
 import { Moods } from '../../api/moods';
 import { FadeTile } from './patterns';
 import { FadePattern, PatternType } from '../../api/patterns';
-import { RGBColor } from '../color-picking/colors';
+import { RGBColor } from '../colorpicking/colors';
 
 export interface MoodTileProps {
   mood: Moods;

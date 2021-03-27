@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { makeStyles, MenuItem, Select } from '@material-ui/core';
 import { range } from '../animations/utils';
-import ColorPicker from '../color-picking/ColorPicker';
-import { HSVColor } from '../color-picking/colors';
+import ColorPicker from '../colorpicking/ColorPicker';
+import { HSVColor } from '../colorpicking/colors';
 import { SolidsState } from '../../controls/SolidControls';
 import throttle from 'lodash.throttle';
 

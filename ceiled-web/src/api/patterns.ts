@@ -1,4 +1,4 @@
-import { RGBColor, isRGBList, IRGBColor } from '../components/color-picking/colors';
+import { RGBColor, isRGBList, IRGBColor } from '../components/colorpicking/colors';
 
 export enum PatternType {
   SOLID = 'solid',
