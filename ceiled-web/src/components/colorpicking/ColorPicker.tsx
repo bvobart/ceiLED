@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { HSVColor } from './colors';
 import Brightness from './Brightness';
@@ -26,7 +26,6 @@ const useStyles = makeStyles({
   },
 });
 
-// TODO: ensure that last selected colour in each color picker persists even after refresh.
 // TODO: make double click on channel header copy the current colour to all other channels.
 
 /**
@@ -36,17 +35,20 @@ const ColorPicker = (props: ColorPickerProps): JSX.Element => {
   const classes = useStyles();
   const [hsv, setHSV] = useState(props.hsv);
 
-  const handleChangeValue = useCallback(
-    (newValue: number) => {
-      setHSV(new HSVColor({ h: hsv.h, s: hsv.s, v: newValue }));
-      // TODO: call onChange
-    },
-    [hsv.h, hsv.s],
-  );
+  const onChange = (newColor: HSVColor) => {
+    setHSV(newColor);
+    props.onChange(newColor);
+  };
+
+  const handleChangeHueSaturation = onChange;
+  const handleChangeValue = (newValue: number) => {
+    const newColor = new HSVColor({ h: hsv.h, s: hsv.s, v: newValue });
+    onChange(newColor);
+  };
 
   return (
     <div className={`${classes.root} ${props.className}`}>
-      <HueSaturation hue={hsv.h} saturation={hsv.s} value={hsv.v} onChange={setHSV} />
+      <HueSaturation hue={hsv.h} saturation={hsv.s} value={hsv.v} onChange={handleChangeHueSaturation} />
       <Brightness className={classes.brightness} value={hsv.v} onChange={handleChangeValue} />
     </div>
   );

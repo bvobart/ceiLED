@@ -24,10 +24,12 @@ export interface AllChannelPickerProps {
 
 export const AllChannelPicker = (props: AllChannelPickerProps) => {
   const classes = useStyles();
+  const { state } = props;
+
   return (
     <Grid container justify='space-between' alignItems='center' spacing={1}>
       {range(3).map(channel => {
-        const color = props.state.get(channel) || HSVColor.random();
+        const color = state.get(channel) || HSVColor.random();
         return (
           <Grid item xs={4} key={`solid-picker-${channel}`}>
             <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>
@@ -37,7 +39,7 @@ export const AllChannelPicker = (props: AllChannelPickerProps) => {
               preview
               className={classes.picker}
               hsv={color}
-              onChange={c => props.onChange(new Map(props.state.set(channel, c)))}
+              onChange={c => props.onChange(new Map(state.set(channel, c)))}
             />
           </Grid>
         );
