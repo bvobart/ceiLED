@@ -59,6 +59,10 @@ export class HSVColor implements IHSVColor {
     return this.toHSL().toCSS(alpha);
   }
 
+  /**
+   * Converts an HSV colour to HSL. All HSV and HSL components will be within 0 and 1.
+   * Code inspired by: https://stackoverflow.com/questions/3423214/convert-hsb-hsv-color-to-hsl
+   */
   toHSL(): HSLColor {
     const lum = ((2 - this.s) * this.v) / 2;
 

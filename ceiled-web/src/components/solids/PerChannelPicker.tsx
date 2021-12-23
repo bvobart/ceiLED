@@ -15,6 +15,7 @@ const useStyles = makeStyles({
     width: '100%',
   },
   picker: {
+    marginTop: '8px',
     minHeight: '276px',
   },
 });

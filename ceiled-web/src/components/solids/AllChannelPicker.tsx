@@ -1,5 +1,5 @@
 import React from 'react';
-import { GridList, GridListTile, makeStyles, Typography } from '@material-ui/core';
+import { Grid, makeStyles, Typography } from '@material-ui/core';
 import ColorPicker from '../colorpicking/ColorPicker';
 import { range } from '../animations/utils';
 import { HSVColor } from '../colorpicking/colors';
@@ -25,11 +25,11 @@ export interface AllChannelPickerProps {
 export const AllChannelPicker = (props: AllChannelPickerProps) => {
   const classes = useStyles();
   return (
-    <GridList className={classes.gridList} spacing={8} cellHeight='auto' cols={3}>
+    <Grid container justify='space-between' alignItems='center' spacing={1}>
       {range(3).map(channel => {
         const color = props.state.get(channel) || HSVColor.random();
         return (
-          <GridListTile key={`solid-picker-${channel}`}>
+          <Grid item xs={4} key={`solid-picker-${channel}`}>
             <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>
               Channel {channel + 1}
             </Typography>
@@ -39,9 +39,9 @@ export const AllChannelPicker = (props: AllChannelPickerProps) => {
               hsv={color}
               onChange={c => props.onChange(new Map(props.state.set(channel, c)))}
             />
-          </GridListTile>
+          </Grid>
         );
       })}
-    </GridList>
+    </Grid>
   );
 };

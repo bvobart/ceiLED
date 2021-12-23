@@ -1,5 +1,5 @@
 import { makeStyles } from '@material-ui/core';
-import React, { CSSProperties, FC, RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { CSSProperties, FC, RefObject, useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
 import useBrightness from '../../hooks/api/useBrightness';
 import { HSVColor } from './colors';
 import { inRange } from './utils';
@@ -12,14 +12,26 @@ export interface HueSaturationProps {
   onChange: (newHSV: HSVColor) => void;
 }
 
+const spacerHeight = 8;
+
 const useStyles = makeStyles({
   root: {
     position: 'relative',
     display: 'inline-grid',
     width: '100%',
-    height: '248px',
+    height: '256px',
+  },
+  spacer: {
+    minHeight: `${spacerHeight}px`,
+    width: '100%',
   },
 });
+
+const previewStyle: CSSProperties = {
+  boxShadow: '0px 2px 3px rgba(0,0,0,.5)',
+};
+
+const pickerStyle = previewStyle;
 
 /**
  * Basic styles for the pointer
@@ -49,11 +61,16 @@ const HueSaturation: FC<HueSaturationProps> = props => {
   // assume 250 x 200 viewpoint on first render, afterwards the offsetWidth and offsetHeight will be set.
   const [rootWidth, setRootWidth] = useState(rootRef.current?.offsetWidth || 250);
   const [rootHeight, setRootHeight] = useState(rootRef.current?.offsetHeight || 200);
-  useEffect(() => {
+  const setCurrentSize = useCallback(() => {
     if (!rootRef.current) return;
     setRootWidth(rootRef.current.offsetWidth);
     setRootHeight(rootRef.current.offsetHeight);
-  }, []);
+  }, [rootRef]);
+  useLayoutEffect(() => {
+    setCurrentSize();
+    window.addEventListener('resize', setCurrentSize);
+    return () => window.removeEventListener('resize', setCurrentSize);
+  }, [setCurrentSize]);
 
   const dpi = window.devicePixelRatio || 1;
   const width = rootWidth * dpi;
@@ -65,7 +82,7 @@ const HueSaturation: FC<HueSaturationProps> = props => {
   // calculate pointer { x, y } position on picker canvas
   const { hue, saturation, value, onChange } = props;
   const x = width * hue;
-  const y = previewHeight + pickerHeight * (1 - saturation);
+  const y = previewHeight + spacerHeight + pickerHeight * (1 - saturation);
 
   // make colour picker apply global brightness level.
   const [brightness] = useBrightness();
@@ -126,25 +143,26 @@ const HueSaturation: FC<HueSaturationProps> = props => {
   // upon component mount and unmount, also mount / unmount the listener for when pointer is moved.
   useLayoutEffect(() => {
     moverRef.current.mount();
-    return moverRef.current.unmount();
+    return moverRef.current.unmount.bind(moverRef.current);
   }, []);
 
   const classes = useStyles();
   return (
-    <div ref={rootRef} className={`${classes.root} ${props.className}`}>
+    <div ref={rootRef} className={`${classes.root} ${props.className ?? ''}`}>
       {/* preview */}
       <canvas
         ref={previewRef}
         width={width}
         height={previewHeight}
-        style={{ width: `${width / dpi}px`, height: `${previewHeight / dpi}px` }}
+        style={{ ...previewStyle, width: `${width / dpi}px`, height: `${previewHeight / dpi}px` }}
       />
+      <div className={classes.spacer} />
       {/* picker */}
       <canvas
         ref={pickerRef}
         width={width}
         height={pickerHeight}
-        style={{ width: `${width / dpi}px`, height: `${pickerHeight / dpi}px` }}
+        style={{ ...pickerStyle, width: `${width / dpi}px`, height: `${pickerHeight / dpi}px` }}
       />
       {/* pointer */}
       <canvas

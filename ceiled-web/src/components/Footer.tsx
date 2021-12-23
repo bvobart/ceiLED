@@ -8,6 +8,9 @@ const useStyles = makeStyles({
   about: {
     padding: '16px 0px 0px 0px',
   },
+  aboutButton: {
+    boxShadow: 'none',
+  },
 });
 
 export interface FooterProps {
@@ -24,7 +27,7 @@ const Footer = (props: FooterProps): JSX.Element => {
     <Card ref={ref} className={props.className}>
       <CardContent>
         <Grid container justify='space-between' alignItems='center'>
-          <Button variant='text' onClick={() => setShowAbout(!showAbout)}>
+          <Button className={classes.aboutButton} variant='text' onClick={() => setShowAbout(!showAbout)}>
             About
           </Button>
           <Typography variant='subtitle2'>Status - {status}</Typography>
