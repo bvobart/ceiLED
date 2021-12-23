@@ -30,9 +30,13 @@ const AnimationControls = (props: ControlsProps): JSX.Element => {
         <AccordionSummary onClick={() => setExpanded(!expanded)}>
           <Grid container justify='space-between'>
             <Typography variant='h6'>Animations</Typography>
-            <Grid item container xs={4} justify='space-between'>
-              <SendButton disabled={!expanded} />
-              <SyncButton disabled={!expanded} />
+            <Grid item container xs={4} justify='flex-end' spacing={2}>
+              <Grid item>
+                <SendButton disabled={!expanded} />
+              </Grid>
+              <Grid item>
+                <SyncButton disabled={!expanded} />
+              </Grid>
             </Grid>
           </Grid>
         </AccordionSummary>
