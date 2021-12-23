@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Grid, makeStyles, Typography } from '@material-ui/core';
 import ColorPicker from '../colorpicking/ColorPicker';
 import { range } from '../animations/utils';
@@ -24,22 +24,48 @@ export interface AllChannelPickerProps {
 
 export const AllChannelPicker = (props: AllChannelPickerProps) => {
   const classes = useStyles();
-  const { state } = props;
+  const { state, onChange: onChangeProp } = props;
+  const [clickCount, setClickCount] = useState(0);
+
+  const onChange = useCallback(
+    (newState: Map<number, HSVColor>) => {
+      onChangeProp(newState);
+    },
+    [onChangeProp],
+  );
+
+  /**
+   * On double clicking the header for a specific channel,
+   * set the picked colour of that channel on all channels
+   */
+  const onDoubleClickHeader = (channel: number) => {
+    const color = state.get(channel);
+    if (!color) return;
+
+    for (const i of range(3)) {
+      state.set(i, color);
+    }
+
+    onChange(new Map(state));
+    setClickCount(clickCount + 1); // refresh other pickers
+  };
 
   return (
     <Grid container justify='space-between' alignItems='center' spacing={1}>
       {range(3).map(channel => {
         const color = state.get(channel) || HSVColor.random();
         return (
-          <Grid item xs={4} key={`solid-picker-${channel}`}>
-            <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>
-              Channel {channel + 1}
-            </Typography>
+          <Grid item xs={4} key={`solid-picker-${channel}-${clickCount}`}>
+            <div onDoubleClick={() => onDoubleClickHeader(channel)}>
+              <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>
+                Channel {channel + 1}
+              </Typography>
+            </div>
             <ColorPicker
               preview
               className={classes.picker}
               hsv={color}
-              onChange={c => props.onChange(new Map(state.set(channel, c)))}
+              onChange={c => onChange(new Map(state.set(channel, c)))}
             />
           </Grid>
         );
