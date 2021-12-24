@@ -4,7 +4,7 @@
   "description": "TypeScript NodeJS WebSocket server for displaying patterns on LED devices connected through ceiled-driver.",
   "main": "src/server.ts",
   "engines": {
-    "node": "~12"
+    "node": ">12"
   },
   "typings": "src/typings.d.ts",
   "author": "Bart van Oort",
