@@ -1,7 +1,6 @@
 import { readFileSync } from 'fs';
 import { createServer } from 'https';
 import * as SocketIO from 'socket.io';
-
 import AuthRepository from '../auth/AuthRepository';
 import { decodeAnimationMap } from '../patterns/Animation';
 import { decodePattern, decodePatternMap } from '../patterns/Pattern';
@@ -58,7 +57,7 @@ export class APIServer {
    * @param keyFile path to SSL private key file
    * @param certFile path to SSL public certificate file
    */
-  public listen(port: number, keyFile?: string, certFile?: string): void {
+  listen(port: number, keyFile?: string, certFile?: string): void {
     if (keyFile && certFile) {
       const httpsServer = createServer({
         key: readFileSync(keyFile),
@@ -76,12 +75,12 @@ export class APIServer {
   /**
    * Closes the server
    */
-  public close(): Promise<void> {
-    return new Promise((resolve) => {
+  async close(): Promise<void> {
+    return new Promise(resolve => {
       if (!this.server) return resolve();
 
       this.server.emit(Events.SERVER, 'closing');
-      this.server.close(resolve);
+      this.server.close(() => resolve());
     });
   }
 
@@ -122,21 +121,21 @@ export class APIServer {
 
     socket.on(Events.DISCONNECT, this.handleDisconnect.bind(this));
 
-    socket.on(Events.BRIGHTNESS, (m: any) =>
-      this.authorised(handleError(this.handleBrightness.bind(this)))(Events.BRIGHTNESS, socket, m),
-    );
-    socket.on(Events.ROOMLIGHT, (m: any) =>
-      this.authorised(handleError(this.handleRoomlight.bind(this)))(Events.ROOMLIGHT, socket, m),
-    );
-    socket.on(Events.FLUX, (m: any) =>
-      this.authorised(handleError(this.handleFlux.bind(this)))(Events.FLUX, socket, m),
-    );
-    socket.on(Events.CEILED, (m: any) =>
-      this.authorised(handleError(this.handleCeiled.bind(this)))(Events.CEILED, socket, m),
-    );
-    socket.on(Events.SPEED, (m: any) =>
-      this.authorised(handleError(this.handleSpeed.bind(this)))(Events.SPEED, socket, m),
-    );
+    socket.on(Events.BRIGHTNESS, (m: any) => {
+      void this.authorised(handleError(this.handleBrightness.bind(this)))(Events.BRIGHTNESS, socket, m) // eslint-disable-line prettier/prettier
+    });
+    socket.on(Events.ROOMLIGHT, (m: any) => {
+      void this.authorised(handleError(this.handleRoomlight.bind(this)))(Events.ROOMLIGHT, socket, m) // eslint-disable-line prettier/prettier
+    });
+    socket.on(Events.FLUX, (m: any) => {
+      void this.authorised(handleError(this.handleFlux.bind(this)))(Events.FLUX, socket, m) // eslint-disable-line prettier/prettier
+    });
+    socket.on(Events.CEILED, (m: any) => {
+      void this.authorised(handleError(this.handleCeiled.bind(this)))(Events.CEILED, socket, m) // eslint-disable-line prettier/prettier
+    });
+    socket.on(Events.SPEED, (m: any) => {
+      void this.authorised(handleError(this.handleSpeed.bind(this)))(Events.SPEED, socket, m) // eslint-disable-line prettier/prettier
+    });
   }
 
   /**
@@ -287,10 +286,11 @@ const handleError = (
     try {
       await handler(socket, message);
     } catch (error) {
+      const err = error as Error;
       console.error('!---------------------------!');
-      console.error('--> An internal error occurred on', event, ':', error);
+      console.error('--> An internal error occurred on', event, ':', err);
       console.error('!---------------------------!');
-      socket.emit(Events.ERRORS, new InternalErrorMessage(event, message, error));
+      socket.emit(Events.ERRORS, new InternalErrorMessage(event, message, err));
     }
   };
 };

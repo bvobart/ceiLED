@@ -15,53 +15,55 @@ export interface IColor {
  */
 export class Color implements IColor {
   /** The colour black. */
-  public static BLACK: Color = new Color({ red: 0, green: 0, blue: 0 });
+  static BLACK: Color = new Color({ red: 0, green: 0, blue: 0 });
   /** The colour white */
-  public static WHITE: Color = new Color({ red: 255, green: 255, blue: 255 });
+  static WHITE: Color = new Color({ red: 255, green: 255, blue: 255 });
 
   /** The colour red */
-  public static RED: Color = new Color({ red: 255, green: 0, blue: 0 });
+  static RED: Color = new Color({ red: 255, green: 0, blue: 0 });
   /** The colour orange */
-  public static ORANGE: Color = new Color({ red: 255, green: 127, blue: 0 });
+  static ORANGE: Color = new Color({ red: 255, green: 127, blue: 0 });
   /** The colour yellow */
-  public static YELLOW: Color = new Color({ red: 255, green: 255, blue: 0 });
+  static YELLOW: Color = new Color({ red: 255, green: 255, blue: 0 });
   /** The colour lime */
-  public static LIME: Color = new Color({ red: 172, green: 255, blue: 0 });
+  static LIME: Color = new Color({ red: 172, green: 255, blue: 0 });
   /** The colour green */
-  public static GREEN: Color = new Color({ red: 0, green: 255, blue: 0 });
+  static GREEN: Color = new Color({ red: 0, green: 255, blue: 0 });
   /** The color turquoise */
-  public static TURQUOISE: Color = new Color({ red: 0, green: 164, blue: 255 });
+  static TURQUOISE: Color = new Color({ red: 0, green: 164, blue: 255 });
   /** The colour light blue */
-  public static LIGHTBLUE: Color = new Color({ red: 0, green: 255, blue: 255 });
+  static LIGHTBLUE: Color = new Color({ red: 0, green: 255, blue: 255 });
   /** The colour blue */
-  public static BLUE: Color = new Color({ red: 0, green: 0, blue: 255 });
+  static BLUE: Color = new Color({ red: 0, green: 0, blue: 255 });
   /** The colour purple */
-  public static PURPLE: Color = new Color({ red: 200, green: 0, blue: 255 });
+  static PURPLE: Color = new Color({ red: 200, green: 0, blue: 255 });
   /** The colour pink */
-  public static PINK: Color = new Color({ red: 255, green: 0, blue: 200 });
+  static PINK: Color = new Color({ red: 255, green: 0, blue: 200 });
 
   /** The colour of standard room lighting */
-  public static ROOMLIGHT: Color = new Color({ red: 255, green: 132, blue: 24 });
+  static ROOMLIGHT: Color = new Color({ red: 255, green: 132, blue: 24 });
   /** The colour used for flux setting 1, i.e. 6000K */
-  public static FLUX1: Color = new Color({ red: 255, green: 246, blue: 237 });
+  static FLUX1: Color = new Color({ red: 255, green: 246, blue: 237 });
   /** The colour used for flux setting 2, i.e. 5500K */
-  public static FLUX2: Color = new Color({ red: 255, green: 237, blue: 222 });
+  static FLUX2: Color = new Color({ red: 255, green: 237, blue: 222 });
   /** The colour used for flux setting 3, i.e. 5000K */
-  public static FLUX3: Color = new Color({ red: 255, green: 228, blue: 206 });
+  static FLUX3: Color = new Color({ red: 255, green: 228, blue: 206 });
   /** The colour used for flux setting 4, i.e. 4500K */
-  public static FLUX4: Color = new Color({ red: 255, green: 218, blue: 187 });
+  static FLUX4: Color = new Color({ red: 255, green: 218, blue: 187 });
   /** The colour used for flux setting 5, i.e. 4000K */
-  public static FLUX5: Color = new Color({ red: 255, green: 206, blue: 166 });
+  static FLUX5: Color = new Color({ red: 255, green: 206, blue: 166 });
 
-  public static is(x: any): x is IColor {
-    return typeof x.red === 'number' && typeof x.green === 'number' && typeof x.blue === 'number';
+  static is(x: any): x is IColor {
+    return Boolean(
+      x && typeof x.red === 'number' && typeof x.green === 'number' && typeof x.blue === 'number',
+    );
   }
 
-  public static isList(xs: any): xs is IColor[] {
+  static isList(xs: any): xs is IColor[] {
     return Array.isArray(xs) && !xs.some(c => !Color.is(c));
   }
 
-  public static random(): Color {
+  static random(): Color {
     return new Color({
       red: Math.round(Math.random() * 255),
       green: Math.round(Math.random() * 255),
@@ -70,16 +72,16 @@ export class Color implements IColor {
   }
 
   /** The amount of red in this colour. */
-  public red: number;
+  red: number;
   /** The amount of green in this colour. */
-  public green: number;
+  green: number;
   /** The amount of blue in this colour. */
-  public blue: number;
+  blue: number;
 
   constructor({ red, green, blue }: IColor) {
-    if (red < 0 || red > 255) throw new Error('Red value not in range: ' + red);
-    if (green < 0 || green > 255) throw new Error('Green value not in range: ' + green);
-    if (blue < 0 || blue > 255) throw new Error('Blue value not in range: ' + blue);
+    if (red < 0 || red > 255) throw new Error(`Red value not in range: ${red}`);
+    if (green < 0 || green > 255) throw new Error(`Green value not in range: ${green}`);
+    if (blue < 0 || blue > 255) throw new Error(`Blue value not in range: ${blue}`);
 
     this.red = red;
     this.green = green;
@@ -90,7 +92,7 @@ export class Color implements IColor {
    * Mixes this colour with another colour.
    * @param color color to mix with
    */
-  public blend(color: Color): Color {
+  blend(color: Color): Color {
     return new Color({
       red: Math.round(this.red * (color.red / 255)),
       green: Math.round(this.green * (color.green / 255)),
@@ -102,9 +104,9 @@ export class Color implements IColor {
    * Sets this colour to a specific brightness.
    * @param brightness Percentage of colour brightness
    */
-  public withBrightness(brightness: number): Color {
+  withBrightness(brightness: number): Color {
     if (brightness < 0 || brightness > 100)
-      throw new Error('Brightness not in range: ' + brightness);
+      throw new Error(`Brightness not in range: ${brightness}`);
     if (brightness === 0) return Color.BLACK;
     if (brightness === 100) return this;
 
@@ -120,8 +122,8 @@ export class Color implements IColor {
    * Blends this colour with some standard room lighting colour.
    * @param roomLight Percentage of room light to be blended through.
    */
-  public withRoomLight(roomLight: number): Color {
-    if (roomLight < 0 || roomLight > 100) throw new Error('Room light not in range: ' + roomLight);
+  withRoomLight(roomLight: number): Color {
+    if (roomLight < 0 || roomLight > 100) throw new Error(`Room light not in range: ${roomLight}`);
     if (roomLight === 0) return this;
     if (roomLight === 100) return Color.ROOMLIGHT;
 
@@ -137,7 +139,7 @@ export class Color implements IColor {
    * Blend this colour with one of the flux colours given the flux setting.
    * @param flux current flux setting, see ControllerSettings for more detail
    */
-  public withFlux(flux: number): Color {
+  withFlux(flux: number): Color {
     switch (flux) {
       case 0:
         return this;

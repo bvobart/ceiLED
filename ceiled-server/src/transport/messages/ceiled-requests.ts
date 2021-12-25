@@ -39,12 +39,12 @@ export class GetPatternRequest implements AuthorisedRequest {
 
 export class SetPatternRequest implements AuthorisedRequest {
   public static is(x: any): x is SetPatternRequest {
-    return (
+    return Boolean(
       x.action === 'set' &&
-      (x.channel === 'all' || typeof x.channel === 'number') &&
-      x.pattern &&
-      isPattern(x.pattern) &&
-      AuthorisedRequest.is(x)
+        (x.channel === 'all' || typeof x.channel === 'number') &&
+        x.pattern &&
+        isPattern(x.pattern) &&
+        AuthorisedRequest.is(x),
     );
   }
 
@@ -110,7 +110,11 @@ export class SetAnimationsRequest implements AuthorisedRequest {
 
 export class SetMoodRequest implements AuthorisedRequest {
   public static is(x: any): x is SetMoodRequest {
-    return x.action === 'set' && Object.values(Moods).includes(x.mood) && AuthorisedRequest.is(x);
+    return (
+      x.action === 'set' &&
+      Object.values(Moods).includes(x.mood as Moods) &&
+      AuthorisedRequest.is(x)
+    );
   }
 
   authToken: string;

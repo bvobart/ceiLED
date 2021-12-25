@@ -4,10 +4,10 @@ import { FadePattern } from './FadePattern';
 import { SolidPattern } from './SolidPattern';
 
 export enum PatternType {
-  MOOD = 'mood',
-  SOLID = 'solid',
-  FADE_LINEAR = 'fade-linear',
-  FADE_SIGMOID = 'fade-sigmoid',
+  Mood = 'mood',
+  Solid = 'solid',
+  FadeLinear = 'fade-linear',
+  FadeSigmoid = 'fade-sigmoid',
 }
 
 export interface IPattern {
@@ -31,7 +31,7 @@ export interface Pattern extends IPattern {
 }
 
 export const isPattern = (x: any): x is IPattern => {
-  return Object.values(PatternType).includes(x.type) && typeof x.length === 'number';
+  return Object.values(PatternType).includes(x.type as PatternType) && typeof x.length === 'number';
 };
 
 export const isPatternArray = (x: any): x is IPattern[] => {
@@ -39,28 +39,29 @@ export const isPatternArray = (x: any): x is IPattern[] => {
 };
 
 export const decodePattern = (p: any): Pattern => {
-  if (!Object.values(PatternType).includes(p.type)) {
-    throw new Error(`Invalid pattern type: ${p.type}`);
+  if (!Object.values(PatternType).includes(p.type as PatternType)) {
+    throw new Error(`Invalid pattern type: ${JSON.stringify(p.type)}`);
   }
 
   if (typeof p.length !== 'number') {
-    throw new Error(`Invalid pattern length: not a number: ${p.length}`);
+    throw new Error(`Invalid pattern length: not a number: ${JSON.stringify(p.length)}`);
   }
 
-  if (p.type === PatternType.SOLID) {
+  if (p.type === PatternType.Solid) {
     if (Color.is(p.color)) {
-      return new SolidPattern(p.length, new Color(p.color));
+      return new SolidPattern(p.length as number, new Color(p.color as IColor));
     } else {
       throw new Error(`Invalid solid pattern: Invalid color: ${JSON.stringify(p.color)}`);
     }
   }
 
-  if (p.type === PatternType.FADE_LINEAR || p.type === PatternType.FADE_SIGMOID) {
+  if (p.type === PatternType.FadeLinear || p.type === PatternType.FadeSigmoid) {
     if (Color.isList(p.colors)) {
+      const colors = p.colors as IColor[];
       return new FadePattern(
-        p.type,
-        p.length,
-        p.colors.map((c: IColor) => new Color(c)),
+        p.type as PatternType.FadeLinear | PatternType.FadeSigmoid,
+        p.length as number,
+        colors.map((c: IColor) => new Color(c)),
       );
     } else {
       throw new Error(`Invalid fade pattern: invalid colors: ${JSON.stringify(p.colors)}`);

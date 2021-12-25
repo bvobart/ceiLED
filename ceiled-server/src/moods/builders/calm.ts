@@ -13,6 +13,6 @@ const colors = [
 /**
  * Calm: primarily roomlight, but with nuanced warm colour accents
  */
-export const builder = () => {
-  return new AlternatingFadeBuilder().colors(colors).type(PatternType.FADE_LINEAR);
+export const builder = (): AlternatingFadeBuilder => {
+  return new AlternatingFadeBuilder().colors(colors).type(PatternType.FadeLinear);
 };

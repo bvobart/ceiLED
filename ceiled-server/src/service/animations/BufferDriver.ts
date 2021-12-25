@@ -3,7 +3,7 @@ import { Driver } from '../../hardware/Driver';
 import { InterpolationType } from '../../hardware/interpolate';
 
 export class BufferDriver implements Driver {
-  public channels: number;
+  channels: number;
 
   // the underlying driver
   private driver: Driver;
@@ -21,14 +21,14 @@ export class BufferDriver implements Driver {
     this.fadeBuffer = new Map<number, Color>();
   }
 
-  public setColors(colors: Map<number, Color>): Promise<void> {
+  async setColors(colors: Map<number, Color>): Promise<void> {
     for (const [channel, color] of colors.entries()) {
       this.colorBuffer.set(channel, color);
     }
     return Promise.resolve();
   }
 
-  public setFades(
+  async setFades(
     colors: Map<number, Color>,
     millis: number,
     interpolation: InterpolationType = InterpolationType.LINEAR,
@@ -48,39 +48,39 @@ export class BufferDriver implements Driver {
     this.fadeBuffer.clear();
   }
 
-  public connect(): Promise<void> {
+  async connect(): Promise<void> {
     return this.driver.connect();
   }
 
-  public close(): void {
+  close(): void {
     return this.driver.close();
   }
 
-  public off(): Promise<void> {
+  async off(): Promise<void> {
     return this.driver.off();
   }
 
-  public setBrightness(brightness: number): Promise<void> {
+  async setBrightness(brightness: number): Promise<void> {
     return this.setBrightness(brightness);
   }
 
-  public getBrightness(): Promise<number> {
+  async getBrightness(): Promise<number> {
     return this.driver.getBrightness();
   }
 
-  public setRoomlight(roomlight: number): Promise<void> {
+  async setRoomlight(roomlight: number): Promise<void> {
     return this.driver.setRoomlight(roomlight);
   }
 
-  public getRoomlight(): Promise<number> {
+  async getRoomlight(): Promise<number> {
     return this.driver.getRoomlight();
   }
 
-  public setFlux(flux: number): Promise<void> {
+  async setFlux(flux: number): Promise<void> {
     return this.driver.setFlux(flux);
   }
 
-  public getFlux(): Promise<number> {
+  async getFlux(): Promise<number> {
     return this.driver.getFlux();
   }
 }

@@ -17,11 +17,9 @@ export class Interpolate {
   ): (delta: number, currentStep: number, totalSteps: number) => number {
     switch (type) {
       case InterpolationType.LINEAR:
-        return Interpolate.linear;
+        return Interpolate.linear; // eslint-disable-line @typescript-eslint/unbound-method
       case InterpolationType.SIGMOID:
-        return Interpolate.sigmoid;
-      default:
-        throw new TypeError('Invalid InterpolationType: ' + type);
+        return Interpolate.sigmoid; // eslint-disable-line @typescript-eslint/unbound-method
     }
   }
 

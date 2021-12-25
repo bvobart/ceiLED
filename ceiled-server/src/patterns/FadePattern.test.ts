@@ -1,11 +1,11 @@
 import { mocked } from 'ts-jest/utils';
 import Color from '../common/Color';
+import { CeiledDriver } from '../hardware/CeiledDriver';
 import { InterpolationType } from '../hardware/interpolate';
 import { FadePattern } from './FadePattern';
 import { PatternType } from './Pattern';
 import { range } from './utils';
 
-import { CeiledDriver } from '../hardware/CeiledDriver';
 jest.mock('../hardware/CeiledDriver.ts');
 
 describe('FadePattern', () => {
@@ -13,13 +13,13 @@ describe('FadePattern', () => {
     const driver = mocked(new CeiledDriver('mocked', 1), true);
     const colors = [Color.PURPLE, Color.RED, Color.BLUE];
     const length = 3;
-    const pattern = new FadePattern(PatternType.FADE_LINEAR, length, colors);
+    const pattern = new FadePattern(PatternType.FadeLinear, length, colors);
 
     // expected behaviour: call setFades with purple, then red, then blue
     for (const i of range(length)) {
       await pattern.show(0, driver, 120);
       const fades = new Map().set(0, colors[i]);
-      expect(driver.setFades).toHaveBeenCalledWith(fades, 500, InterpolationType.LINEAR);
+      expect(driver.setFades).toHaveBeenCalledWith(fades, 500, InterpolationType.LINEAR); // eslint-disable-line @typescript-eslint/unbound-method
       driver.setFades.mockClear();
     }
 
@@ -29,7 +29,7 @@ describe('FadePattern', () => {
       for (const i of range(length)) {
         await pattern.show(0, driver, 120);
         const fades = new Map().set(0, colors[i]);
-        expect(driver.setFades).toHaveBeenCalledWith(fades, 500, InterpolationType.LINEAR);
+        expect(driver.setFades).toHaveBeenCalledWith(fades, 500, InterpolationType.LINEAR); // eslint-disable-line @typescript-eslint/unbound-method
         driver.setFades.mockClear();
       }
     }

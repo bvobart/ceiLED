@@ -9,7 +9,7 @@ describe('Animation', () => {
     it('loops continuously over list of patterns with length 1', () => {
       const patterns = [
         new SolidPattern(1, Color.BLACK),
-        new FadePattern(PatternType.FADE_SIGMOID, 1, [Color.BLUE]),
+        new FadePattern(PatternType.FadeSigmoid, 1, [Color.BLUE]),
         new SolidPattern(1, Color.RED),
       ];
       const anim = new Animation(patterns);
@@ -25,7 +25,7 @@ describe('Animation', () => {
       const patterns = [
         new SolidPattern(2, Color.BLACK),
         new SolidPattern(3, Color.RED),
-        new FadePattern(PatternType.FADE_SIGMOID, 1, [Color.GREEN]),
+        new FadePattern(PatternType.FadeSigmoid, 1, [Color.GREEN]),
       ];
       const anim = new Animation(patterns);
       expect(anim.next().value).toEqual(patterns[0]);

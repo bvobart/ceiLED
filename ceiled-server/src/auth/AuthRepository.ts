@@ -13,16 +13,16 @@ export class AuthRepository {
     this.collection = collection;
   }
 
-  public findByToken(token: string): Promise<Auth | null> {
+  async findByToken(token: string): Promise<Auth | null> {
     return this.collection.findOne({ token });
   }
 
-  public async create(token: string, name: string): Promise<void> {
+  async create(token: string, name: string): Promise<void> {
     const res = await this.collection.insertOne({ token, name });
     if (!res.result.ok) throw new Error('Auth token was not inserted an unknown reason');
   }
 
-  public async list(): Promise<Auth[]> {
+  async list(): Promise<Auth[]> {
     return this.collection.find().toArray();
   }
 
@@ -31,7 +31,7 @@ export class AuthRepository {
    * Returns the amount of documents deleted.
    * @param nameOrToken the name or token by which to find the entry
    */
-  public async remove(nameOrToken: string): Promise<number> {
+  async remove(nameOrToken: string): Promise<number> {
     const res = await this.collection.deleteOne({
       $or: [{ name: nameOrToken }, { token: nameOrToken }],
     });
@@ -43,7 +43,7 @@ export class AuthRepository {
    * Returns the amount of documents deleted.
    * @param nameOrToken the names or tokens by which to find the entries
    */
-  public async removeMany(namesOrTokens: string[]): Promise<number> {
+  async removeMany(namesOrTokens: string[]): Promise<number> {
     const res = await this.collection.deleteMany({
       $or: [{ name: { $in: namesOrTokens } }, { token: { $in: namesOrTokens } }],
     });

@@ -1,11 +1,8 @@
-import * as Bluebird from 'bluebird';
-Bluebird.config({ cancellation: true });
-
 import AuthRepository from './auth/AuthRepository';
+import { Config } from './config';
 import { CeiledDriver } from './hardware/CeiledDriver';
 import { CeiledService } from './service/CeiledService';
 import { APIServer } from './transport/APIServer';
-import { Config } from './config';
 import { connectToMongoDB } from './utils';
 
 /**
@@ -35,7 +32,7 @@ const launch = async (): Promise<void> => {
    * When the main process exits, this function performs a graceful shutdown.
    * @param code Exit code
    */
-  const onExit = (code: any) => {
+  const onExit = (code?: number) => {
     driver.close();
     void server.close();
     process.exit(code);

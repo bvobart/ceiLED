@@ -34,13 +34,13 @@ export class CeiledService implements Service {
   // ----  Flux  ----
   // --            --
 
-  public async getBrightness(): Promise<number> {
+  async getBrightness(): Promise<number> {
     const brightness = Math.round((await this.driver.getBrightness()) / 2.55);
     this.state.brightness = brightness;
     return brightness;
   }
 
-  public async setBrightness(brightness: number): Promise<void> {
+  async setBrightness(brightness: number): Promise<void> {
     const newBrightness = inRange(brightness, 0, 100);
     if (this.state.brightness === newBrightness) return Promise.resolve();
 
@@ -57,13 +57,13 @@ export class CeiledService implements Service {
   // ----  Flux  ----
   // --            --
 
-  public async getRoomlight(): Promise<number> {
+  async getRoomlight(): Promise<number> {
     const roomlight = Math.round((await this.driver.getRoomlight()) / 2.55);
     this.state.roomlight = roomlight;
     return roomlight;
   }
 
-  public async setRoomlight(roomlight: number): Promise<void> {
+  async setRoomlight(roomlight: number): Promise<void> {
     const newRoomlight = inRange(roomlight, 0, 100);
     if (this.state.roomlight === newRoomlight) return Promise.resolve();
 
@@ -80,7 +80,7 @@ export class CeiledService implements Service {
   // ----  Flux  ----
   // --            --
 
-  public async getFlux(): Promise<number> {
+  async getFlux(): Promise<number> {
     if (this.state.flux === -1) return -1;
 
     const flux = await this.driver.getFlux();
@@ -88,7 +88,7 @@ export class CeiledService implements Service {
     return flux;
   }
 
-  public async setFlux(flux: number): Promise<void> {
+  async setFlux(flux: number): Promise<void> {
     const newFlux = inRange(flux, -1, 5);
     if (this.state.flux === newFlux) return Promise.resolve();
 
@@ -110,7 +110,7 @@ export class CeiledService implements Service {
   // ----  Off  ----
   // --           --
 
-  public off(): Promise<void> {
+  async off(): Promise<void> {
     this.state.mode = DisplayMode.Off;
     return this.driver.off();
   }
@@ -119,14 +119,14 @@ export class CeiledService implements Service {
   // ----  Patterns  ----
   // --                --
 
-  public getPattern(channel: number): Promise<Pattern | undefined> {
+  async getPattern(channel: number): Promise<Pattern | undefined> {
     if (this.animationEngine.isRunning()) {
       return Promise.resolve(this.animationEngine.getCurrentPattern(channel));
     }
     return Promise.resolve(this.state.current.patterns.get(channel));
   }
 
-  public getPatterns(): Promise<Map<number, Pattern>> {
+  async getPatterns(): Promise<Map<number, Pattern>> {
     if (this.animationEngine.isRunning()) {
       return Promise.resolve(this.animationEngine.getCurrentPatterns());
     }
@@ -137,7 +137,7 @@ export class CeiledService implements Service {
   // ----  Solids  ----
   // --              --
 
-  public setPattern(channel: number | 'all', pattern: Pattern): Promise<void> {
+  async setPattern(channel: number | 'all', pattern: Pattern): Promise<void> {
     if (channel === 'all') {
       for (const c of range(this.driver.channels)) this.state.current.patterns.set(c, pattern);
     } else {
@@ -165,7 +165,7 @@ export class CeiledService implements Service {
   // ----  Animations  ----
   // --                  --
 
-  public setAnimations(animations: Map<number, Animation>): Promise<void> {
+  async setAnimations(animations: Map<number, Animation>): Promise<void> {
     for (const [channel, animation] of animations) {
       if (channel >= this.driver.channels) throw new Error(`invalid channel ${channel}`);
       if (animation.patterns.length < 1)
@@ -185,7 +185,7 @@ export class CeiledService implements Service {
    * Sets a mood, see the `ceiled-server/moods` folder for the configured moods.
    * @param mood the mood to be set
    */
-  public setMood(mood: Moods): Promise<void> {
+  async setMood(mood: Moods): Promise<void> {
     const animations = moods.builder(mood).channels(this.driver.channels).generate();
     this.state.mode = DisplayMode.Mood;
     this.state.current.mood = mood;
@@ -197,11 +197,11 @@ export class CeiledService implements Service {
   // ----  Animation speed  ----
   // --                       --
 
-  public getSpeed(): Promise<number> {
+  async getSpeed(): Promise<number> {
     return Promise.resolve(this.animationEngine.speed);
   }
 
-  public setSpeed(speed: number): Promise<void> {
+  async setSpeed(speed: number): Promise<void> {
     return this.animationEngine.setSpeed(speed);
   }
 
@@ -221,10 +221,12 @@ export class CeiledService implements Service {
   /**
    * Enables automatic flux setting. Will keep calling itself until `clearAutoFluxTimer` is called.
    */
-  private autoUpdateFlux(): Promise<void> {
+  private async autoUpdateFlux(): Promise<void> {
     this.clearAutoFluxTimer();
     const millis = millisUntilNextFluxChange(new Date());
-    this.autoFluxTimeout = setTimeout(this.autoUpdateFlux.bind(this), millis);
+    this.autoFluxTimeout = setTimeout(() => {
+      this.autoUpdateFlux().catch(err => console.error('failed to auto update flux:', err));
+    }, millis);
 
     const newFlux = currentFluxLevel(new Date());
     return this.driver.setFlux(newFlux);

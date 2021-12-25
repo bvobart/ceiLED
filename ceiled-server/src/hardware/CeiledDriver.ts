@@ -6,8 +6,8 @@ import { InterpolationType } from './interpolate';
 const CMD_OFF = 'set roomlight 0\nset all solid 0 0 0';
 
 export class CeiledDriver implements Driver {
-  public channels: number;
-  public isConnected = false;
+  channels: number;
+  isConnected = false;
 
   private socketFileName: string;
   private socket: Socket | null;
@@ -22,15 +22,19 @@ export class CeiledDriver implements Driver {
     this.socket = null;
   }
 
-  public connect(): Promise<void> {
+  async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.socket = createConnection(this.socketFileName, () => {
         console.log('--> ceiled-driver connected');
         this.isConnected = true;
         this.shouldReconnect = true;
 
-        this.socket && this.socket.on('data', this.onResponse.bind(this));
-        this.socket && this.socket.on('close', this.onClose.bind(this));
+        this.socket?.on('data', this.onResponse.bind(this));
+        this.socket?.on('close', (hadErr: boolean) => {
+          this.onClose(hadErr).catch(err =>
+            console.error('failed to close connection to driver:', err),
+          );
+        });
 
         resolve();
       }).on('error', (err: Error) => {
@@ -39,7 +43,7 @@ export class CeiledDriver implements Driver {
     });
   }
 
-  public close(): void {
+  close(): void {
     if (this.socket) {
       this.shouldReconnect = false;
       this.isConnected = false;
@@ -48,7 +52,7 @@ export class CeiledDriver implements Driver {
     }
   }
 
-  public off(): Promise<void> {
+  async off(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       const id = this.nextRequestId++;
@@ -57,7 +61,7 @@ export class CeiledDriver implements Driver {
     });
   }
 
-  public setColors(colors: Map<number, Color>): Promise<void> {
+  async setColors(colors: Map<number, Color>): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       if (colors.size === 0) return resolve();
@@ -74,7 +78,7 @@ export class CeiledDriver implements Driver {
     });
   }
 
-  public setFades(
+  async setFades(
     colors: Map<number, Color>,
     millis: number,
     interpolation: InterpolationType = InterpolationType.LINEAR,
@@ -99,7 +103,7 @@ export class CeiledDriver implements Driver {
     });
   }
 
-  public setBrightness(brightness: number): Promise<void> {
+  async setBrightness(brightness: number): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       const id = this.nextRequestId++;
@@ -109,11 +113,11 @@ export class CeiledDriver implements Driver {
     });
   }
 
-  public getBrightness(): Promise<number> {
+  async getBrightness(): Promise<number> {
     return this.getNumber('brightness');
   }
 
-  public setRoomlight(roomlight: number): Promise<void> {
+  async setRoomlight(roomlight: number): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       const id = this.nextRequestId++;
@@ -123,11 +127,11 @@ export class CeiledDriver implements Driver {
     });
   }
 
-  public getRoomlight(): Promise<number> {
+  async getRoomlight(): Promise<number> {
     return this.getNumber('roomlight');
   }
 
-  public setFlux(flux: number): Promise<void> {
+  async setFlux(flux: number): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this.isConnected) return reject('ceiled-driver not connected');
       const id = this.nextRequestId++;
@@ -137,7 +141,7 @@ export class CeiledDriver implements Driver {
     });
   }
 
-  public getFlux(): Promise<number> {
+  async getFlux(): Promise<number> {
     return this.getNumber('flux');
   }
 
@@ -153,8 +157,8 @@ export class CeiledDriver implements Driver {
     return parseInt(reply, 10);
   }
 
-  private expectReply(id: number): Promise<string> {
-    return new Promise((resolve) => {
+  private async expectReply(id: number): Promise<string> {
+    return new Promise(resolve => {
       this.waitingForResponse.set(id, resolve);
     });
   }
@@ -196,4 +200,4 @@ export class CeiledDriver implements Driver {
   }
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

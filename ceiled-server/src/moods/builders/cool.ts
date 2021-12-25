@@ -13,6 +13,6 @@ const colors = [
 /**
  * Cool: primarily blue, some purple / pink and turquoise tones
  */
-export const builder = () => {
-  return new AlternatingFadeBuilder().colors(colors).type(PatternType.FADE_LINEAR);
+export const builder = (): AlternatingFadeBuilder => {
+  return new AlternatingFadeBuilder().colors(colors).type(PatternType.FadeLinear);
 };

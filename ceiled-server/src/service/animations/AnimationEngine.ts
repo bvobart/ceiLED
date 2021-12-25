@@ -4,8 +4,8 @@ import { Pattern } from '../../patterns/Pattern';
 import { BufferDriver } from './BufferDriver';
 
 export class AnimationEngine {
-  public speed = 30; // bpm
-  public onError = (error: Error): void => {
+  speed = 30; // bpm
+  onError = (error: Error): void => {
     console.error('!-> Error: AnimationEngine:', error);
   };
 
@@ -20,36 +20,36 @@ export class AnimationEngine {
     this.driver = new BufferDriver(driver);
   }
 
-  public isRunning(): boolean {
+  isRunning(): boolean {
     return this.running;
   }
 
-  public getCurrentPattern(channel: number): Pattern | undefined {
+  getCurrentPattern(channel: number): Pattern | undefined {
     return this.activePatterns.get(channel);
   }
 
-  public getCurrentPatterns(): Map<number, Pattern> {
+  getCurrentPatterns(): Map<number, Pattern> {
     return this.activePatterns;
   }
 
-  public async setSpeed(speed: number): Promise<void> {
+  async setSpeed(speed: number): Promise<void> {
     if (speed <= 0) return Promise.reject('speed must be more than 0 bpm');
     this.speed = speed;
   }
 
-  public play(animations: Map<number, Animation>): void {
+  play(animations: Map<number, Animation>): void {
     this.pause();
     this.animations = animations;
     this.activePatterns = new Map<number, Pattern>(); // TODO: activePatterns is not being used.
     this.continue();
   }
 
-  public pause(): void {
+  pause(): void {
     this.running = false;
     this.timeout && clearTimeout(this.timeout);
   }
 
-  public continue(): void {
+  continue(): void {
     this.running = true;
     this.run().catch(this.onError);
   }
@@ -63,7 +63,9 @@ export class AnimationEngine {
     const execTime = endTime[0] * 1000 + endTime[1] / 1000000;
 
     const millis = (60 * 1000) / this.speed - execTime;
-    this.timeout = setTimeout(this.run.bind(this), Math.max(millis, 0));
+    this.timeout = setTimeout(() => {
+      this.run().catch(err => console.error('Error in AnimationEngine.run():', err));
+    }, Math.max(millis, 0));
   }
 
   private async playNextBeat(): Promise<void> {

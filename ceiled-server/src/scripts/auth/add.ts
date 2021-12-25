@@ -1,7 +1,7 @@
+import * as prompts from 'prompts';
 import AuthRepository from '../../auth/AuthRepository';
 import { Config } from '../../config';
 import { connectToMongoDB } from '../../utils';
-import * as prompts from 'prompts';
 
 const fail = (message: any): never => {
   console.error('!-> ERROR:', message);
@@ -61,5 +61,3 @@ if (require.main === module) {
   const [name, token] = validateArgs();
   add(name, token).catch(fail);
 }
-
-// TODO: implement list and remove

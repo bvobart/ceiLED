@@ -16,6 +16,6 @@ const colors = [
 /**
  * Rainbow: all the colours of the rainbow, in that order :)
  */
-export const builder = () => {
-  return new AlternatingFadeBuilder().colors(colors).type(PatternType.FADE_SIGMOID);
+export const builder = (): AlternatingFadeBuilder => {
+  return new AlternatingFadeBuilder().colors(colors).type(PatternType.FadeSigmoid);
 };

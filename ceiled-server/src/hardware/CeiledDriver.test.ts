@@ -17,9 +17,9 @@ describe('ceiled-driver', () => {
       done();
     });
 
-    it('fails with error when connect fails', () => {
+    it('fails with error when connect fails', async () => {
       const driver = new CeiledDriver('does-not-exist', 3);
-      expect(driver.connect()).rejects.toBeDefined();
+      return expect(driver.connect()).rejects.toBeDefined();
     });
   });
 
@@ -33,7 +33,7 @@ describe('ceiled-driver', () => {
     afterEach(() => driver.close());
 
     it.skip('turns off', async done => {
-      driver.off();
+      await driver.off();
       done();
     });
 

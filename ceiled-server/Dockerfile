@@ -1,4 +1,4 @@
-FROM node:12-alpine as builder
+FROM node:16-alpine as builder
 WORKDIR /app
 
 COPY yarn.lock package.json ./
@@ -7,7 +7,7 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN yarn build
 
-FROM node:12-alpine
+FROM node:16-alpine
 WORKDIR /app
 
 COPY yarn.lock package.json ./

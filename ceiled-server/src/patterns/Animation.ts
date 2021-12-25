@@ -1,19 +1,20 @@
 import { decodePattern, IPattern, Pattern } from './Pattern';
 
 export class Animation implements IterableIterator<Pattern> {
-  public patterns: Pattern[];
-  private currentIndex: number = 0;
-  private repeat: number = 0;
+  patterns: Pattern[];
+
+  private currentIndex = 0;
+  private repeat = 0;
 
   constructor(patterns: Pattern[]) {
     this.patterns = patterns;
   }
 
-  public clone(): Animation {
-    return new Animation(this.patterns.map(p => Object.create(p)));
+  clone(): Animation {
+    return new Animation(this.patterns.map(p => Object.create(p) as Pattern)); // eslint-disable-line @typescript-eslint/no-unsafe-return
   }
 
-  public next(): IteratorResult<Pattern, null> {
+  next(): IteratorResult<Pattern, null> {
     if (!this.patterns || this.patterns.length === 0) return { done: true, value: null };
 
     const pattern = this.patterns[this.currentIndex % this.patterns.length];
@@ -33,7 +34,7 @@ export class Animation implements IterableIterator<Pattern> {
   }
 
   // makes it possible to use in for loops
-  public [Symbol.iterator](): IterableIterator<Pattern> {
+  [Symbol.iterator](): IterableIterator<Pattern> {
     return this;
   }
 }

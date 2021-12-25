@@ -6,9 +6,9 @@ import { PatternType } from '../../patterns/Pattern';
 import { range } from '../../patterns/utils';
 
 export class AlternatingFadeBuilder implements MoodBuilder {
-  private channelz: number = 0;
+  private channelz = 0;
   private colorz: Color[] = [];
-  private typ: PatternType.FADE_LINEAR | PatternType.FADE_SIGMOID = PatternType.FADE_LINEAR;
+  private typ: PatternType.FadeLinear | PatternType.FadeSigmoid = PatternType.FadeLinear;
 
   public channels(channels: number): AlternatingFadeBuilder {
     this.channelz = channels;
@@ -20,7 +20,7 @@ export class AlternatingFadeBuilder implements MoodBuilder {
     return this;
   }
 
-  public type(type: PatternType.FADE_LINEAR | PatternType.FADE_SIGMOID): AlternatingFadeBuilder {
+  public type(type: PatternType.FadeLinear | PatternType.FadeSigmoid): AlternatingFadeBuilder {
     this.typ = type;
     return this;
   }

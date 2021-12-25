@@ -5,14 +5,14 @@ import { Pattern, PatternType } from './Pattern';
 import { range } from './utils';
 
 export class FadePattern implements Pattern {
-  public type: PatternType.FADE_LINEAR | PatternType.FADE_SIGMOID;
-  public length: number;
-  public colors: Color[];
+  type: PatternType.FadeLinear | PatternType.FadeSigmoid;
+  length: number;
+  colors: Color[];
 
-  private index: number = 0;
+  private index = 0;
 
   constructor(
-    type: PatternType.FADE_LINEAR | PatternType.FADE_SIGMOID,
+    type: PatternType.FadeLinear | PatternType.FadeSigmoid,
     length: number,
     colors: Color[],
   ) {
@@ -21,7 +21,7 @@ export class FadePattern implements Pattern {
     this.colors = colors;
   }
 
-  public show(channel: number | 'all', driver: Driver, speed: number): Promise<void> {
+  async show(channel: number | 'all', driver: Driver, speed: number): Promise<void> {
     const nextColor = this.colors[this.index++];
     if (this.index === this.length) this.index = 0;
 
@@ -38,9 +38,7 @@ export class FadePattern implements Pattern {
   }
 }
 
-const interpType = (
-  type: PatternType.FADE_LINEAR | PatternType.FADE_SIGMOID,
-): InterpolationType => {
-  if (type === PatternType.FADE_LINEAR) return InterpolationType.LINEAR;
+const interpType = (type: PatternType.FadeLinear | PatternType.FadeSigmoid): InterpolationType => {
+  if (type === PatternType.FadeLinear) return InterpolationType.LINEAR;
   else return InterpolationType.SIGMOID;
 };
