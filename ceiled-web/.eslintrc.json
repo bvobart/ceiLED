@@ -1,35 +1,11 @@
 {
-  "env": {
-    "browser": true,
-    "es6": true,
-    "jest": true
-  },
   "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": 2020,
-    "sourceType": "module"
-  },
   "extends": [
-    "plugin:react/recommended",
+    "next/core-web-vitals",
     "plugin:prettier/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react-hooks/recommended",
-    "prettier/@typescript-eslint"
+    "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
-    "@typescript-eslint/ban-ts-comment": "warn",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/interface-name-prefix": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "max-classes-per-file": "off",
-    "object-literal-sort-keys": "off",
-    "quotes": ["error", "single", "avoid-escape"],
-    "react/display-name": "warn",
-    "react/prop-types": "off"
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
+    "@typescript-eslint/no-explicit-any": "off"
   }
 }

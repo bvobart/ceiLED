@@ -8,6 +8,10 @@
 # testing
 /coverage
 
+# next.js
+/.next/
+/out/
+
 # build folders are ignored in top-level .gitignore
 # /build
 
@@ -31,5 +35,6 @@ yarn-error.log*
 
 # old ceiled-web files
 old
+old-2
 # experimental snippets of code.
 src/.experiments
