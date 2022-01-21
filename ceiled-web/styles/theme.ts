@@ -3,6 +3,8 @@ import { createTheme } from '@mui/material/styles';
 
 const boxShadow = '0px 2px 3px rgba(0,0,0,.5)';
 
+export const minWidth = '400px';
+
 export const theme = createTheme({
   palette: {
     mode: 'dark',

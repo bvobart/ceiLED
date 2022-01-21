@@ -1,4 +1,4 @@
-import { Grid, Slider, Typography } from '@material-ui/core';
+import { Grid, Slider, Typography } from '@mui/material';
 import React from 'react';
 import useFlux from '../../hooks/api/useFlux';
 

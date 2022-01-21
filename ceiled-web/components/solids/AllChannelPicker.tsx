@@ -1,21 +1,8 @@
-import { Grid, makeStyles, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import { HSVColor } from '../../api/colors';
 import { range } from '../animations/utils';
 import ColorPicker from '../colorpicking/ColorPicker';
-
-const useStyles = makeStyles({
-  picker: {
-    minHeight: '276px',
-  },
-  channelLabel: {
-    width: '100%',
-  },
-  gridList: {
-    flexWrap: 'nowrap',
-    transform: 'translateZ(0)',
-  },
-});
 
 export interface AllChannelPickerProps {
   state: Map<number, HSVColor>;
@@ -23,7 +10,6 @@ export interface AllChannelPickerProps {
 }
 
 export const AllChannelPicker = (props: AllChannelPickerProps) => {
-  const classes = useStyles();
   const { state, onChange: onChangeProp } = props;
   const [clickCount, setClickCount] = useState(0);
 
@@ -57,15 +43,15 @@ export const AllChannelPicker = (props: AllChannelPickerProps) => {
         return (
           <Grid item xs={4} key={`solid-picker-${channel}-${clickCount}`}>
             <div onDoubleClick={() => onDoubleClickHeader(channel)}>
-              <Typography gutterBottom className={classes.channelLabel} align='center' variant='subtitle1'>
+              <Typography gutterBottom align='center' variant='subtitle1' sx={{ width: '100%' }}>
                 Channel {channel + 1}
               </Typography>
             </div>
             <ColorPicker
               preview
-              className={classes.picker}
               hsv={color}
               onChange={c => onChange(new Map(state.set(channel, c)))}
+              style={{ minHeight: '276px' }}
             />
           </Grid>
         );

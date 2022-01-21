@@ -1,5 +1,5 @@
+import { Link, TextField, Typography } from '@mui/material';
 import React from 'react';
-import { Typography, Link, TextField } from '@mui/material';
 import useAuthToken from '../hooks/api/useAuthToken';
 
 interface AboutProps {
@@ -10,7 +10,7 @@ const About = (props: AboutProps) => {
   const authToken = useAuthToken();
 
   return (
-    <div className={props.className}>
+    <div className={props.className} style={{ padding: '16px 0px 0px 0px' }}>
       <Typography variant='body2' gutterBottom>
         CeiLED is a suite of software that I made in order to control the LED strips on my ceiling. The source code of
         CeiLED is open source and can be found <Link href='https://github.com/bvobart/ceiLED'>on GitHub</Link>. Want to

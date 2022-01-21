@@ -1,24 +1,10 @@
-import { makeStyles, MenuItem, Select } from '@material-ui/core';
+import { MenuItem, Select } from '@mui/material';
 import throttle from 'lodash.throttle';
 import React, { useState } from 'react';
 import { HSVColor } from '../../api/colors';
 import { SolidsState } from '../../controls/SolidControls';
 import { range } from '../animations/utils';
 import ColorPicker from '../colorpicking/ColorPicker';
-
-const useStyles = makeStyles({
-  select: {
-    width: '100%',
-    textAlign: 'center',
-  },
-  channelLabel: {
-    width: '100%',
-  },
-  picker: {
-    marginTop: '8px',
-    minHeight: '276px',
-  },
-});
 
 export interface PerChannelPickerProps {
   state: SolidsState;
@@ -28,7 +14,6 @@ export interface PerChannelPickerProps {
 const channelOptions = ['All Channels', ...range(3).map(ch => `Channel ${ch + 1}`)];
 
 export const PerChannelPicker = (props: PerChannelPickerProps) => {
-  const classes = useStyles();
   const [selectedChannel, setSelectedChannel] = useState(0); // index on channelOptions
 
   const ceiledChannel = selectedChannel - 1;
@@ -41,7 +26,7 @@ export const PerChannelPicker = (props: PerChannelPickerProps) => {
         id='select-solid-channel'
         value={selectedChannel}
         onChange={event => setSelectedChannel(event.target.value as number)}
-        className={classes.select}
+        sx={{ width: '100%', textAlign: 'center' }}
       >
         {channelOptions.map((label, index) => (
           <MenuItem key={`PerChannelPicker-${index}`} value={index}>
@@ -50,7 +35,12 @@ export const PerChannelPicker = (props: PerChannelPickerProps) => {
         ))}
       </Select>
 
-      <ColorPicker preview className={classes.picker} hsv={selectedColor} onChange={handleChange} />
+      <ColorPicker
+        preview
+        hsv={selectedColor}
+        onChange={handleChange}
+        style={{ minHeight: '276px', marginTop: '8px' }}
+      />
     </>
   );
 };

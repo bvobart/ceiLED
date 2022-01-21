@@ -1,10 +1,12 @@
+import { Slider, Theme } from '@mui/material';
+import type { SxProps } from '@mui/system';
 import React from 'react';
-import { Slider } from '@material-ui/core';
 
 export interface BrightnessProps {
   className?: string;
   value: number;
   onChange: (newValue: number) => void;
+  sx?: SxProps<Theme>;
 }
 
 const Brightness = (props: BrightnessProps) => {
@@ -17,6 +19,7 @@ const Brightness = (props: BrightnessProps) => {
       min={0}
       max={1}
       step={0.01}
+      sx={props.sx}
     />
   );
 };

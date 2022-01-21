@@ -1,13 +1,4 @@
-import {
-  Accordion,
-  AccordionSummary,
-  Button,
-  Grid,
-  makeStyles,
-  Theme,
-  Typography,
-  useMediaQuery,
-} from '@material-ui/core';
+import { Accordion, AccordionSummary, Button, Grid, Theme, Typography, useMediaQuery } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ControlsProps } from '.';
 import { CeiledState } from '../api';
@@ -17,26 +8,7 @@ import { AllChannelPicker } from '../components/solids/AllChannelPicker';
 import { PerChannelPicker } from '../components/solids/PerChannelPicker';
 import { isBrowser } from '../config';
 import useCeiledAPI from '../hooks/api/useCeiledAPI';
-
-const useStyles = makeStyles({
-  panel: {
-    minWidth: '400px',
-  },
-  content: {
-    padding: '0px 8px 8px 8px',
-    userSelect: 'none',
-  },
-  picker: {
-    minHeight: '276px',
-  },
-  channelLabel: {
-    width: '100%',
-  },
-  gridList: {
-    flexWrap: 'nowrap',
-    transform: 'translateZ(0)',
-  },
-});
+import { minWidth } from '../styles/theme';
 
 const key = 'solids-state';
 
@@ -49,7 +21,6 @@ export type SolidsState = Map<number, HSVColor>;
  * currently actually being displayed on the server.
  */
 const SolidControls = (props: ControlsProps): JSX.Element => {
-  const classes = useStyles();
   const [ceiledState, api] = useCeiledAPI();
   const [solidsState, setSolidsState] = useSolidsState();
   const [expanded, setExpanded] = useState(props.expanded);
@@ -75,9 +46,9 @@ const SolidControls = (props: ControlsProps): JSX.Element => {
   );
 
   return (
-    <Accordion className={classes.panel} expanded={expanded}>
+    <Accordion expanded={expanded} sx={{ minWidth }}>
       <AccordionSummary onClick={() => setExpanded(!expanded)}>
-        <Grid container justify='space-between'>
+        <Grid container justifyContent='space-between'>
           <Grid item>
             <Typography variant='h6'>Solids</Typography>
           </Grid>
@@ -88,7 +59,7 @@ const SolidControls = (props: ControlsProps): JSX.Element => {
           </Grid>
         </Grid>
       </AccordionSummary>
-      <div className={classes.content}>
+      <div style={{ padding: '0px 8px 8px 8px', userSelect: 'none' }}>
         {showAllChannels ? (
           <AllChannelPicker state={solidsState} onChange={onChangeSolidsState} />
         ) : (
