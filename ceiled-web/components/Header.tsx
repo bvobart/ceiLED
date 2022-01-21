@@ -1,4 +1,5 @@
-import { Card, Grid, makeStyles, Theme, Typography } from '@material-ui/core';
+import { Card, Grid, Theme, Typography } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 import PowerButton from './global/PowerButton';
 

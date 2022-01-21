@@ -1,5 +1,5 @@
-import { Button, Card, CardContent, Collapse, Grid, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { Button, Card, CardContent, Collapse, Grid, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import React, { useRef, useState } from 'react';
 import useCeiled from '../hooks/api/useCeiled';
 import About from './About';

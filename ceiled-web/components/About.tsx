@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Link, TextField } from '@material-ui/core';
+import { Typography, Link, TextField } from '@mui/material';
 import useAuthToken from '../hooks/api/useAuthToken';
 
 interface AboutProps {

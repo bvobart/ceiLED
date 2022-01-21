@@ -1,21 +1,31 @@
-import { deepPurple } from '@material-ui/core/colors';
-import { createTheme } from '@material-ui/core/styles';
+import { deepPurple } from '@mui/material/colors';
+import { createTheme } from '@mui/material/styles';
 
 const boxShadow = '0px 2px 3px rgba(0,0,0,.5)';
 
 export const theme = createTheme({
   palette: {
-    type: 'dark',
-    primary: deepPurple,
+    mode: 'dark',
+    primary: {
+      main: deepPurple.A200,
+    },
+    background: {
+      paper: '#1A181C',
+      default: '#121212',
+    },
   },
-  overrides: {
+  components: {
     MuiSlider: {
-      rail: { boxShadow },
-      thumb: { boxShadow },
+      styleOverrides: {
+        rail: { boxShadow },
+        thumb: { boxShadow },
+      },
     },
     MuiButton: {
-      outlined: { boxShadow },
-      text: { boxShadow },
+      styleOverrides: {
+        outlined: { boxShadow },
+        text: { boxShadow },
+      },
     },
   },
 });

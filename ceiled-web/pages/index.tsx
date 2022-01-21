@@ -1,5 +1,5 @@
-import { Container, Grid, Theme, useMediaQuery } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { Container, Grid, Theme, useMediaQuery } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import ErrorDialog from '../components/ErrorDialog';

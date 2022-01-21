@@ -1,6 +1,7 @@
-import { Divider, makeStyles, Typography, useMediaQuery, useTheme } from '@material-ui/core';
-import ImageList from '@material-ui/core/ImageList';
-import ImageListItem from '@material-ui/core/ImageListItem';
+import { Divider, Typography, useMediaQuery, useTheme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
 import React from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import useAnimations from '../../hooks/animations/useAnimations';

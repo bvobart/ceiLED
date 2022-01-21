@@ -7,7 +7,7 @@ import {
   DialogTitle,
   TextField,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React from 'react';
 import Highlight from 'react-highlight.js';
 import { InternalErrorMessage, InvalidRequestMessage } from '../api/errors';
