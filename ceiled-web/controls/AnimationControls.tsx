@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, Button, Collapse, Grid, makeStyles, Typography } from '@material-ui/core';
+import { Accordion, AccordionSummary, Button, Collapse, Grid, Typography } from '@mui/material';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { ControlsProps } from '.';
 import { CeiledState } from '../api';
@@ -8,24 +8,15 @@ import SpeedSlider from '../components/animations/SpeedSlider';
 import useAnimations from '../hooks/animations/useAnimations';
 import useCeiledAPI from '../hooks/api/useCeiledAPI';
 import { AnimationsProvider } from '../hooks/context/AnimationsContext';
-
-const useStyles = makeStyles({
-  panel: {
-    minWidth: '400px',
-  },
-  speed: {
-    padding: '0px 24px 8px 24px',
-  },
-});
+import { minWidth } from '../styles/theme';
 
 const AnimationControls = (props: ControlsProps): JSX.Element => {
-  const classes = useStyles();
   const [syncCount] = useSyncCount();
   const [expanded, setExpanded] = useState(props.expanded);
   useEffect(() => setExpanded(props.expanded), [props.expanded]);
 
   return (
-    <Accordion expanded={expanded} className={classes.panel}>
+    <Accordion expanded={expanded} sx={{ minWidth: minWidth }}>
       <AnimationsProvider>
         <AccordionSummary onClick={() => setExpanded(!expanded)}>
           <Grid container justifyContent='space-between'>
@@ -40,7 +31,7 @@ const AnimationControls = (props: ControlsProps): JSX.Element => {
             </Grid>
           </Grid>
         </AccordionSummary>
-        <SpeedSlider className={classes.speed} />
+        <SpeedSlider sx={{ padding: '0px 24px 8px 24px' }} />
         <Collapse in={expanded}>
           <AnimationComposer key={`animation-composer-${syncCount}`} />
         </Collapse>

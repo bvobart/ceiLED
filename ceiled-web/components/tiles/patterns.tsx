@@ -1,37 +1,22 @@
-import { Grid, IconButton, makeStyles } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/DeleteOutlined';
-import EditIcon from '@material-ui/icons/EditOutlined';
-import React, { FunctionComponent, useState } from 'react';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import EditIcon from '@mui/icons-material/EditOutlined';
+import { Grid, IconButton } from '@mui/material';
+import React, { CSSProperties, FunctionComponent, useState } from 'react';
 import { Tile } from '.';
 import { FadePattern, Pattern, SolidPattern } from '../../api/patterns';
 import EditPattern from '../animations/EditPattern';
-import OutlinedBox from '../global/OutlinedBox';
+import OutlinedBox from './OutlinedBox';
 
-const useStyles = makeStyles({
-  solidTile: {
-    borderRadius: '4px',
-    minHeight: '48px',
-    width: '100%',
-  },
-  fadeTile: {
-    borderRadius: '4px',
-    width: '100%',
-  },
-  editTile: {
-    minHeight: '48px',
-    marginRight: '8px',
-  },
-  icon: {
-    // TODO: set the colour of the icon based on the pattern's colour so that the icons are always visible
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  outlined: {
-    width: '100%',
-    borderRadius: '4px',
-    border: '1px solid rgba(255, 255, 255, 0.23)',
-    padding: '4px 4px 8px 4px',
-  },
-});
+const tileStyles = {
+  borderRadius: '4px',
+  minHeight: '48px',
+  width: '100%',
+};
+
+const iconStyles = {
+  // TODO: set the colour of the icon based on the pattern's colour so that the icons are always visible
+  color: 'rgba(255, 255, 255, 0.7)',
+};
 
 //----------------------------------------------------------------------------------------
 
@@ -44,7 +29,6 @@ export interface EditablePatternTileProps {
 
 export const EditablePatternTile: FunctionComponent<EditablePatternTileProps> = props => {
   const { pattern, onEditStart, onEditConfirm, onDelete } = props;
-  const classes = useStyles();
   const [editing, setEditing] = useState(false);
 
   const onEdit = () => {
@@ -63,12 +47,12 @@ export const EditablePatternTile: FunctionComponent<EditablePatternTileProps> = 
     </OutlinedBox>
   ) : (
     <PatternTile pattern={pattern}>
-      <Grid className={classes.editTile} container justifyContent='flex-end' alignItems='center'>
+      <Grid container justifyContent='flex-end' alignItems='center' sx={{ minHeight: '48px', marginRight: '8px' }}>
         <IconButton size='small' onClick={onEdit}>
-          <EditIcon className={classes.icon} />
+          <EditIcon sx={iconStyles} />
         </IconButton>
         <IconButton size='small' onClick={onDelete}>
-          <DeleteIcon className={classes.icon} />
+          <DeleteIcon sx={iconStyles} />
         </IconButton>
       </Grid>
     </PatternTile>
@@ -83,7 +67,6 @@ export interface PatternTileProps {
 
 export const PatternTile: FunctionComponent<PatternTileProps> = props => {
   const { pattern } = props;
-  const classes = useStyles();
 
   if (pattern instanceof SolidPattern) {
     return <SolidTile pattern={pattern}>{props.children}</SolidTile>;
@@ -92,22 +75,23 @@ export const PatternTile: FunctionComponent<PatternTileProps> = props => {
     return <FadeTile pattern={pattern}>{props.children}</FadeTile>;
   }
 
-  return <div className={classes.solidTile}>NONE</div>;
+  return <div style={tileStyles}>NONE</div>;
 };
 
 //----------------------------------------------------------------------------------------
 
 export interface SolidTileProps extends PatternTileProps {
   pattern: SolidPattern;
+  style?: CSSProperties;
 }
 
 export const SolidTile: FunctionComponent<SolidTileProps> = props => {
-  const { pattern } = props;
-  const classes = useStyles();
+  const { pattern, style } = props;
   // minimum height is the pattern's length times the height of one block, plus the padding normally found in between the blocks.
-  const minHeight = 48 * pattern.length + 8 * (pattern.length - 1);
+  const minHeight = `${48 * pattern.length + 8 * (pattern.length - 1)}px`;
+
   return (
-    <Tile className={classes.solidTile} hsv={pattern.color.toHSV()} style={{ minHeight: `${minHeight}px` }}>
+    <Tile hsv={pattern.color.toHSV()} style={{ ...tileStyles, minHeight, ...style }}>
       {props.children}
     </Tile>
   );
@@ -119,20 +103,18 @@ export interface FadeTileProps extends PatternTileProps {
   pattern: FadePattern;
   // direction of the gradient
   direction?: string;
+  style?: CSSProperties;
 }
 
 export const FadeTile: FunctionComponent<FadeTileProps> = props => {
-  const { pattern, direction } = props;
-  const classes = useStyles();
+  const { pattern, direction, style } = props;
   const background = pattern.toCSS(direction);
   // minimum height is the pattern's length times the height of one block, plus the padding normally found in between the blocks.
-  const minHeight = 48 * pattern.length + 8 * (pattern.length - 1);
+  const minHeight = `${48 * pattern.length + 8 * (pattern.length - 1)}px`;
   // TODO: show some distinction between linear and sigmoid, possibly also a switch to swap between the two
-  return (
-    <div className={classes.fadeTile} style={{ background, minHeight: `${minHeight}px` }}>
-      {props.children}
-    </div>
-  );
+
+  const styles = { ...tileStyles, background, minHeight, ...style };
+  return <div style={styles}>{props.children}</div>;
 };
 
 //----------------------------------------------------------------------------------------

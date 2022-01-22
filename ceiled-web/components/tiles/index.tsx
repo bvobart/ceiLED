@@ -1,26 +1,16 @@
-import { Button, Grid, IconButton, makeStyles } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/DeleteOutlined';
-import EditIcon from '@material-ui/icons/EditOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import EditIcon from '@mui/icons-material/EditOutlined';
+import { Button, Grid, IconButton } from '@mui/material';
 import React, { CSSProperties, forwardRef, FunctionComponent, PropsWithChildren, useState } from 'react';
 import { HSVColor } from '../../api/colors';
 import ColorPicker from '../colorpicking/ColorPicker';
 
-const useStyles = makeStyles({
-  button: {
-    width: '100%',
-    marginTop: '4px',
-    minHeight: '48px',
-  },
-  editTile: {
-    minHeight: '48px',
-    marginRight: '8px',
-  },
-  icon: {
-    // TODO: set the colour of the icon based on the pattern's colour so that the icons are always visible
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  picker: {},
-});
+const minHeight = '48px';
+
+const iconStyles = {
+  // TODO: set the colour of the icon based on the pattern's colour so that the icons are always visible
+  color: 'rgba(255, 255, 255, 0.7)',
+};
 
 export interface EditableTileProps {
   className?: string;
@@ -28,12 +18,12 @@ export interface EditableTileProps {
   onEditStart?: () => void;
   onEditConfirm: (color: HSVColor) => void;
   onDelete: () => void;
+  style?: CSSProperties;
 }
 
 export const EditableTile: FunctionComponent<EditableTileProps> = props => {
   const { className, hsv: initialHSV, onEditConfirm, onEditStart, onDelete } = props;
   const [editing, setEditing] = useState(false);
-  const classes = useStyles();
   const [hsv, setHSV] = useState(initialHSV);
 
   const onEdit = () => {
@@ -56,24 +46,24 @@ export const EditableTile: FunctionComponent<EditableTileProps> = props => {
         padding: '4px 4px 4px 4px',
       }}
     >
-      <ColorPicker className={classes.picker} hsv={hsv} onChange={setHSV} />
+      <ColorPicker hsv={hsv} onChange={setHSV} />
       <Button
-        className={classes.button}
+        fullWidth
         variant='outlined'
         onClick={() => onConfirm(hsv)}
-        style={{ background: hsv.toCSS() }}
+        style={{ minHeight, marginTop: '4px', background: hsv.toCSS() }}
       >
         Confirm
       </Button>
     </div>
   ) : (
-    <Tile className={className} hsv={hsv}>
-      <Grid className={classes.editTile} container justifyContent='flex-end' alignItems='center'>
+    <Tile className={className} hsv={hsv} style={props.style}>
+      <Grid container justifyContent='flex-end' alignItems='center' sx={{ minHeight, marginRight: '8px' }}>
         <IconButton size='small' onClick={onEdit}>
-          <EditIcon className={classes.icon} />
+          <EditIcon sx={iconStyles} />
         </IconButton>
         <IconButton size='small' onClick={onDelete}>
-          <DeleteIcon className={classes.icon} />
+          <DeleteIcon sx={iconStyles} />
         </IconButton>
       </Grid>
     </Tile>

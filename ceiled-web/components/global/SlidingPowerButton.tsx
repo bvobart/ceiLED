@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useEffect } from 'react';
-import { IconButtonProps, Slide } from '@material-ui/core';
+import { IconButtonProps, Slide } from '@mui/material';
 import { CeiledStatus } from '../../api';
 import useCeiled from '../../hooks/api/useCeiled';
 import PowerButton from './PowerButton';

@@ -1,9 +1,11 @@
-import { Grid, Slider, Typography } from '@material-ui/core';
+import { Grid, Slider, Theme, Typography } from '@mui/material';
+import type { SxProps } from '@mui/system';
 import React from 'react';
 import useSpeed from '../../hooks/api/useSpeed';
 
 interface SpeedSliderProps {
   className?: string;
+  sx?: SxProps<Theme>;
 }
 
 const SpeedSlider = (props: SpeedSliderProps): JSX.Element => {
@@ -12,7 +14,7 @@ const SpeedSlider = (props: SpeedSliderProps): JSX.Element => {
   // TODO: allow speed input through textbox
 
   return (
-    <Grid container item className={props.className} alignItems='center' justifyContent='space-between'>
+    <Grid container item className={props.className} alignItems='center' justifyContent='space-between' sx={props.sx}>
       <Grid container item xs={6} sm={2} justifyContent='space-between'>
         <Grid item xs={3} sm={1}>
           <Typography variant='caption'>Speed</Typography>
