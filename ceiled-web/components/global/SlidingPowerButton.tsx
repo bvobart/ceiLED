@@ -1,5 +1,5 @@
-import React, { forwardRef, useState, useEffect } from 'react';
 import { IconButtonProps, Slide } from '@mui/material';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { CeiledStatus } from '../../api';
 import useCeiled from '../../hooks/api/useCeiled';
 import PowerButton from './PowerButton';
@@ -10,8 +10,9 @@ import PowerButton from './PowerButton';
  * until it is connected, or until the attempt at establishing a connection times out.
  */
 export const SlidingPowerButton = forwardRef<HTMLButtonElement, IconButtonProps & { in: boolean }>((props, ref) => {
-  const [show, setShow] = useState(props.in);
-  useEffect(() => setShow(props.in), [props.in]);
+  const { in: initIn, onClick, ...buttonProps } = props;
+  const [show, setShow] = useState(initIn);
+  useEffect(() => setShow(initIn), [initIn]);
 
   const [status] = useCeiled();
   useEffect(() => {
@@ -28,10 +29,9 @@ export const SlidingPowerButton = forwardRef<HTMLButtonElement, IconButtonProps 
     event.stopPropagation();
     hideTimout && clearTimeout(hideTimout);
     setHideTimeout(null);
-    props.onClick && props.onClick(event);
+    onClick && onClick(event);
   };
 
-  const { in: _, ...buttonProps } = props;
   return (
     <Slide ref={ref} direction='down' in={show} mountOnEnter unmountOnExit>
       <PowerButton {...buttonProps} onClick={onClickPower} />
