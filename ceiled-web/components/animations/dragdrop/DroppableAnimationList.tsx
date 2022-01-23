@@ -1,9 +1,10 @@
-import React, { FunctionComponent } from 'react';
+import React, { CSSProperties, FunctionComponent } from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import AnimationList, { AnimationListProps } from '../AnimationList';
 
 export interface DroppableAnimationListProps extends AnimationListProps {
   droppableId: string;
+  style?: CSSProperties;
 }
 
 const DroppableAnimationList: FunctionComponent<DroppableAnimationListProps> = props => {

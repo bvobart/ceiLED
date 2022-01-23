@@ -7,11 +7,6 @@ import ColorPicker from '../colorpicking/ColorPicker';
 
 const minHeight = '48px';
 
-const iconStyles = {
-  // TODO: set the colour of the icon based on the pattern's colour so that the icons are always visible
-  color: 'rgba(255, 255, 255, 0.7)',
-};
-
 export interface EditableTileProps {
   className?: string;
   hsv: HSVColor;
@@ -36,14 +31,15 @@ export const EditableTile: FunctionComponent<EditableTileProps> = props => {
     onEditConfirm(color);
   };
 
+  const textColor = hsv.textCSS();
+
   return editing ? (
     <div
       className={className}
       style={{
-        width: 'calc(100% - 10px)',
         borderRadius: '4px',
         border: '1px solid rgba(255, 255, 255, 0.23)',
-        padding: '4px 4px 4px 4px',
+        padding: '8px',
       }}
     >
       <ColorPicker hsv={hsv} onChange={setHSV} />
@@ -51,7 +47,7 @@ export const EditableTile: FunctionComponent<EditableTileProps> = props => {
         fullWidth
         variant='outlined'
         onClick={() => onConfirm(hsv)}
-        style={{ minHeight, marginTop: '4px', background: hsv.toCSS() }}
+        style={{ minHeight, marginTop: '4px', background: hsv.toCSS(), color: textColor }}
       >
         Confirm
       </Button>
@@ -60,10 +56,10 @@ export const EditableTile: FunctionComponent<EditableTileProps> = props => {
     <Tile className={className} hsv={hsv} style={props.style}>
       <Grid container justifyContent='flex-end' alignItems='center' sx={{ minHeight, marginRight: '8px' }}>
         <IconButton size='small' onClick={onEdit}>
-          <EditIcon sx={iconStyles} />
+          <EditIcon sx={{ color: textColor, opacity: 0.8 }} />
         </IconButton>
         <IconButton size='small' onClick={onDelete}>
-          <DeleteIcon sx={iconStyles} />
+          <DeleteIcon sx={{ color: textColor, opacity: 0.7 }} />
         </IconButton>
       </Grid>
     </Tile>

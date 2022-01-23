@@ -1,9 +1,50 @@
-import { makeStyles } from '@material-ui/core';
-import React, { CSSProperties, FC, RefObject, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  CSSProperties,
+  FC,
+  RefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { HSVColor } from '../../api/colors';
 import { isBrowser } from '../../config';
 import useBrightness from '../../hooks/api/useBrightness';
 import { inRange } from './utils';
+
+/**
+ * Styles
+ */
+const rootStyles: CSSProperties = {
+  position: 'relative',
+  display: 'inline-grid',
+  width: '100%',
+  height: '256px',
+};
+
+const previewStyle: CSSProperties = {
+  boxShadow: '0px 2px 3px rgba(0,0,0,.5)',
+};
+
+const spacerHeight = 8;
+const spacerStyle: CSSProperties = {
+  minHeight: `${spacerHeight}px`,
+  width: '100%',
+};
+
+const pickerStyle = previewStyle;
+
+const pointerStyle: CSSProperties = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  borderRadius: '50%',
+  pointerEvents: 'none',
+};
+
+//-----------------------------------
 
 export interface HueSaturationProps {
   className?: string;
@@ -12,39 +53,6 @@ export interface HueSaturationProps {
   value: number;
   onChange: (newHSV: HSVColor) => void;
 }
-
-const spacerHeight = 8;
-
-const useStyles = makeStyles({
-  root: {
-    position: 'relative',
-    display: 'inline-grid',
-    width: '100%',
-    height: '256px',
-  },
-  spacer: {
-    minHeight: `${spacerHeight}px`,
-    width: '100%',
-  },
-});
-
-const previewStyle: CSSProperties = {
-  boxShadow: '0px 2px 3px rgba(0,0,0,.5)',
-};
-
-const pickerStyle = previewStyle;
-
-/**
- * Basic styles for the pointer
- */
-const pointerStyle: CSSProperties = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  border: '2px solid black',
-  borderRadius: '50%',
-  pointerEvents: 'none',
-};
 
 /**
  * Component for picking Hue and Saturation of a colour.
@@ -87,6 +95,10 @@ const HueSaturation: FC<HueSaturationProps> = props => {
 
   // make colour picker apply global brightness level.
   const [brightness] = useBrightness();
+  const currentColor = useMemo(
+    () => new HSVColor({ h: hue, s: saturation, v: value }).withBrightness(brightness),
+    [hue, saturation, value, brightness],
+  );
 
   // redraw the hue and saturation gradients on the canvas when canvas size changes.
   useEffect(() => {
@@ -122,10 +134,9 @@ const HueSaturation: FC<HueSaturationProps> = props => {
     if (!context) return;
 
     // draw preview
-    const currentColor = new HSVColor({ h: hue, s: saturation, v: value }).withBrightness(brightness);
     context.fillStyle = currentColor.toCSS();
     context.fillRect(0, 0, width, previewHeight);
-  }, [previewHeight, width, hue, saturation, value, brightness]);
+  }, [previewHeight, width, currentColor]);
 
   /**
    * Handles how hue and saturation changes when moving the pointer across the canvas
@@ -147,9 +158,8 @@ const HueSaturation: FC<HueSaturationProps> = props => {
     return moverRef.current.unmount.bind(moverRef.current);
   }, []);
 
-  const classes = useStyles();
   return (
-    <div ref={rootRef} className={`${classes.root} ${props.className ?? ''}`}>
+    <div ref={rootRef} className={props.className} style={rootStyles}>
       {/* preview */}
       <canvas
         ref={previewRef}
@@ -157,7 +167,7 @@ const HueSaturation: FC<HueSaturationProps> = props => {
         height={previewHeight}
         style={{ ...previewStyle, width: `${width / dpi}px`, height: `${previewHeight / dpi}px` }}
       />
-      <div className={classes.spacer} />
+      <div style={spacerStyle} />
       {/* picker */}
       <canvas
         ref={pickerRef}
@@ -172,6 +182,7 @@ const HueSaturation: FC<HueSaturationProps> = props => {
         height={pointerSize}
         style={{
           ...pointerStyle,
+          border: `2px solid ${currentColor.textCSS()}`,
           width: `${pointerSize / dpi}px`,
           height: `${pointerSize / dpi}px`,
           transform: `translate(-50%, -50%) translate(${x / dpi}px, ${y / dpi}px)`,

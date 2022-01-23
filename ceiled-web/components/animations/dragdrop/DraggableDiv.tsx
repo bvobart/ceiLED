@@ -1,9 +1,10 @@
-import React, { FunctionComponent } from 'react';
+import React, { CSSProperties, FunctionComponent } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 
 export interface DraggableDivProps {
   index: number;
   disabled?: boolean;
+  style?: CSSProperties;
 }
 
 const DraggableDiv: FunctionComponent<DraggableDivProps> = props => {
@@ -11,7 +12,7 @@ const DraggableDiv: FunctionComponent<DraggableDivProps> = props => {
   return (
     <Draggable draggableId={id} index={props.index} isDragDisabled={props.disabled}>
       {provided => (
-        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+        <div style={props.style} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
           {props.children}
         </div>
       )}

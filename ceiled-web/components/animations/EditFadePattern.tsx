@@ -1,37 +1,26 @@
-import { Button, Grid, makeStyles } from '@material-ui/core';
-import React, { useCallback, useState } from 'react';
+import { Button, Grid } from '@mui/material';
+import React, { CSSProperties, useCallback, useState } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { HSVColor } from '../../api/colors';
 import { FadePattern, PatternType } from '../../api/patterns';
-import OutlinedBox from '../global/OutlinedBox';
 import { EditableTile } from '../tiles';
+import OutlinedBox from '../tiles/OutlinedBox';
 import DraggableDiv from './dragdrop/DraggableDiv';
 import { remove, reorder, replace } from './utils';
 
-const useStyles = makeStyles({
-  buttonCancel: {
-    width: '100%',
-    marginTop: '8px',
-    minHeight: '48px',
-    background: '#b2102f',
-  },
-  buttonConfirm: {
-    width: '100%',
-    marginTop: '8px',
-    minHeight: '48px',
-    background: '#00a152',
-  },
-  buttonAdd: {
-    width: '100%',
-    minHeight: '32px',
-  },
-  roundedTop: {
-    borderRadius: '4px 4px 0px 0px',
-  },
-  roundedBottom: {
-    borderRadius: '0px 0px 4px 4px',
-  },
-});
+const marginTop = '4px';
+const buttonStyles = {
+  minHeight: '48px',
+  width: '100%',
+  marginTop,
+};
+
+const roundedTop = {
+  borderRadius: '4px 4px 0px 0px',
+};
+const roundedBottom = {
+  borderRadius: '0px 0px 4px 4px',
+};
 
 let droppableCount = 0;
 
@@ -43,7 +32,6 @@ export interface EditFadePatternProps {
 
 const EditFadePattern = (props: EditFadePatternProps): JSX.Element => {
   const { pattern: initialPattern, onConfirm, type } = props;
-  const classes = useStyles();
   const defaultColors = initialPattern ? initialPattern.colors.map(c => c.toHSV()) : [HSVColor.random()];
   const [colors, setColors] = useState<HSVColor[]>(defaultColors);
 
@@ -80,11 +68,7 @@ const EditFadePattern = (props: EditFadePatternProps): JSX.Element => {
       <>
         {colors.map((color, index) => (
           <DraggableEditableTile
-            // make the first tile have rounded top and last tile have rounded bottom
             key={`edittile-${index}`}
-            className={
-              index === 0 ? classes.roundedTop : index === colors.length - 1 ? classes.roundedBottom : undefined
-            }
             color={color}
             index={index}
             onEditConfirm={newColor => {
@@ -94,11 +78,13 @@ const EditFadePattern = (props: EditFadePatternProps): JSX.Element => {
               const [cs] = remove(colors, index);
               setColors(cs);
             }}
+            // make the first tile have rounded top and last tile have rounded bottom
+            style={{ ...(index === 0 ? roundedTop : index === colors.length - 1 ? roundedBottom : {}) }}
           />
         ))}
       </>
     ),
-    [colors, classes.roundedTop, classes.roundedBottom],
+    [colors],
   );
 
   return (
@@ -114,18 +100,26 @@ const EditFadePattern = (props: EditFadePatternProps): JSX.Element => {
             )}
           </Droppable>
         </DragDropContext>
-        <Button className={classes.buttonAdd} variant='outlined' onClick={onClickAdd}>
+        <Button variant='outlined' onClick={onClickAdd} sx={{ ...buttonStyles }}>
           Add Color
         </Button>
       </OutlinedBox>
       <Grid container>
         <Grid item xs={8}>
-          <Button className={classes.buttonConfirm} variant='outlined' onClick={onClickConfirm}>
+          <Button
+            variant='outlined'
+            onClick={onClickConfirm}
+            sx={{ ...buttonStyles, background: '#00a152', color: 'white' }}
+          >
             Confirm
           </Button>
         </Grid>
         <Grid item xs={4}>
-          <Button className={classes.buttonCancel} variant='outlined' onClick={onClickCancel}>
+          <Button
+            variant='outlined'
+            onClick={onClickCancel}
+            sx={{ ...buttonStyles, background: '#b2102f', color: 'white' }}
+          >
             Cancel
           </Button>
         </Grid>
@@ -142,6 +136,7 @@ interface DraggableEditableTileProps {
   index: number;
   onEditConfirm: (color: HSVColor) => void;
   onDelete: () => void;
+  style?: CSSProperties;
 }
 
 /**
@@ -163,6 +158,7 @@ const DraggableEditableTile = (props: DraggableEditableTileProps) => {
           onEditConfirm(newColor);
         }}
         onDelete={onDelete}
+        style={props.style}
       />
     </DraggableDiv>
   );

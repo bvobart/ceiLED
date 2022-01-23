@@ -1,26 +1,15 @@
-import { Button, Grid } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { Button, Grid } from '@mui/material';
 import React, { useState } from 'react';
 import { HSVColor } from '../../api/colors';
 import { SolidPattern } from '../../api/patterns';
 import ColorPicker from '../colorpicking/ColorPicker';
 
-const useStyles = makeStyles({
-  buttonCancel: {
-    width: '100%',
-    marginTop: '4px',
-    minHeight: '48px',
-    background: '#b2102f',
-  },
-  buttonConfirm: {
-    width: '100%',
-    marginTop: '4px',
-    minHeight: '48px',
-  },
-  picker: {
-    marginTop: '4px',
-  },
-});
+const marginTop = '4px';
+const buttonStyles = {
+  minHeight: '48px',
+  width: '100%',
+  marginTop,
+};
 
 export interface EditSolidPatternProps {
   pattern?: SolidPattern;
@@ -31,7 +20,6 @@ const key = 'animations-pick-solid';
 
 const EditSolidPattern = (props: EditSolidPatternProps): JSX.Element => {
   const { pattern: initialPattern, onConfirm } = props;
-  const classes = useStyles();
   const previousColor = getSavedColor();
   const defaultColor = initialPattern ? initialPattern.color.toHSV() : previousColor;
   const [color, setColor] = useState<HSVColor>(defaultColor);
@@ -46,20 +34,23 @@ const EditSolidPattern = (props: EditSolidPatternProps): JSX.Element => {
 
   return (
     <>
-      <ColorPicker className={classes.picker} hsv={color} onChange={setColor} />
+      <ColorPicker hsv={color} onChange={setColor} style={{ marginTop }} />
       <Grid container justifyContent='space-between'>
         <Grid item xs={8}>
           <Button
-            className={classes.buttonConfirm}
             variant='outlined'
             onClick={onClickConfirm}
-            style={{ background: color.toCSS() }}
+            style={{ ...buttonStyles, background: color.toCSS(), color: color.textCSS() }}
           >
             Confirm
           </Button>
         </Grid>
         <Grid item xs={4}>
-          <Button className={classes.buttonCancel} variant='outlined' onClick={onClickCancel}>
+          <Button
+            variant='outlined'
+            onClick={onClickCancel}
+            style={{ ...buttonStyles, background: '#b2102f', color: 'white' }}
+          >
             Cancel
           </Button>
         </Grid>

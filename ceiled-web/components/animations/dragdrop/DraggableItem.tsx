@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
-import { ListItem } from '@material-ui/core';
+import { ListItem } from '@mui/material';
 
 export interface DraggableItemProps {
   index: number;

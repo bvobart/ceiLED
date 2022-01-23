@@ -1,5 +1,4 @@
-import { makeStyles } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, { CSSProperties, useState } from 'react';
 import { HSVColor } from '../../api/colors';
 import { isBrowser } from '../../config';
 import Brightness from './Brightness';
@@ -7,25 +6,16 @@ import HueSaturation from './HueSaturation';
 
 interface ColorPickerProps {
   /** CSS classname for the root component */
-  className: string;
+  className?: string;
   /** Initial HSV colour to edit */
   hsv: HSVColor;
   /** Callback that will be called every time the colour changes */
   onChange: (color: HSVColor) => void;
   /** whether to render a colour preview */
   preview?: boolean;
+  /** Custom CSS properties */
+  style?: CSSProperties;
 }
-
-const useStyles = makeStyles({
-  root: {
-    width: '100%',
-    height: '100%',
-  },
-  brightness: {
-    margin: '12px 8px 0px 8px',
-    width: 'calc(100% - 16px)',
-  },
-});
 
 // TODO: make double click on channel header copy the current colour to all other channels.
 
@@ -33,7 +23,6 @@ const useStyles = makeStyles({
  * Color picker used all throughout CeiLED.
  */
 const ColorPicker = (props: ColorPickerProps): JSX.Element => {
-  const classes = useStyles();
   const [hsv, setHSV] = useState(props.hsv);
 
   const onChange = (newColor: HSVColor) => {
@@ -48,11 +37,15 @@ const ColorPicker = (props: ColorPickerProps): JSX.Element => {
   };
 
   return (
-    <div className={`${classes.root} ${props.className}`}>
+    <div className={props.className} style={{ width: '100%', height: '100%', ...props.style }}>
       {isBrowser() && (
         <HueSaturation hue={hsv.h} saturation={hsv.s} value={hsv.v} onChange={handleChangeHueSaturation} />
       )}
-      <Brightness className={classes.brightness} value={hsv.v} onChange={handleChangeValue} />
+      <Brightness
+        value={hsv.v}
+        onChange={handleChangeValue}
+        sx={{ margin: '12px 8px 0px 8px', width: 'calc(100% - 16px)' }}
+      />
     </div>
   );
 };

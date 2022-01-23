@@ -1,23 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { makeStyles, FormControl, InputLabel, Select, MenuItem, TextField } from '@material-ui/core';
-import { Pattern, PatternType, SolidPattern, FadePattern } from '../../api/patterns';
-import EditSolidPattern from './EditSolidPattern';
+import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import React, { useState } from 'react';
+import { FadePattern, Pattern, PatternType, SolidPattern } from '../../api/patterns';
 import EditFadePattern from './EditFadePattern';
-
-const useStyles = makeStyles({
-  root: {
-    width: '100%',
-  },
-  typeForm: {
-    width: '100%',
-  },
-  select: {
-    minHeight: '44px',
-  },
-  lengthField: {
-    marginTop: '8px',
-  },
-});
+import EditSolidPattern from './EditSolidPattern';
 
 interface EditPatternProps {
   pattern?: Pattern;
@@ -33,18 +18,10 @@ interface EditPatternProps {
  */
 const EditPattern = (props: EditPatternProps): JSX.Element => {
   const { pattern, onConfirm } = props;
-  const classes = useStyles();
   const defaultType = pattern ? pattern.type : PatternType.SOLID;
   const [patternType, setPatternType] = useState<PatternType>(defaultType);
   const defaultLength = pattern ? pattern.length : 1;
   const [length, setLength] = useState(defaultLength);
-
-  // ensures that the outline of the selection box is broken by the label
-  const inputLabel = useRef<HTMLLabelElement>(null);
-  const [labelWidth, setLabelWidth] = useState(0);
-  useEffect(() => {
-    setLabelWidth(inputLabel.current ? inputLabel.current.offsetWidth : 0);
-  }, []);
 
   // upon changing the pattern length
   const onChangeLength = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,20 +39,19 @@ const EditPattern = (props: EditPatternProps): JSX.Element => {
   const isEditingFade =
     pattern && (pattern.type === PatternType.FADE_LINEAR || pattern.type === PatternType.FADE_SIGMOID);
 
+  const label = 'Pattern Type';
   return (
-    <div className={classes.root}>
+    <div style={{ width: '100%' }}>
       {(!isEditing || (isEditing && isEditingFade)) && (
-        <FormControl className={classes.typeForm} variant='outlined' margin='dense'>
-          <InputLabel ref={inputLabel} id='select-patterntype-label'>
-            Pattern Type
-          </InputLabel>
+        <FormControl variant='outlined' margin='dense' sx={{ width: '100%' }}>
+          <InputLabel id='select-patterntype-label'>{label}</InputLabel>
           <Select
-            className={classes.select}
             labelId='select-patterntype-label'
             id='select-patterntype'
             value={patternType}
             onChange={event => setPatternType(event.target.value as PatternType)}
-            labelWidth={labelWidth}
+            label={label}
+            sx={{ minHeight: '44px' }}
           >
             {!isEditing && <MenuItem value={PatternType.SOLID}>Solid</MenuItem>}
             <MenuItem value={PatternType.FADE_LINEAR}>Linear Fade</MenuItem>
@@ -84,13 +60,13 @@ const EditPattern = (props: EditPatternProps): JSX.Element => {
         </FormControl>
       )}
       <TextField
-        className={classes.lengthField}
         variant='outlined'
         label='Length'
         margin='dense'
         type='number'
         value={length}
         onChange={onChangeLength}
+        sx={{ marginTop: '8px' }}
       />
       <Editor type={patternType} pattern={pattern} onConfirm={onEditorConfirm} />
     </div>

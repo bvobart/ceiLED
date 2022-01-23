@@ -1,5 +1,4 @@
 import { Divider, Typography, useMediaQuery, useTheme } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import React from 'react';
@@ -10,26 +9,13 @@ import { insert, range, remove, reorder, replace } from './utils';
 
 const numChannels = 3;
 
-const useStyles = makeStyles({
-  root: {
-    padding: '0px 8px 8px 8px',
-    userSelect: 'none',
-    flexWrap: 'nowrap',
-  },
-  animator: {
-    width: '100%',
-    marginTop: '4px',
-  },
-  label: {
-    width: '100%',
-  },
-  tile: {
-    minHeight: '48px',
-  },
-});
+const rootStyles = {
+  padding: '0px 8px 8px 8px',
+  userSelect: 'none',
+  flexWrap: 'nowrap',
+};
 
 const AnimationComposer = (): JSX.Element => {
-  const classes = useStyles();
   const theme = useTheme();
   const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
   const [animations, setAnimations] = useAnimations();
@@ -64,19 +50,19 @@ const AnimationComposer = (): JSX.Element => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <ImageList className={classes.root} gap={8} rowHeight='auto' cols={isNotMobile ? 3 : 1.5}>
+      <ImageList gap={8} rowHeight='auto' cols={isNotMobile ? 3 : 1} sx={rootStyles}>
         {range(numChannels).map(channel => (
           <ImageListItem key={channel}>
-            <Typography gutterBottom className={classes.label} align='center' variant='subtitle1'>
+            <Typography gutterBottom align='center' variant='subtitle1' sx={{ width: '100%' }}>
               Channel {channel + 1}
             </Typography>
             <Divider />
             <DroppableAnimationList
               animation={animations[channel]}
               channel={channel}
-              className={classes.animator}
               droppableId={`channel-${channel}`}
               onChange={anim => setAnimations(replace(animations, channel, anim))}
+              style={{ width: '100%', marginTop: '4px' }}
             />
           </ImageListItem>
         ))}

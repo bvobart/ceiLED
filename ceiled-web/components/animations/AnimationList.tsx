@@ -1,6 +1,5 @@
-import React, { useState, FunctionComponent } from 'react';
-import { List, Button } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { Button, List } from '@mui/material';
+import React, { CSSProperties, FunctionComponent, useState } from 'react';
 import { Animation, Pattern } from '../../api/patterns';
 import { EditablePatternTile } from '../tiles/patterns';
 import DraggableItem from './dragdrop/DraggableItem';
@@ -12,26 +11,11 @@ export interface AnimationListProps {
   channel?: number;
   animation: Animation;
   onChange: (anim: Animation) => void;
+  style?: CSSProperties;
 }
-
-const useStyles = makeStyles({
-  button: {
-    width: '100%',
-    marginTop: '4px',
-    minHeight: '48px',
-  },
-  label: {
-    width: '100%',
-  },
-  picker: {
-    minHeight: '276px',
-    marginTop: '8px',
-  },
-});
 
 const AnimationList: FunctionComponent<AnimationListProps> = props => {
   const { animation, onChange } = props;
-  const classes = useStyles();
   const [adding, setAdding] = useState<boolean>(false);
 
   const onAddPattern = (pattern: Pattern | undefined) => {
@@ -50,7 +34,7 @@ const AnimationList: FunctionComponent<AnimationListProps> = props => {
   };
 
   return (
-    <div className={props.className} key={`animation-list-${props.channel}`}>
+    <div className={props.className} key={`animation-list-${props.channel}`} style={props.style}>
       <List disablePadding>
         {animation.map((pattern: Pattern, index: number) => {
           const key = `li-${props.channel}-${index}`;
@@ -70,7 +54,11 @@ const AnimationList: FunctionComponent<AnimationListProps> = props => {
       {adding ? (
         <EditPattern onConfirm={onAddPattern} />
       ) : (
-        <Button className={classes.button} variant='outlined' onClick={() => setAdding(true)}>
+        <Button
+          variant='outlined'
+          onClick={() => setAdding(true)}
+          sx={{ width: '100%', marginTop: '4px', minHeight: '48px' }}
+        >
           Add
         </Button>
       )}

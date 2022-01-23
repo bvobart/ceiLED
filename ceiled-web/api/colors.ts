@@ -60,6 +60,17 @@ export class HSVColor implements IHSVColor {
   }
 
   /**
+   * Returns whether text that is rendered on top of this colour should be 'black' or 'white' in order to be readable.
+   * Basically, darker colours will have white text color, whereas lighter colours will get black text colour.
+   * Sourced from: https://stackoverflow.com/questions/1855884/determine-font-color-based-on-background-color
+   */
+  textCSS(): string {
+    const { red, green, blue } = this.toRGB();
+    const luma = (0.299 * red + 0.587 * green + 0.114 * blue) / 255;
+    return luma > 0.5 ? 'black' : 'white';
+  }
+
+  /**
    * Converts an HSV colour to HSL. All HSV and HSL components will be within 0 and 1.
    * Code inspired by: https://stackoverflow.com/questions/3423214/convert-hsb-hsv-color-to-hsl
    */
