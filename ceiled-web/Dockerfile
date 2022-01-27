@@ -1,32 +1,47 @@
-# NodeJS builder image
-FROM node:lts-alpine AS builder
+# Install dependencies
+FROM node:16-alpine AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
-# Build static website
-COPY tsconfig.json README.md ./
-COPY public ./public
-COPY src ./src
+
+# Build NextJS website
+FROM node:16-alpine AS builder
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=deps /app/node_modules ./node_modules
+# TODO: start using a src directory to only need to copy src and public
+COPY . .
 RUN yarn build
 
 # ---
 
-# Caddy server as deployment image
-FROM caddy:2.1.1-alpine
+# Copy NextJS static website and run Caddy to manage automatic HTTPS, web traffic ingress and routing to API.
+FROM node:16-alpine as runner
 WORKDIR /app
 
-RUN apk --no-cache add jq gettext nodejs npm
-RUN npm install --global @beam-australia/react-env
+RUN apk --no-cache add jq gettext caddy
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001 && chown nextjs:nodejs .
 
-COPY caddy ./caddy
-COPY --from=builder /app/build ./public
+COPY scripts ./scripts
+COPY package.json yarn.lock /app/
+
+COPY --from=deps /app/node_modules /app/node_modules
+RUN yarn install --frozen-lockfi1le --prefer-offline --production
+
+COPY --from=builder --chown=nextjs:nodejs /app/out /app/public
+
+USER nextjs
 
 # -----------------------
 # Environment Variables
 # -----------------------
+
+ENV NODE_ENV='production'
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # SITE_ADDRESS is the address on which ceiled-web will be hosted. 
 # Per default, if this is a public domain name, Caddy will try to acquire 
@@ -49,7 +64,4 @@ ENV SITE_ACCESS_POLICY='lan' API_ACCESS_POLICY='lan'
 
 # -----------------------
 
-CMD echo "REACT_APP_API_ADDRESS=${API_ADDRESS}" > .env \
-    && react-env --dest ./public \
-    && ./caddy/build-config.sh > caddy-config.json \
-    && caddy run --environ --config caddy-config.json
+CMD ./scripts/docker-cmd.sh

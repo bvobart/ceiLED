@@ -4,7 +4,7 @@ import BrightnessSlider from '../components/global/BrightnessSlider';
 import FluxSlider from '../components/global/FluxSlider';
 import RoomlightSlider from '../components/global/RoomlightSlider';
 
-const borderRadius = '0px 0px 4px 4px';
+const borderRadius = '4px';
 const padding = '8px 24px 16px 16px';
 
 const GlobalControls = (): JSX.Element => {

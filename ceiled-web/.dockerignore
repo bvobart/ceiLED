@@ -1,10 +1,14 @@
+.next
 build
 node_modules
+out
+
 old
+old-2
 
 .dockerignore
 Dockerfile
 yarn-error.log
 
 # Generated env file.
-/public/env.js
+/public/__ENV.js
