@@ -18,7 +18,7 @@ export const SlidingPowerButton = forwardRef<HTMLButtonElement, IconButtonProps 
   useEffect(() => {
     if (status === CeiledStatus.CONNECTED) {
       setTimeout(() => setShow(false), 500);
-    } else if (status === CeiledStatus.TIMEOUT) {
+    } else if (status === CeiledStatus.ERROR) {
       setTimeout(() => setShow(false), 2000);
     }
   }, [status]);
