@@ -23,6 +23,8 @@ export class Config {
     collection: 'authorisedTokens',
   };
 
+  cors = ['http://localhost', 'http://localhost:3000'];
+
   constructor() {
     this.port = parseInt(process.env.PORT || '', 10) || this.port;
     this.insecure = process.env.INSECURE ? true : false;
@@ -35,5 +37,7 @@ export class Config {
     this.db.username = process.env.DB_USERNAME || this.db.username;
     this.db.password = process.env.DB_PASSWORD || this.db.password;
     this.db.name = process.env.DB_NAME || this.db.name;
+
+    this.cors = process.env.CORS?.split(',') || this.cors;
   }
 }

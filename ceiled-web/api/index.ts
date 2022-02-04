@@ -1,18 +1,20 @@
-import { Animation, Pattern } from './patterns';
 import { Moods } from './moods';
+import { Animation, Pattern } from './patterns';
 
 export enum CeiledStatus {
   DISCONNECTED = 'disconnected',
   CONNECTING = 'connecting',
   CONNECTED = 'connected',
-  TIMEOUT = 'timeout',
+  ERROR = 'error',
 }
 
 export enum Events {
+  // System
   CONNECT = 'connect',
+  CONNECT_ERROR = 'connect_error',
   CONNECT_TIMEOUT = 'connect_timeout',
-  RECONNECT_FAILED = 'reconnect_failed',
   DISCONNECT = 'disconnect',
+  // CeiLED
   ERRORS = 'errors',
   BRIGHTNESS = 'brightness',
   ROOMLIGHT = 'roomlight',

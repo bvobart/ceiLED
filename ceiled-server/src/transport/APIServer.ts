@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs';
 import { createServer } from 'https';
-import * as SocketIO from 'socket.io';
+import { Server, ServerOptions, Socket } from 'socket.io';
 import AuthRepository from '../auth/AuthRepository';
+import { Config } from '../config';
 import { decodeAnimationMap } from '../patterns/Animation';
 import { decodePattern, decodePatternMap } from '../patterns/Pattern';
 import { Service } from '../service/Service';
@@ -34,7 +35,7 @@ export enum Events {
 }
 
 export class APIServer {
-  private server: SocketIO.Server | null;
+  private server: Server | null;
   private service: Service;
   private auth: AuthRepository;
 
@@ -57,16 +58,20 @@ export class APIServer {
    * @param keyFile path to SSL private key file
    * @param certFile path to SSL public certificate file
    */
-  listen(port: number, keyFile?: string, certFile?: string): void {
-    if (keyFile && certFile) {
+  listen(config: Config): void {
+    const { insecure, keyFile, certFile, port, cors } = config;
+    const opts = { cors: { origin: cors } } as ServerOptions;
+
+    if (!insecure && keyFile && certFile) {
       const httpsServer = createServer({
         key: readFileSync(keyFile),
         cert: readFileSync(certFile),
       });
       httpsServer.listen(port);
-      this.server = SocketIO(httpsServer);
+
+      this.server = new Server(httpsServer, opts);
     } else {
-      this.server = SocketIO(port);
+      this.server = new Server(port, opts);
     }
 
     this.server.on(Events.CONNECT, this.handleConnect.bind(this));
@@ -93,9 +98,9 @@ export class APIServer {
    * @param handler the handler function that should handle messages for that event.
    */
   public authorised(
-    handler: (event: Events, socket: SocketIO.Socket, message: any) => Promise<void>,
-  ): (event: Events, socket: SocketIO.Socket, message: any) => Promise<void> {
-    return async (event: Events, socket: SocketIO.Socket, message: any): Promise<void> => {
+    handler: (event: Events, socket: Socket, message: any) => Promise<void>,
+  ): (event: Events, socket: Socket, message: any) => Promise<void> {
+    return async (event: Events, socket: Socket, message: any): Promise<void> => {
       if (!AuthorisedRequest.is(message)) {
         socket.emit(Events.ERRORS, new UnauthorisedMessage());
         return;
@@ -116,7 +121,7 @@ export class APIServer {
    * Handles a newly established socket connection.
    * @param socket the newly connected socket
    */
-  public handleConnect(socket: SocketIO.Socket): void {
+  public handleConnect(socket: Socket): void {
     console.log('-> Client connected.');
 
     socket.on(Events.DISCONNECT, this.handleDisconnect.bind(this));
@@ -151,7 +156,7 @@ export class APIServer {
    * @param socket the active socket that the message was sent through
    * @param message the incoming message
    */
-  public async handleBrightness(socket: SocketIO.Socket, message: unknown): Promise<void> {
+  public async handleBrightness(socket: Socket, message: unknown): Promise<void> {
     if (GetSettingRequest.is(message)) {
       const brightness = await this.service.getBrightness();
       socket.emit(Events.BRIGHTNESS, brightness);
@@ -168,7 +173,7 @@ export class APIServer {
    * @param socket the active socket that the message was sent through
    * @param message the incoming message
    */
-  public async handleRoomlight(socket: SocketIO.Socket, message: unknown): Promise<void> {
+  public async handleRoomlight(socket: Socket, message: unknown): Promise<void> {
     if (GetSettingRequest.is(message)) {
       const roomlight = await this.service.getRoomlight();
       socket.emit(Events.ROOMLIGHT, roomlight);
@@ -185,7 +190,7 @@ export class APIServer {
    * @param socket the active socket that the message was sent through
    * @param message the incoming message
    */
-  public async handleFlux(socket: SocketIO.Socket, message: unknown): Promise<void> {
+  public async handleFlux(socket: Socket, message: unknown): Promise<void> {
     if (GetSettingRequest.is(message)) {
       const flux = await this.service.getFlux();
       socket.emit(Events.FLUX, flux);
@@ -203,7 +208,7 @@ export class APIServer {
    * @param socket the active socket that the message was sent through
    * @param message the incoming message
    */
-  public async handleSpeed(socket: SocketIO.Socket, message: unknown): Promise<void> {
+  public async handleSpeed(socket: Socket, message: unknown): Promise<void> {
     if (GetSettingRequest.is(message)) {
       const speed = await this.service.getSpeed();
       socket.emit(Events.SPEED, speed);
@@ -221,7 +226,7 @@ export class APIServer {
    * @param socket the active socket that the message was sent through
    * @param message the incoming message
    */
-  public async handleCeiled(socket: SocketIO.Socket, message: unknown): Promise<void> {
+  public async handleCeiled(socket: Socket, message: unknown): Promise<void> {
     // get pattern(s)
     if (GetPatternRequest.is(message)) {
       // get all
@@ -280,9 +285,9 @@ export class APIServer {
 }
 
 const handleError = (
-  handler: (socket: SocketIO.Socket, message: any) => Promise<void>,
-): ((event: Events, socket: SocketIO.Socket, message: any) => Promise<void>) => {
-  return async (event: Events, socket: SocketIO.Socket, message: any): Promise<void> => {
+  handler: (socket: Socket, message: any) => Promise<void>,
+): ((event: Events, socket: Socket, message: any) => Promise<void>) => {
+  return async (event: Events, socket: Socket, message: any): Promise<void> => {
     try {
       await handler(socket, message);
     } catch (error) {

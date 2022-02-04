@@ -22,11 +22,7 @@ const launch = async (): Promise<void> => {
 
   // start API server
   const server = new APIServer(service, authRepo);
-  if (config.insecure) {
-    server.listen(config.port);
-  } else {
-    server.listen(config.port, config.keyFile, config.certFile);
-  }
+  server.listen(config);
 
   /**
    * When the main process exits, this function performs a graceful shutdown.

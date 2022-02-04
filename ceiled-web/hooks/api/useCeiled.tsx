@@ -11,32 +11,28 @@ const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => P
   const authToken = useAuthToken();
 
   const connect = useCallback(
-    (address: string): Promise<void> => {
-      if (status !== CeiledStatus.DISCONNECTED && status !== CeiledStatus.TIMEOUT) {
-        return Promise.resolve();
+    async (address: string): Promise<void> => {
+      if ([CeiledStatus.CONNECTED, CeiledStatus.CONNECTING].includes(status)) {
+        return;
       }
+
+      console.log('> Connecting to CeiLED API...');
 
       const newSocket = io(address, { reconnectionAttempts: 5 });
       newSocket.on(Events.CONNECT, () => {
-        console.log('connected');
+        console.log('> Connected!');
         if (socket) socket.close();
         setSocket(newSocket);
         setStatus(CeiledStatus.CONNECTED);
       });
-      newSocket.on(Events.CONNECT_TIMEOUT, () => {
-        console.log('timeout');
+      newSocket.on(Events.CONNECT_ERROR, () => {
+        console.log('> Connection Error!');
         if (socket) socket.close();
-        setStatus(CeiledStatus.TIMEOUT);
+        setStatus(CeiledStatus.ERROR);
         setSocket(null);
       });
-      newSocket.on(Events.RECONNECT_FAILED, () => {
-        console.log('reconnect timeout');
-        if (socket) socket.close();
-        setStatus(CeiledStatus.TIMEOUT);
-        setSocket(null);
-      });
-      newSocket.on(Events.DISCONNECT, () => {
-        console.log('disconnected');
+      newSocket.on(Events.DISCONNECT, (reason: string) => {
+        console.log('> Disconnected: ', reason);
         if (socket) socket.close();
         setStatus(CeiledStatus.DISCONNECTED);
         setSocket(null);
@@ -44,12 +40,11 @@ const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => P
 
       setSocket(newSocket);
       setStatus(CeiledStatus.CONNECTING);
-      return Promise.resolve();
     },
     [status, socket, setSocket, setStatus],
   );
 
-  const off = useCallback((): Promise<void> => {
+  const off = useCallback(async (): Promise<void> => {
     if (isConnected(socket)) {
       socket.emit(Events.CEILED, { action: 'off', authToken });
       socket.close();
@@ -57,7 +52,6 @@ const useCeiled = (): [CeiledStatus, (address: string) => Promise<void>, () => P
 
     setStatus(CeiledStatus.DISCONNECTED);
     setSocket(null);
-    return Promise.resolve();
   }, [authToken, socket, setSocket, setStatus]);
 
   return [status, connect, off];

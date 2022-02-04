@@ -35,22 +35,21 @@ Be sure to mount a volume with the driver's `ceiled.sock` file in it to `/app/ce
 | `DB_NAME`       | `ceiled`                       | Name of the database to use for data.                                         |
 | `DB_USERNAME`   |                                | Username to authenticate to MongoDB with                                      |
 | `DB_PASSWORD`   |                                | Password to authenticate to MongoDB with                                      |
+| `CORS`          | `http://localhost,http://localhost:3000` | Cross-Origin Resource Sharing (CORS) origins to accept. Comma separated list of domains, including their protocol. |
 
 ## Verifying that API is up
 
-Either launch ceiled-web and try to connect, or use the command below. Requires NodeJS and NPM / NPX to be installed.
+Either launch ceiled-web and try to connect, or use the command below. Requires `curl` to be installed.
 
-```
-npx wscat -c ws://hostname:port/socket.io/\?transport=websocket
+```sh
+# replace `http://localhost:6565` with the address that your ceiled-server is hosted at.
+curl "http://localhost:6565/socket.io/?EIO=4&transport=polling"
 ```
 
 Output should be something like:
 
 ```
-Connected (press CTRL+C to quit)
-< 0{"sid":"uTPa4zYoDJ8LX4R5AAAC","upgrades":[],"pingInterval":25000,"pingTimeout":5000}
-< 40
->
+0{"sid":"ny7bO7TL_VXgWRCWAAAA","upgrades":["websocket"],"pingInterval":25000,"pingTimeout":20000}⏎
 ```
 
-(Source)[https://stackoverflow.com/questions/60212309/curl-request-for-socket-io-on-node-express]
+(Source)[https://socket.io/docs/v4/handling-cors/#cors-header-access-control-allow-origin-missing]

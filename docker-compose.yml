@@ -50,6 +50,7 @@ services:
       CEILED_SOCKET: app/ceiled-driver/ceiled.sock
       INSECURE: "true"
       DB_HOST: mongodb
+      CORS: ${CORS:-http://localhost}
 
   web:
     image: bvobart/ceiled-web:${DOCKER_TAG:-master}
