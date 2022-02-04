@@ -9,7 +9,7 @@ version: "3.7"
 #                                specify that port here, so that it will be exposed to the host.
 # SITE_ADDRESS - Default: 'localhost' - Hostname on which ceiled-web will be hosted. Append ':80' to explicitly disable HTTPS.
 # API_ADDRESS  - Default: 'api.localhost' - Hostname on which the ceiled API will be hosted. Append ':80' to explicitly disable HTTPS.
-# 
+#
 # SITE_ACCESS_POLICY - Default: 'lan' - By default, access to the website is limited to clients coming from within your LAN. Set this to 'public' to allow the website to be accessed publically.
 # API_ACCESS_POLICY  - Default: 'lan' - By default, access to the API is limited to clients coming from within your LAN. Set this to 'public' to allow the API to be accessed publically.
 #####################################################
@@ -26,7 +26,7 @@ services:
     devices: []
     environment:
       ARGS: --debug --socketFile /app/socket/ceiled.sock
-    
+
   mongodb:
     image: mongo:4.2
     restart: unless-stopped
@@ -50,7 +50,7 @@ services:
       CEILED_SOCKET: app/ceiled-driver/ceiled.sock
       INSECURE: "true"
       DB_HOST: mongodb
-      
+
   web:
     image: bvobart/ceiled-web:${DOCKER_TAG:-master}
     restart: unless-stopped
@@ -59,16 +59,15 @@ services:
       - ${HTTPS_PORT:-443}:443
       - ${API_PORT:-6565}:${API_PORT:-6565}
     volumes:
-      - caddy-data:/data
+      - caddy:/home/nextjs/.local/share/caddy
     environment:
       SERVER_ADDRESS: server:6565
       SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
       API_ADDRESS: ${API_ADDRESS:-api.localhost}
       SITE_ACCESS_POLICY: ${SITE_ACCESS_POLICY:-lan}
       API_ACCESS_POLICY: ${API_ACCESS_POLICY:-lan}
-    
 
 volumes:
   ceiled-driver:
-  caddy-data:
+  caddy:
   mongodb:
