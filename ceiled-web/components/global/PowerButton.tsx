@@ -1,7 +1,7 @@
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { IconButton, IconButtonProps } from '@mui/material';
-import { green, red } from '@mui/material/colors';
-import React, { forwardRef } from 'react';
+import { deepOrange, green, orange, red } from '@mui/material/colors';
+import React, { forwardRef, useMemo } from 'react';
 import { CeiledStatus } from '../../api';
 import config from '../../config';
 import useCeiled from '../../hooks/api/useCeiled';
@@ -20,15 +20,21 @@ const PowerButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) 
     connect(config.serverAddress);
   };
 
+  const color = useMemo(() => {
+    switch (status) {
+      case CeiledStatus.CONNECTED:
+        return green.A700;
+      case CeiledStatus.CONNECTING:
+        return orange.A700;
+      case CeiledStatus.DISCONNECTED:
+        return deepOrange.A700;
+      case CeiledStatus.ERROR:
+        return red.A700;
+    }
+  }, [status]);
+
   return (
-    <IconButton
-      {...props}
-      ref={ref}
-      onClick={onClick}
-      onDoubleClick={() => off()}
-      size='large'
-      sx={{ color: status === CeiledStatus.CONNECTED ? green.A700 : red.A700 }}
-    >
+    <IconButton {...props} ref={ref} onClick={onClick} onDoubleClick={() => off()} size='large' sx={{ color }}>
       <PowerSettingsNewIcon sx={{ width: '96px', height: '96px' }} />
       {props.children}
     </IconButton>
