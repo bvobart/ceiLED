@@ -53,6 +53,7 @@ services:
       CORS: ${CORS:-http://localhost}
 
   web:
+    user: 1001:1001
     image: bvobart/ceiled-web:${DOCKER_TAG:-master}
     restart: unless-stopped
     ports:

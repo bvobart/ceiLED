@@ -24,7 +24,7 @@ FROM node:16-alpine as runner
 WORKDIR /app
 
 RUN apk --no-cache add jq gettext caddy
-RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001 && chown nextjs:nodejs .
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001 && chown 1001:1001 .
 
 COPY scripts ./scripts
 COPY package.json yarn.lock /app/
@@ -34,7 +34,7 @@ RUN yarn install --frozen-lockfi1le --prefer-offline --production
 
 COPY --from=builder --chown=nextjs:nodejs /app/out /app/public
 
-USER nextjs
+USER 1001:1001
 
 # -----------------------
 # Environment Variables
