@@ -24,7 +24,11 @@ FROM node:16-alpine as runner
 WORKDIR /app
 
 RUN apk --no-cache add jq gettext caddy
-RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001 && chown 1001:1001 .
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001 \
+  && chown -R 1001:1001 . \
+  && mkdir -p /home/nextjs/.local/share/caddy \
+  && mkdir -p /home/nextjs/.config/caddy \
+  && chown -R 1001:1001 /home/nextjs
 
 COPY scripts ./scripts
 COPY package.json yarn.lock /app/
