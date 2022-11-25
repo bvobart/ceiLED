@@ -9,8 +9,6 @@ import useCeiled from '../../hooks/api/useCeiled';
 /**
  * The power button at the top right of the header.
  * When clicked, connects to the server at address `config.serverAddress`
- *
- * TODO: implement showing 'connecting' as orange or so
  */
 const PowerButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
   const [status, connect, off] = useCeiled();
@@ -35,7 +33,7 @@ const PowerButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) 
 
   return (
     <IconButton {...props} ref={ref} onClick={onClick} onDoubleClick={() => off()} size='large' sx={{ color }}>
-      <PowerSettingsNewIcon sx={{ width: '96px', height: '96px' }} />
+      <PowerSettingsNewIcon sx={{ width: '64px', height: '64px' }} />
       {props.children}
     </IconButton>
   );

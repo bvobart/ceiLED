@@ -1,16 +1,26 @@
+import type { SxProps, Theme } from '@mui/material';
 import { Grid, Slider, Typography } from '@mui/material';
-import React from 'react';
 import useFlux from '../../hooks/api/useFlux';
 
 interface FluxSliderProps {
   className?: string;
+  styles?: {
+    slider: SxProps<Theme>;
+  };
 }
 
 const FluxSlider = (props: FluxSliderProps): JSX.Element => {
   const [flux, setFlux] = useFlux();
 
   return (
-    <Grid container item className={props.className} alignItems='center' justifyContent='space-between'>
+    <Grid
+      container
+      item
+      className={props.className}
+      alignItems='center'
+      justifyContent='space-between'
+      py={{ xs: 0, sm: 1 }}
+    >
       <Grid container item xs={6} sm={2} alignItems='center' justifyContent='space-between'>
         <Grid item xs={4} sm={1}>
           <Typography variant='caption'>Flux</Typography>
@@ -26,6 +36,7 @@ const FluxSlider = (props: FluxSliderProps): JSX.Element => {
           min={-1}
           max={5}
           step={1}
+          sx={props.styles?.slider}
         />
       </Grid>
     </Grid>

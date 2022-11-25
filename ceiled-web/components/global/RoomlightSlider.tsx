@@ -1,16 +1,26 @@
+import type { SxProps, Theme } from '@mui/material';
 import { Grid, Slider, Typography } from '@mui/material';
-import React from 'react';
 import useRoomlight from '../../hooks/api/useRoomlight';
 
 interface RoomlightSliderProps {
   className?: string;
+  styles?: {
+    slider: SxProps<Theme>;
+  };
 }
 
 const RoomlightSlider = (props: RoomlightSliderProps): JSX.Element => {
   const [roomlight, setRoomlight] = useRoomlight();
 
   return (
-    <Grid container item className={props.className} alignItems='center' justifyContent='space-between'>
+    <Grid
+      container
+      item
+      className={props.className}
+      alignItems='center'
+      justifyContent='space-between'
+      py={{ xs: 0, sm: 1 }}
+    >
       <Grid container item xs={6} sm={2} justifyContent='space-between'>
         <Grid item xs={4} sm={1}>
           <Typography variant='caption'>Roomlight</Typography>
@@ -26,6 +36,7 @@ const RoomlightSlider = (props: RoomlightSliderProps): JSX.Element => {
           min={0}
           max={100}
           step={1}
+          sx={props.styles?.slider}
         />
       </Grid>
     </Grid>
