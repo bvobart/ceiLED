@@ -10,5 +10,4 @@ services:
   driver:
     devices:
       - ${DEV_PCA9685:-/dev/i2c-5}:/dev/i2c-5
-    environment:
-      ARGS: --pca9685 /dev/i2c-5 --socketFile /app/socket/ceiled.sock
+    command: --pca9685 /dev/i2c-5

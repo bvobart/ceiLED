@@ -11,4 +11,9 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/target/release/ceiled-driver ./ceiled-driver
-CMD ./ceiled-driver $ARGS
+
+# The driver socket will be available at /app/socket/ceiled.sock
+# Mount a volume ot /app/socket to share it with ceiled-server
+ENTRYPOINT ["./ceiled-driver", "--socketFile /app/socket/ceiled.sock"]
+# Per default, the driver starts with the debug driver, but this can be overriden to enable other devices.
+CMD --debug

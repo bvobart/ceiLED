@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+[[ -n $DEBUG ]] && set -x
 
 # Returns the full path referenced by $1
 function get_path {

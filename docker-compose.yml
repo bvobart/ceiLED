@@ -24,8 +24,6 @@ services:
     volumes:
       - ceiled-driver:/app/socket
     devices: []
-    environment:
-      ARGS: --debug --socketFile /app/socket/ceiled.sock
 
   mongodb:
     image: mongo:4.2
