@@ -10,7 +10,6 @@ import React, {
   useState,
 } from 'react';
 import { HSVColor } from '../../api/colors';
-import { isBrowser } from '../../config';
 import useBrightness from '../../hooks/api/useBrightness';
 import { inRange } from './utils';
 
@@ -81,7 +80,8 @@ const HueSaturation: FC<HueSaturationProps> = props => {
     return () => window.removeEventListener('resize', setCurrentSize);
   }, [setCurrentSize]);
 
-  const dpi = isBrowser() ? window.devicePixelRatio || 1 : 1;
+  // const dpi = isBrowser() ? window.devicePixelRatio || 1 : 1;
+  const dpi = 1;
   const width = rootWidth * dpi;
   const totalHeight = rootHeight * dpi;
   const previewHeight = 0.2 * totalHeight;
@@ -194,7 +194,8 @@ const HueSaturation: FC<HueSaturationProps> = props => {
 
 class PointerMover {
   private canvas: RefObject<HTMLCanvasElement>;
-  private dpi = isBrowser() ? window.devicePixelRatio || 1 : 1;
+  // private dpi = isBrowser() ? window.devicePixelRatio || 1 : 1;
+  private dpi = 1;
   private isMoving = false;
   private bounds?: DOMRect;
 
