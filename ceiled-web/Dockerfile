@@ -34,7 +34,7 @@ COPY scripts ./scripts
 COPY package.json yarn.lock /app/
 
 COPY --from=deps /app/node_modules /app/node_modules
-RUN yarn install --frozen-lockfi1le --prefer-offline --production
+RUN yarn install --frozen-lockfi1le --prefer-offline --production && rm -r $(yarn cache dir)
 
 COPY --from=builder --chown=nextjs:nodejs /app/out /app/public
 
