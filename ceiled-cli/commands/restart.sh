@@ -1,6 +1,6 @@
 # Restarts one or more CeiLED services without a rolling update, simply using docker-compose up -d --no-deps.
 function restart_services {
-  docker-compose up -d --no-deps $@
+  docker-compose up -d --no-deps "$@"
 }
 
 # Restarts all CeiLED services.
@@ -15,7 +15,7 @@ function is_ceiled_service {
 
 # Restarts CeiLED if it is running, or starts it if it doesn't.
 function restart {
-  cd $CEILED_DIR
+  cd "$CEILED_DIR" || return
 
   # when called without further arguments, restart all services
   if [[ $# == 1 || "$1" == "all" ]]; then
@@ -26,10 +26,10 @@ function restart {
   fi
 
   # when called with one or more args, check whether they're all valid CeiLED services, then restart them
-  for arg in $@; do
+  for arg in "$@"; do
     is_ceiled_service "$arg" || fail "argument must be one or more of [server, driver, mongodb, web], but got: $arg"
   done
-  restart_services $@
+  restart_services "$@"
 
   print_green "--> Done!"
 }

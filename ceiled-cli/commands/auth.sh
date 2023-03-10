@@ -44,18 +44,18 @@ function auth_list {
 }
 
 function auth_remove {
-  local args="$@"
+  local args=( "$@" )
   local server_container=$(docker-compose ps -q server)
   local mongo_container=$(docker-compose ps -q mongodb)
 
   [[ -z "$server_container" ]] && fail "ceiled-server must be running to remove a user from the authorisation database"
   [[ -z "$mongo_container" ]] && fail "CeiLED's MongoDB container must be running to remove a user from the authorisation database"
 
-  docker-compose exec server node scripts/auth/remove.js "$args"
+  docker-compose exec server node scripts/auth/remove.js "${args[@]}"
 }
 
 function auth {
-  cd $CEILED_DIR
+  cd "$CEILED_DIR" || return
   while true; do
     case "$1" in
       add)

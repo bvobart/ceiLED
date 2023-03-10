@@ -8,7 +8,7 @@ function fail {
 }
 
 function get_version {
-  cat $CEILED_CLI_DIR/version
+  cat "$CEILED_CLI_DIR"/version
 }
 
 #-----------------
@@ -67,11 +67,11 @@ function echo_ceiled_files {
 
 # Copies CeiLED's files to the target directory $1
 function copy_ceiled_files {
-  cp $CEILED_DIR/docker-compose.yml "$1"
-  cp $CEILED_DIR/docker-compose.pca9685.yml "$1"
-  cp -r $CEILED_DIR/ceiled-cli "$1"
-  cp $CEILED_DIR/.env.sample "$1"
-  cp $CEILED_DIR/ReadMe.md "$1"
+  cp "$CEILED_DIR"/docker-compose.yml "$1"
+  cp "$CEILED_DIR"/docker-compose.pca9685.yml "$1"
+  cp -r "$CEILED_DIR"/ceiled-cli "$1"
+  cp "$CEILED_DIR"/.env.sample "$1"
+  cp "$CEILED_DIR"/ReadMe.md "$1"
 }
 
 # Checks if $1 is a directory where CeiLED is installed.
@@ -91,12 +91,12 @@ function assert_ceiled_dir {
 
 # Checks if the environment variable $1 is defined in CeiLED's .env file
 function is_in_envfile {
-  grep -e "^\s*$1=.*" $CEILED_DIR/.env &> /dev/null
+  grep -e "^\s*$1=.*" "$CEILED_DIR"/.env &> /dev/null
 }
 
 # Checks if the device $1 should be used.
 function use_device {
-  is_in_envfile $1
+  is_in_envfile "$1"
 }
 
 # Prints every supported device.

@@ -6,7 +6,7 @@ function prepare_target_folder {
   local target_ref="$2"
   [[ -z "$target_ref" ]] && target_ref="master"
 
-  cd $target_dir
+  cd "$target_dir" || return
   git init
   git config advice.detachedHead false
   git config core.sparseCheckout true
@@ -27,10 +27,10 @@ function install {
   print_green "--> Installing CeiLED to $target_dir"
   [[ -n "$target_ref" ]] && print_green "> Using Git branch / ref: $target_ref"
   print_yellow "--> Preparing target folder..."
-  prepare_target_folder $target_dir $target_ref
+  prepare_target_folder "$target_dir" "$target_ref"
 
   print_yellow "--> Copying CeiLED files..."
-  copy_ceiled_files $target_dir
+  copy_ceiled_files "$target_dir"
 
   local profile_target='/etc/profile.d/ceiled.sh'
   local export_cmd="export PATH=$target_dir/ceiled-cli:\$PATH"
@@ -48,12 +48,12 @@ function install {
 
   # if we're installing a different ref of CeiLED, we should specify this ref as a Docker image tag.
   if [[ -n "$target_ref" ]]; then
-    echo "DOCKER_TAG=$target_ref" >> $target_dir/.env
-    cat $CEILED_DIR/.env.sample >> $target_dir/.env
+    echo "DOCKER_TAG=$target_ref" >> "$target_dir"/.env
+    cat "$CEILED_DIR"/.env.sample >> "$target_dir"/.env
   fi
 
   # Running `ceiled update`, which prints Done! at the end
-  bash $target_dir/ceiled-cli/ceiled update
+  bash "$target_dir"/ceiled-cli/ceiled update
   
   print_green ""
   print_green "> CeiLED is now installed at $target_dir"

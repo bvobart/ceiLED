@@ -7,15 +7,16 @@ function get_path {
   readlink -f "$1"
 }
 
-export CEILED_CLI_DIR=$(get_path $(dirname $0))
-export CEILED_DIR=$(dirname $CEILED_CLI_DIR)
+export CEILED_CLI_DIR=$(get_path "$(dirname "$0")")
+export CEILED_DIR=$(dirname "$CEILED_CLI_DIR")
 
 export DEV="false"
 
 # Make an alias for docker-compose so it includes the right .yml config files
-source $CEILED_CLI_DIR/utils.sh
+# shellcheck source=./utils.sh
+source "$CEILED_CLI_DIR"/utils.sh
 export COMPOSE_FILES="$(get_compose_files)"
-alias docker-compose="docker-compose $COMPOSE_FILES"
+alias docker-compose="docker-compose \$COMPOSE_FILES"
 
 function help {
   cli_name=${0##*/}
@@ -48,8 +49,6 @@ Commands:
   update                Updates CeiLED by downloading the latest versions of CeiLED's Docker containers.
   *                     Prints this help
 "
-# Deprecated, since only LetsEncrypt HTTPS is possible now anyways:
-# root_cert    Copy the root certificate from ceiled-web's data volume to the current directory. This can then be imported into browsers to allow CeiLED to be hosted over HTTPS without needing a public domain name.
 }
 
 while true; do
@@ -70,70 +69,76 @@ while true; do
       shift
       ;;
     auth)
-      assert_ceiled_dir $CEILED_DIR
+      assert_ceiled_dir "$CEILED_DIR"
+      # shellcheck source=./commands/auth.sh
       source "$CEILED_CLI_DIR/commands/auth.sh"
       shift
       auth "$@"
       exit
       ;;
     build)
-      assert_ceiled_dir $CEILED_DIR
+      assert_ceiled_dir "$CEILED_DIR"
+      # shellcheck source=./commands/build.sh
       source "$CEILED_CLI_DIR/commands/build.sh"
       shift
       build "$@"
       exit
       ;;
     env)
+      # shellcheck source=./commands/env.sh
       source "$CEILED_CLI_DIR/commands/env.sh"
       env
       exit
       ;;
     install)
+      # shellcheck source=./commands/install.sh
       source "$CEILED_CLI_DIR/commands/install.sh"
       shift
       install "$@"
       exit
       ;;
     logs)
-      assert_ceiled_dir $CEILED_DIR
+      assert_ceiled_dir "$CEILED_DIR"
+      # shellcheck source=./commands/logs.sh
       source "$CEILED_CLI_DIR/commands/logs.sh"
       shift
       logs "$@"
       exit
       ;;
     restart)
-      assert_ceiled_dir $CEILED_DIR
+      assert_ceiled_dir "$CEILED_DIR"
+      # shellcheck source=./commands/restart.sh
       source "$CEILED_CLI_DIR/commands/restart.sh"
       restart "$2"
       exit
       ;;
     start)
-      assert_ceiled_dir $CEILED_DIR
+      assert_ceiled_dir "$CEILED_DIR"
+      # shellcheck source=./commands/start.sh
       source "$CEILED_CLI_DIR/commands/start.sh"
       start
       exit
       ;;
     status)
-      assert_ceiled_dir $CEILED_DIR
+      assert_ceiled_dir "$CEILED_DIR"
+      # shellcheck source=./commands/status.sh
       source "$CEILED_CLI_DIR/commands/status.sh"
       status
       exit
       ;;
     stop)
-      assert_ceiled_dir $CEILED_DIR
+      assert_ceiled_dir "$CEILED_DIR"
+      # shellcheck source=./commands/stop.sh
       source "$CEILED_CLI_DIR/commands/stop.sh"
       stop
       exit
       ;;
     update)
+      # shellcheck source=./commands/update.sh
       source "$CEILED_CLI_DIR/commands/update.sh"
       update
       exit
       ;;
-    # root_cert)
-    #   source "$CEILED_CLI_DIR/commands/get_local_root_cert.sh"
-    #   get_local_root_cert
-    #   ;;
     *)
       is_help "$1" || print_red "Error: Unknown command: $1\n"
       help
